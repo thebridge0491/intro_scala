@@ -1,0 +1,107 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<project name = '${parent}' default = 'help' basedir = '.'>
+  <description>Multi-package Ant buildfile script.</description>
+  
+  <property environment = 'env'/>
+  <property file = 'build.properties'/>
+  
+  <property name = 'echo.pat' value = '^ant\.'/>
+
+  <condition property = 'tar.compression' value = 'xz'>
+    <equals casesensitive = 'false' arg1 = 'tar.xz' arg2 = "${symbol_dollar}{tarext}"/>
+  </condition>
+  <condition property = 'tar.compression' value = 'bzip2'>
+    <equals casesensitive = 'false' arg1 = 'tar.bz2' arg2 = "${symbol_dollar}{tarext}"/>
+  </condition>
+  <condition property = 'tar.compression' value = 'gzip'>
+    <equals casesensitive = 'false' arg1 = 'tar.gz' arg2 = "${symbol_dollar}{tarext}"/>
+  </condition>
+  <condition property = 'tar.compression' value = 'none' else = 'none'>
+    <equals casesensitive = 'false' arg1 = 'tar' arg2 = "${symbol_dollar}{tarext}"/>
+  </condition>
+  
+  <macrodef name = 'iterate'>
+    <attribute name = 'target'/>
+    <sequential>
+      <!--<subant target = "@{target}">
+        <fileset dir = '.' includes = 'common/build.xml,app/build.xml'/>
+      </subant>-->
+      <subant target = "@{target}">
+        <dirset dir = '.' includes = "${symbol_dollar}{subdirs}"/> </subant>
+    </sequential>
+  </macrodef>
+  
+  <target name = 'help' description = "Usage: ant [-Dsubdirs='${symbol_dollar}{subdirs}' -DDEBUG=${symbol_dollar}{DEBUG}] [target]">
+    <iterate target = 'help'/> </target>
+  
+  <target name = 'properties' description = "Echo properties matching pattern [-Dsubdirs='${symbol_dollar}{subdirs}' -Decho.pat='${symbol_dollar}{echo.pat}']">
+    <iterate target = 'properties'/> </target>
+  <target name = 'prep' description = "Prep build [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'prep'/> </target>
+  
+  <target name = 'clean' description = "Remove generated file(s) [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'clean'/> </target>
+  <target name = 'compile' description = "Build target [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'compile'/> </target>
+  <target name = 'testCompile' description = "Build test [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'testCompile'/> </target>
+  <target name = 'test' description = "Run test: ant [-Dsubdirs='${symbol_dollar}{subdirs}' -Dtest.opts='${symbol_dollar}{test.opts}'] test">
+    <iterate target = 'test'/> </target>
+  <target name = 'run' description = "Run program: ant [-Dsubdirs='${symbol_dollar}{subdirs}' -Dapp.args='${symbol_dollar}{app.args}'] run">
+    <iterate target = 'run'/> </target>
+  <target name = 'debug' description = "Debug program: ant [-Dsubdirs='${symbol_dollar}{subdirs}' -Dapp.args='${symbol_dollar}{app.args}'] debug">
+    <iterate target = 'debug'/> </target>
+
+  <target name = 'distTar' description = 'Distribution tarball'>
+    <delete failonerror = 'false'
+      dir = "${symbol_dollar}{build.dir}/${symbol_dollar}{ant.project.name}-${symbol_dollar}{ant.project.rev}"/>
+    <mkdir dir = "${symbol_dollar}{build.dir}/${symbol_dollar}{ant.project.name}-${symbol_dollar}{ant.project.rev}"/>
+    <exec executable = 'sh'>
+      <arg value = '-c'/>
+      <arg value = "tar -L -X ${symbol_dollar}{basedir}/exclude.lst -cf - . | tar -vxpf - -C ${symbol_dollar}{build.dir}/${symbol_dollar}{ant.project.name}-${symbol_dollar}{ant.project.rev}"/>
+    </exec>
+
+    <delete failonerror = 'false'
+      file = "${symbol_dollar}{build.dir}/${symbol_dollar}{ant.project.name}-${symbol_dollar}{ant.project.rev}.${symbol_dollar}{tarext}"/>
+    <tar destfile = "${symbol_dollar}{build.dir}/${symbol_dollar}{ant.project.name}-${symbol_dollar}{ant.project.rev}.${symbol_dollar}{tarext}"
+        basedir = "${symbol_dollar}{build.dir}" compression = "${symbol_dollar}{tar.compression}" 
+        excludesfile = "${symbol_dollar}{basedir}/exclude.lst"
+        includes = "${symbol_dollar}{ant.project.name}-${symbol_dollar}{ant.project.rev}/**"/>
+  </target>
+  <target name = 'distZip' description = 'Distribution zip archive'
+        depends = 'distTar'>
+    <delete failonerror = 'false'
+      file = "${symbol_dollar}{build.dir}/${symbol_dollar}{ant.project.name}-${symbol_dollar}{ant.project.rev}.zip"/>
+    <zip destfile = "${symbol_dollar}{build.dir}/${symbol_dollar}{ant.project.name}-${symbol_dollar}{ant.project.rev}.zip"
+        basedir = "${symbol_dollar}{build.dir}" excludesfile = "${symbol_dollar}{basedir}/exclude.lst"
+        includes = "${symbol_dollar}{ant.project.name}-${symbol_dollar}{ant.project.rev}/**"/>
+  </target>
+  
+  <target name = 'package' description = "Package project (jar) [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'package'/> </target>
+  <target name = 'javadoc' description = "Generate documentation (javadoc) [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'javadoc'/> </target>
+  <target name = 'scaladoc' description = "Generate documentation (scaladoc) [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'scaladoc'/> </target>
+  <target name = 'doc' description = "Generate documentation (javadoc &amp; scaladoc) [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'doc'/> </target>
+
+  <target name = 'xmlToHtml' description = "Convert xml to html: ant xmlToHtml [-Dsubdirs='${symbol_dollar}{subdirs}' -Dxslt.outDir=${symbol_dollar}{build.dir}/checkstyle_rpt -Dxslt.outFile=rpt.html -Dxslt.xsl=${symbol_dollar}{ant.home}/etc/checkstyle/checkstyle-frames.xsl -Dxslt.in=${symbol_dollar}{build.dir}/checkstyle_errors.xml]">
+    <iterate target = 'xmlToHtml'/> </target>
+  <target name = 'checkstyle' description = "Lint check (checkstyle) [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'checkstyle'/> </target>
+  <target name = 'scalastyle' description = "Lint check (scalastyle) [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'scalastyle'/> </target>
+  <target name = 'lint' description = "Lint check (checkstyle &amp; scalastyle) [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'lint'/> </target>
+
+  <target name = 'cover' description = "Generate coverage (jacoco): ant [-Dsubdirs='${symbol_dollar}{subdirs}' -Dtest.opts='${symbol_dollar}{test.opts}'] cover">
+    <iterate target = 'cover'/> </target>
+  <target name = 'report' description = "Report coverage (jacoco) [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'report'/> </target>
+  <target name = 'clean_cov' description = "Clean coverage data (jacoco) [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'clean_cov'/> </target>
+</project>

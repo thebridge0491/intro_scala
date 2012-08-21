@@ -1,0 +1,72 @@
+= {{parentcap}}{{^parentcap}}Intro_scala{{/parentcap}}{{joiner}}{{^joiner}}-{{/joiner}}{{projectcap}}{{^projectcap}}Util{{/projectcap}}
+:author: {{author}}{{^author}}{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}{{/author}}
+:email: <{{email}}{{^email}}{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}-codelab@yahoo.com{{/email}}>
+:revnumber: {{version}}{{^version}}0.1.0{{/version}}
+:description: README for {{name}}{{^name}}intro_scala-util{{/name}}
+:hardbreaks:
+:linkcss:
+//:stylesheet!:
+
+////
+.adoc to .html: asciidoctor -n -a toc -a toclevels=2 foo.adoc
+////
+
+{{description}}{{^description}}Utilities sub-package for Scala Intro examples project.{{/description}}
+
+== Installation
+source code tarball download:
+    
+        # [aria2c --check-certificate=false | wget --no-check-certificate | curl -kOL]
+        FETCHCMD='aria2c --check-certificate=false'
+        $FETCHCMD https://{{repohost}}{{^repohost}}bitbucket.org{{/repohost}}/{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}/{{parent}}{{^parent}}intro_scala{{/parent}}/[get | archive]/master.zip
+
+version control repository clone:
+        
+        git clone https://{{repohost}}{{^repohost}}bitbucket.org{{/repohost}}/{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}/{{parent}}{{^parent}}intro_scala{{/parent}}.git
+
+build example with sbt:
+cd <path> ; sbt [-Djava.library.path=$PREFIX/lib] compile [test:run]
+sbt publishLocal
+
+build example with rake:
+cd <path> ; [sh] ./configure.sh [--prefix=$PREFIX] [--help]
+rake main [check]
+rake publish
+
+build example with make:
+cd <path> ; [sh] ./configure.sh [--prefix=$PREFIX] [--help]
+make all [check]
+make publish
+
+build example with ant:
+cd <path> ; ant [-Djava.library.path=$PREFIX/lib] compile [test]
+ant publish
+
+build example with maven:
+cd <path> ; mvn [-Djava.library.path=$PREFIX/lib] compile [test]
+mvn install
+
+build example with gradle:
+cd <path> ; gradle [-Djava.library.path=$PREFIX/lib] assemble [check]
+gradle install
+
+== Usage
+{{#executable}}
+        [env RSRC_PATH=<path>/resources] java -jar {{name}}{{^name}}intro_scala-util{{/name}}-<version>.jar [-h]
+{{/executable}}
+{{^executable}}
+        // PKG_CONFIG='pkg-config --with-path=$PREFIX/lib/pkgconfig'
+        // $PKG_CONFIG --cflags --libs <ffi-lib>
+        // java [-Djava.library.path=$PREFIX/lib] ...
+        
+        import {{namespace}}{{^namespace}}org.sandbox.intro_scala.util{{/namespace}}.Library
+        ...
+        val (arr1, arr2) = (Array[Int](0, 1, 2), Array[Int](10, 20, 30))
+        val nested_arr = Library.cartesian_prod(arr1, arr2)
+{{/executable}}
+
+== Author/Copyright
+Copyright (c) {{year}}{{^year}}2012{{/year}} by {{author}}{{^author}}{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}{{/author}} <{{email}}{{^email}}{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}-codelab@yahoo.com{{/email}}>
+
+== License
+Licensed under the {{license}}{{^license}}Apache-2.0{{/license}} License. See LICENSE for details.

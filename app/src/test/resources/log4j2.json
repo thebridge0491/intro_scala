@@ -1,0 +1,51 @@
+{
+  "Configuration": {
+    "-status": "warn",
+    "-strict": "true",
+    "Appenders": {
+      "Appender": [
+        {
+          "-type": "Console",
+          "-name": "Root2",
+          "-target": "SYSTEM_ERR",
+          "Layout": {
+            "-type": "PatternLayout",
+            "-pattern": "%d{YYYY-MM-dd HH:mm:ss} - %c - %5p - (%F:%L) - %m%n"
+          }
+        },
+        {
+          "-type": "File",
+          "-name": "Root1",
+          "-filename": "root.log",
+          "Layout": {
+            "-type": "PatternLayout",
+            "-pattern": "%d{YYYY-MM-dd HH:mm:ss} %p:%c:%m%n"
+          }
+        },
+        {
+          "-type": "File",
+          "-name": "A1",
+          "-filename": "prac.log",
+          "Layout": {
+            "-type": "PatternLayout",
+            "-pattern": "%d{YYYY-MM-dd HH:mm:ss} %p:%c:%m%n"
+          }
+        }
+      ]
+    },
+    "Loggers": {
+      "Root": {
+        "-level": "debug",
+        "AppenderRef": [
+          { "-ref": "Root1" },
+          { "-ref": "Root2" }
+        ]
+      },
+      "Logger": {
+        "-name": "prac",
+        "-level": "debug",
+        "AppenderRef": { "-ref": "A1" }
+      }
+    }
+  }
+}

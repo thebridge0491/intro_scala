@@ -1,0 +1,53 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<project name = '${artifactId}' default = 'help' basedir = '.'>
+  <description>Single package Ant buildfile script.</description>
+  
+  <property environment = 'env'/>
+  <property file = 'build.properties'/>
+  
+  <import file = 'depnmgr-ivy.xml'/>
+  <import file = 'build-targets.xml'/>
+  
+  <condition property = 'java.lib' value = '/usr/share/java'
+      else = '/usr/local/share/java/classes'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${symbol_dollar}{os.name}"/>
+  </condition>
+  <condition property = 'scala.lib' value = '/usr/share/scala/lib'
+      else = '/usr/local/share/scala/lib'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${symbol_dollar}{os.name}"/>
+  </condition>
+  
+  <condition property = 'javac.opts' value = "${symbol_dollar}{default.javac.opts} -g"
+      else = "${symbol_dollar}{default.javac.opts}">
+    <equals casesensitive = 'false' arg1 = '1' arg2 = "${symbol_dollar}{DEBUG}"/>
+  </condition>
+  <condition property = 'scalac.opts' value = "${symbol_dollar}{default.scalac.opts} -g:vars"
+      else = "${symbol_dollar}{default.scalac.opts} -optimise">
+    <equals casesensitive = 'false' arg1 = '1' arg2 = "${symbol_dollar}{DEBUG}"/>
+  </condition>
+  
+  <property name = 'java.args' value = "${symbol_dollar}{default.java.args}  -Djava.library.path=${symbol_dollar}{java.library.path}"/>
+  <property name = 'scala.args' value = "${symbol_dollar}{default.scala.args}  -Djava.library.path=${symbol_dollar}{java.library.path}"/>
+  
+  <property name = 'ant.project.pkg'
+      value = "${symbol_dollar}{ant.project.org}.${symbol_dollar}{ant.project.parent}.${name}"/>
+#{if}("yes" == ${executable})
+  <property name = 'main.class' value = "${symbol_dollar}{ant.project.pkg}.Main"/>
+#{end}
+  <property name = 'testexcludepats'
+      value = '**/ClassicTest.*,**/ClassicProp.*'/>
+  
+  <!--<target description = "Compile FFI auxiliary products: ant [-Dprefix='${symbol_dollar}{prefix}'] auxffi" name = 'auxffi'>
+    <condition property = 'make_cmd' value = 'make' else = 'gmake'>
+      <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${symbol_dollar}{os.name}"/>
+    </condition>
+    <exec executable = "${symbol_dollar}{make_cmd}">
+      <arg line = '-B -f Makefile-auxffi.mk auxffi'/>
+      <env key = 'PREFIX' path = "${symbol_dollar}{prefix}"/>
+      <env key = 'CC' path = 'cc'/>
+    </exec>
+  </target>-->
+</project>

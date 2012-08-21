@@ -1,0 +1,45 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn" strict="true">
+ 
+	<Appenders>
+    	<!--<Appender type="RollingFile" name="RootRoll" filename="rootRoll.log"
+    		filepattern="%d{YYYYMMddHHmmss}-rootRoll.log">
+        	<Layout type="PatternLayout" pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n"/>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="20 MB"/>
+			</Policies>
+			<DefaultRolloverStrategy max="20"/>
+    	</Appender>-->
+		
+		<Appender type="Console" name="Root2" target="SYSTEM_ERR">
+			<Layout type="PatternLayout" pattern="%d{YYYY-MM-dd HH:mm:ss} - %c - %5p - (%F:%L) - %m%n"/>
+			<!--<Filters>
+        		<Filter type="MarkerFilter" marker="FLOW" onMatch="DENY" onMismatch="NEUTRAL"/>
+        		<Filter type="MarkerFilter" marker="EXCEPTION" onMatch="DENY" onMismatch="ACCEPT"/>
+      		</Filters>-->
+      	</Appender>
+    	
+    	<Appender type="File" name="Root1" filename="root.log">
+      		<!--<PatternLayout pattern="%d %p %C{1.} [%t] %m%n"/>-->
+        	<Layout type="PatternLayout" pattern="%d{YYYY-MM-dd HH:mm:ss} %p:%c:%m%n"/>
+    	</Appender>
+    	
+    	<Appender type="File" name="A1" filename="prac.log">
+        	<Layout type="PatternLayout" pattern="%d{YYYY-MM-dd HH:mm:ss} %p:%c:%m%n"/>
+    	</Appender>
+	</Appenders>
+	<Loggers>
+		<Root level="debug">
+			<AppenderRef ref="Root1"/>
+			<AppenderRef ref="Root2"/>
+			<!--<AppenderRef ref="RootRoll"/>-->
+		</Root>
+		
+		<Logger name="prac" level="debug">
+			<AppenderRef ref="A1"/>
+		</Logger>
+	</Loggers>
+</Configuration>

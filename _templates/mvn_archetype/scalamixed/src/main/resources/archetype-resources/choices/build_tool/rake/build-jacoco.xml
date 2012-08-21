@@ -1,0 +1,83 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<project default = 'report'
+    xmlns:ivy = 'antlib:org.apache.ivy.ant'
+    xmlns:jacoco = 'antlib:org.jacoco.ant' >
+  
+  <description>Jacoco coverage targets Ant buildfile script.</description>
+  
+  <property environment = 'env'/>
+  <condition property = 'java.lib' value = '/usr/share/java'
+      else = '/usr/local/share/java/classes'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${symbol_dollar}{os.name}"/>
+  </condition>
+  <condition property = 'scala.lib' value = '/usr/share/scala/lib'
+      else = '/usr/local/share/scala/lib'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${symbol_dollar}{os.name}"/>
+  </condition>
+  
+  <property name = 'build.dir' value = "${symbol_dollar}{user.dir}/target"/>
+  <property name = 'classes.dir' value = "${symbol_dollar}{build.dir}/classes"/>
+  <property name = 'dist.jar' value = "${symbol_dollar}{build.dir}/util.jar"/>
+  <property name = 'dist_test.jar' value = "${symbol_dollar}{build.dir}/util-tests.jar"/>
+  <property name = 'java.args' value = " -Djava.library.path=${symbol_dollar}{java.library.path} -esa -ea -Xmx1024m -Xms16m -Xss16m"/>
+  <property name = 'scala.args' value = " -Djava.library.path=${symbol_dollar}{java.library.path} -J-esa -J-ea -J-Xmx1024m -J-Xms16m -J-Xss16m"/>
+  <property name = 'test.opts' value = ''/>
+
+  <target name = 'init_jacoco'>
+    <!--<taskdef uri = 'antlib:org.jacoco.ant' resource = 'org/jacoco/ant/antlib.xml'>
+    <classpath path = "${symbol_dollar}{ant.library.dir}/jacocoant.jar"/> </taskdef>-->
+    <ivy:cachepath resolveMode = 'dynamic' inline = 'true' type = 'jar'
+      organisation = 'org.jacoco' module = 'org.jacoco.ant'
+      revision = '[0.5.9.201207300726,)' pathid = 'jacoco_ant.pathid'/>
+    <taskdef uri = 'antlib:org.jacoco.ant' resource = 'org/jacoco/ant/antlib.xml'>
+      <classpath path = "${symbol_dollar}{toString:jacoco_ant.pathid}"/>
+    </taskdef>
+  </target>
+  <target description = "Generate coverage (jacoco): ant [-Dtest.opts='${symbol_dollar}{test.opts}'] cover" name = 'cover' depends = 'init_jacoco'>
+    <!-- Wrap test execution with the JaCoCo coverage task -->
+    <!--<java jar = "${symbol_dollar}{dist_test.jar}" fork = 'true'>
+      <jvmarg line = "-javaagent:${symbol_dollar}{java.lib}/jacocoagent.jar=destfile=${symbol_dollar}{build.dir}/jacoco.exec ${symbol_dollar}{java.args}"/>
+      <arg line = "${symbol_dollar}{test.opts}"/>
+      <classpath> <pathelement location = "${symbol_dollar}{dist_test.jar}"/>
+          </classpath>
+      <sysproperty key = 'LD_LIBRARY_PATH' path = "${symbol_dollar}{env.LD_LIBRARY_PATH}"/>
+    </java>-->
+    <jacoco:coverage destfile = "${symbol_dollar}{build.dir}/jacoco.exec">
+      <java jar = "${symbol_dollar}{dist_test.jar}" fork = 'true'>
+        <jvmarg line = "${symbol_dollar}{java.args}"/>
+        <arg line = "${symbol_dollar}{test.opts}"/>
+        <classpath> <pathelement location = "${symbol_dollar}{dist_test.jar}"/>
+            </classpath>
+        <sysproperty key = 'LD_LIBRARY_PATH' path = "${symbol_dollar}{env.LD_LIBRARY_PATH}"/>
+      </java>
+    </jacoco:coverage>
+  </target>
+  <target description = 'Report coverage (jacoco): ant report' name = 'report'
+      depends = 'init_jacoco'>
+    <jacoco:report>
+      <executiondata> <file file = "${symbol_dollar}{build.dir}/jacoco.exec"/> </executiondata>
+      <structure name = 'JaCoCo report'>
+        <classfiles>
+          <!--<fileset dir = "${symbol_dollar}{classes.dir}"/>-->
+          <zipfileset src = "${symbol_dollar}{dist.jar}"/>
+        </classfiles>
+        <sourcefiles encoding = 'UTF-8'>
+          <!--<fileset dir = "${symbol_dollar}{user.dir}/src/main"/>-->
+          <zipfileset src = "${symbol_dollar}{dist.jar}" includes = 'src/main/**/*'/>
+        </sourcefiles>
+      </structure>
+      <html destdir = "${symbol_dollar}{build.dir}/cov"/>
+      <!--<csv destfile = "${symbol_dollar}{build.dir}/cov/report.csv"/>-->
+      <!--<xml destfile = "${symbol_dollar}{build.dir}/cov/report.xml"/>-->
+    </jacoco:report>
+  </target>
+  
+  <target description = 'Clean coverage data (jacoco)' name = 'clean_cov'>
+    <delete dir = "${symbol_dollar}{build.dir}/cov" failonerror = 'false'/>
+    <delete file = "${symbol_dollar}{build.dir}/jacoco.exec" failonerror = 'false'/>
+  </target>
+  <target name = 'rebuild_cov' depends = 'clean_cov,cover,report'/>
+</project>

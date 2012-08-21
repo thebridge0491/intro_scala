@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<archetype-descriptor xsi:schemaLocation="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0 http://maven.apache.org/xsd/archetype-descriptor-1.1.0.xsd" name="scalamixed"
+    xmlns="https://maven.apache.org/plugins/maven-archetype-plugin/archetype-descriptor/1.1.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <requiredProperties>
+    <requiredProperty key="groupId">
+      <defaultValue>org.sandbox</defaultValue> </requiredProperty>
+    <requiredProperty key="version">
+      <defaultValue>0.1.0</defaultValue> </requiredProperty>
+    <requiredProperty key="parent">
+      <defaultValue>intro_scala</defaultValue> </requiredProperty>
+    <!--<requiredProperty key="parentcap">
+      <defaultValue>${parent.substring(0,1).toUpperCase()}${parent.substring(1)}</defaultValue>
+    </requiredProperty>-->
+    <requiredProperty key="parentdescription">
+      <defaultValue>Multi-package project Intro examples for Scala.</defaultValue> </requiredProperty>
+    <requiredProperty key="name">
+      <defaultValue>util</defaultValue> </requiredProperty>
+    <requiredProperty key="artifactId">
+      <defaultValue>${parent}-${name}</defaultValue> </requiredProperty>
+    <!--<requiredProperty key="namecap">
+      <defaultValue>${name.substring(0,1).toUpperCase()}${name.substring(1)}</defaultValue>
+    </requiredProperty>-->
+    <requiredProperty key="description">
+      <defaultValue>Utilites sub-package for Scala Intro examples project.</defaultValue> </requiredProperty>
+    <requiredProperty key="package">
+      <defaultValue>${groupId}.${parent}.${name}</defaultValue>
+    </requiredProperty>
+    <requiredProperty key="repohost">
+      <defaultValue>bitbucket.org</defaultValue> </requiredProperty>
+    <requiredProperty key="repoacct">
+      <defaultValue>imcomputer</defaultValue> </requiredProperty>
+    <requiredProperty key="author">
+      <defaultValue>${repoacct}</defaultValue> </requiredProperty>
+    <requiredProperty key="email">
+      <defaultValue>${repoacct}-codelab@yahoo.com</defaultValue>
+    </requiredProperty>
+    <requiredProperty key="date">
+      <!--<defaultValue>2014-03-01</defaultValue>--> </requiredProperty>
+    <!--<requiredProperty key="year">
+      <defaultValue>${date.split("-")[0]}</defaultValue>
+    </requiredProperty>-->
+    <requiredProperty key="readmeExt">
+      <defaultValue>.rst</defaultValue> </requiredProperty>
+    <requiredProperty key="license">
+      <defaultValue>Apache-2.0</defaultValue> </requiredProperty>
+    <requiredProperty key="buildTool">
+      <defaultValue>gradle</defaultValue> </requiredProperty>
+    <requiredProperty key="testFrwk">
+      <defaultValue>scalatest</defaultValue> </requiredProperty>
+    <requiredProperty key="executable">
+      <defaultValue>no</defaultValue> </requiredProperty>
+    <requiredProperty key="ffiLib">
+      <defaultValue>none</defaultValue> </requiredProperty>
+  </requiredProperties>
+  <fileSets>
+    <fileSet filtered="true" packaged="true" encoding="UTF-8">
+      <directory>src/main/scala</directory>
+      <includes> <include>**/*.scala</include> <include>**/*.bak</include>
+        </includes>
+    </fileSet>
+    <fileSet filtered="true" packaged="true" encoding="UTF-8">
+      <directory>src/main/java</directory>
+      <includes> <include>**/*.java</include> <include>**/*.bak</include>
+        </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>src/main/resources</directory>
+      <includes> <include>**/*.txt</include> <include>**/*.xml</include>
+        <include>**/*.bak</include> </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>src/main/resources</directory>
+      <includes> <include>**/*.json</include> <include>**/*.conf</include>
+        <include>**/*.toml</include> <include>**/*.properties</include>
+        <include>**/*.yaml</include> </includes>
+    </fileSet>
+    <fileSet filtered="true" packaged="true" encoding="UTF-8">
+      <directory>src/test/scala</directory>
+      <includes> <include>**/*.scala</include> <include>**/*.bak</include>
+        </includes>
+    </fileSet>
+    <fileSet filtered="true" packaged="true" encoding="UTF-8">
+      <directory>src/test/java</directory>
+      <includes> <include>**/*.java</include> <include>**/*.bak</include>
+        </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>src/test/resources</directory>
+      <includes> <include>**/*.txt</include> <include>**/*.xml</include>
+        <include>**/*.bak</include> </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>src/test/resources</directory>
+      <includes> <include>**/*.json</include> <include>**/*.conf</include>
+        <include>**/*.toml</include> <include>**/*.properties</include>
+        <include>**/*.yaml</include> </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>choices/readme</directory>
+      <includes> <include>**/*.rst</include> <include>**/*.md</include>
+        <include>**/*.adoc</include> </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>choices/testfrwk</directory>
+      <includes> <include>**/*.scala</include> <include>**/*.java</include>
+        </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>choices/license</directory>
+      <includes> <include>**/*.txt</include> </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>choices/_parent_build_tool</directory>
+      <includes> <include>**/*.txt</include> <include>**/*.xml</include>
+        <include>**/*.gradle</include> <include>**/*.mk</include> 
+        <include>**/*.rb</include> <include>**/*.new</include>
+        <include>**/*.sbt</include> <include>**/*.</include> </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>choices/build_tool</directory>
+      <includes> <include>**/*.txt</include> <include>**/*.xml</include>
+        <include>**/*.gradle</include> <include>**/*.mk</include> 
+        <include>**/*.rb</include> <include>**/*.new</include>
+        <include>**/*.sbt</include> <include>**/*.bak</include> </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>choices/ffi_lib</directory>
+      <includes> <include>**/*.scala</include> <include>**/*.java</include>
+        <include>**/*.i</include> </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>choices/_parent_init</directory>
+      <includes> <include>**/*.xml</include> </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>config</directory>
+      <includes> <include>**/*.xml</include> </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory>choices/_parent_readme</directory>
+      <includes> <include>**/*.rst</include> <include>**/*.md</include>
+        <include>**/*.adoc</include> </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>choices/_parent_build_tool</directory>
+      <includes> <include>**/*.properties</include> <include>**/*.</include>
+      <include>**/*.scala</include> <include>**/.sbtopts</include>
+      <include>**/*.bak</include> <include>**/rakefile</include>
+      <include>**/Makefile</include> </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>choices/build_tool</directory>
+      <includes> <include>**/*.properties</include> <include>**/*.</include>
+      <include>**/*.scala</include> <include>**/.sbtopts</include>
+      <include>**/rakefile</include> <include>**/Makefile</include>
+      <include>**/*.sh</include> </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory>choices/_parent_init</directory>
+      <includes> <include>**/*.</include> <include>**/*.sh</include>
+        <include>**/*.editorconfig</include> <include>**/*.lst</include>
+        <include>**/*.properties</include> </includes>
+    </fileSet>
+    <fileSet filtered="true" encoding="UTF-8">
+      <directory></directory>
+      <includes> <include>ivy.xml</include>
+        <include>Makefile-auxffi.mk</include> </includes>
+    </fileSet>
+    <fileSet encoding="UTF-8">
+      <directory></directory>
+      <includes> <include>_gitignore</include> <include>_hgignore</include>
+        <include>.editorconfig</include> <include>exclude.lst</include>
+        </includes>
+    </fileSet>
+  </fileSets>
+</archetype-descriptor>

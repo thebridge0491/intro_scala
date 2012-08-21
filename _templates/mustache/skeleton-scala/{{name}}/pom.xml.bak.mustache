@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- depn scopes: compile, provided, runtime, test, system, import -->
+<!-- maven cmdln cmds: (1) resolve ; (2) build-classpath ; (3) copy-depns ;
+  (4) install ; (5) w/out pom.xml - get single depn ;
+  (6) w/out pom.xml - install external depn
+(1) mvn [-f pom.xml] [-s settings.xml] dependency:resolve[-plugins]
+(2) mvn [-f pom.xml] [-Dmdep.prefix=lib] [-Dmdep.outputFile=<file.txt>] 
+  [-DincludeScope=compile] dependency:build-classpath
+(3) mvn [-f pom.xml] [-DoutputDirectory=lib] dependency:copy-dependencies
+(4) mvn [-f pom.xml] [-DupdateReleaseInfo=true] install:install
+(5) mvn -DrepoUrl=https://repo.maven.apache.org/maven2 [-Dtransitive=false] 
+  -Dartifact=<groupId>:<artifactId>:<version>[:<packaging>] dependency:get
+(6) mvn [-DgroupId=<groupId> -DartifactId=<artifactId> -Dversion=<version>
+  -Dpackaging=jar] -Dfile=file.jar install:install-file
+-->
+<project xmlns = 'http://maven.apache.org/POM/4.0.0'
+    xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'
+    xsi:schemaLocation = 'http://maven.apache.org/POM/4.0.0
+      http://maven.apache.org/xsd/maven-4.0.0.xsd'>
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>{{groupid}}{{^groupid}}org.sandbox{{/groupid}}</groupId>
+  <artifactId>{{name}}{{^name}}intro_scala-util{{/name}}</artifactId>
+  <version>{{version}}{{^version}}0.1.0{{/version}}</version>
+  
+  <name>{{parentcap}}{{^parentcap}}Intro_scala{{/parentcap}}::{{projectcap}}{{^projectcap}}Util{{/projectcap}}</name>
+  <description>{{description}}{{^description}}Utilities sub-package for Scala Intro examples project.{{/description}}</description>
+  <url>https://{{repohost}}{{^repohost}}bitbucket.org{{/repohost}}/{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}/{{parent}}{{^parent}}intro_scala{{/parent}}</url>
+  
+  <properties>
+	<!--<scala.compat>2.9</scala.compat>-->
+    <maven.prereq>3.0.4</maven.prereq>
+  </properties>
+  
+  <prerequisites>
+    <maven>${maven.prereq}</maven>
+  </prerequisites>
+  
+  <issueManagement>
+    <!--<system>Github</system>-->
+    <system>Bitbucket</system>
+    <url>${project.url}/issues</url>
+  </issueManagement>
+  
+  <scm>
+    <url>${project.url}</url>
+    <connection>scm:git:http://{{repohost}}{{^repohost}}bitbucket.org{{/repohost}}/{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}/{{parent}}{{^parent}}intro_scala{{/parent}}.git</connection>
+    <developerConnection>scm:git:ssh://git@{{repohost}}{{^repohost}}bitbucket.org{{/repohost}}/{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}/{{parent}}{{^parent}}intro_scala{{/parent}}.git</developerConnection>
+  </scm>
+  
+  <inceptionYear>{{year}}{{^year}}2012{{/year}}</inceptionYear>
+  <licenses>
+    <license> <name>{{license}}{{^license}}Apache-2.0{{/license}}</name>
+      <url>http://opensource.org/licenses/{{license}}{{^license}}Apache-2.0{{/license}}</url>
+      <distribution>repo</distribution> </license>
+  </licenses>
+  <organization> <name>Coding Sandbox</name>
+    <url>http://sandbox.org/{{parent}}{{^parent}}intro_scala{{/parent}}</url> </organization>
+  <developers>
+    <developer>
+      <id>{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}</id>
+      <name>{{author}}{{^author}}{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}{{/author}}</name>
+      <email>{{email}}{{^email}}{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}-codelab@yahoo.com{{/email}}</email>
+      <url>${project.url}</url>
+      <organization>Coding Sandbox</organization>
+      <organizationUrl>http://sandbox.org</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>America/New_York</timezone>
+    </developer>
+  </developers>
+</project>

@@ -1,0 +1,99 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<!-- version range ex: [${version},)  0.1.+  latest.release -->
+<!-- ivy cmdln cmds: (1) resolve ; (2) cachepath ; (3) retrieve ;
+  (4) deliverto ; (5) publish ; (6) w/out ivy.xml - retrieve single depn
+(1) java -jar ivy.jar [-settings ivysettings.xml] [-ivy ivy.xml] 
+(2) java -jar ivy.jar [-ivy ivy.xml] -confs compile
+  -cachepath classpath_compile.txt
+(3) java -jar ivy.jar [-ivy ivy.xml]
+  -retrieve 'lib/[artifact]-[revision](-[classifier]).[ext]'
+(4) java -jar ivy.jar [-ivy ivy.xml] -revision X -deliverto 'ivy-[revision].xml'
+(5) java -jar ivy.jar [-ivy ivy.xml] [-overwrite] -revision X.Y.Z
+  -deliverto 'ivy-[revision].xml' -publishpattern 'ivy-[revision].xml'
+  [-publishpattern '[artifact]-[revision](-[classifier]).[ext]'] -publish local
+(6) java -jar ivy.jar -retrieve 'lib/[artifact]-[revision](-[classifier]).[ext]'
+  -dependency <organisation> <module> <revision> [-notransitive]
+-->
+<!-- &var; to use as entity variable, example: &scala.lib; -->
+<!-- % versions SYSTEM './src/main/resources/versions.xml' -->
+<!-- % versions SYSTEM 'jar:file:./{parent}-{revision}.jar!/versions.xml' -->
+<!--<!DOCTYPE ivy-module [
+  <!ENTITY scala.lib '/usr/local/share/scala/lib'>
+  <!ENTITY % versions SYSTEM 'jar:file:./${parent}-parent-${version}.jar!/versions.xml'>
+
+  %versions;
+]>-->
+<!--<!DOCTYPE ivy-module [
+  <!ENTITY version.scala '2.9.2'>
+  <!ENTITY version.scalatest '1.8'>
+  <!ENTITY version.scalacheck '1.8'>
+  
+  <!ENTITY version.junit '4.10'>
+  <!ENTITY version.testng '6.7'>
+  <!ENTITY version.spock '0.6-groovy-1.8'>
+  
+  <!ENTITY version.slf4j '1.6.5'>
+  <!ENTITY version.logback '1.0.6'>
+  
+  <!ENTITY version.ini4j '0.5.2'>
+  <!ENTITY version.jna '3.4.0'>
+  
+  <!ENTITY version.jsonp '1.0'>
+  <!ENTITY version.snakeyaml '1.10'>
+]>-->
+
+<ivy-module version = '2.0'
+    xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'
+    xsi:noNamespaceSchemaLocation = 'http://ant.apache.org/ivy/schemas/ivy.xsd'
+    xmlns:m = 'http://ant.apache.org/ivy/maven'>
+  <info module = '${parent}-${name}' revision = '${version}'>
+    <!--<extends location = '../parent/ivy.xml'-->
+    <extends extendType = 'all' revision = '+'
+        organisation = '${groupId}' module = '${parent}-parent'/>
+    <license name = '${license}'
+      url = 'https://opensource.org/licenses/${license}'/>
+    <description homepage = 'https://${repohost}/${repoacct}/${parent}'>
+      ${description}
+    </description>
+  </info>
+  <!--<configurations defaultconfmapping = 'default'>
+    <conf name = 'default' description = 'runtime depns and master' extends = 'runtime,master'/>
+    <conf name = 'master' description = 'module artifact itself only, no transitive depns'/>
+    <conf name = 'compile' description = 'default compile depns'/>
+    <conf name = 'runtime' description = 'runtime depns' extends = 'compile'/>
+    <conf name = 'test' description = 'test depns' extends = 'runtime'/>
+    
+    <conf name = 'sources' description = 'module source artifact only'/>
+    <conf name = 'javadoc' description = 'module javadoc artifact only'/>
+    <conf name = 'optional' description = 'optional depns'/>
+  </configurations>-->
+  <!--<publications>
+    <artifact name = '${parent}-${name}' type = 'jar' ext = 'jar'
+        conf = 'master'/>
+    <artifact name = '${parent}-${name}' type = 'test' ext = 'jar'
+        conf = 'test' m:classifier = 'tests'/>
+  </publications>-->
+  <dependencies defaultconfmapping = '*->compile,master,default'
+      defaultconf = 'compile'>
+    
+    <!--<dependency org = '${groupId}' name = '${parent}-util' rev = '${version}'
+        revConstraint = '[${version},)'/>-->
+    
+    <exclude org = 'org.scalatest'/>
+    <exclude org = 'org.scalacheck'/>
+    <!--<exclude org = 'junit' module = 'junit'/>-->
+    <exclude org = 'org.testng' module = 'testng'/>
+    <exclude org = 'org.slf4j' module = 'log4j-over-slf4j'/>
+    <!--<exclude org = 'ch.qos.logback' module = 'logback-classic'/>-->
+    <exclude org = 'org.ini4j' module = 'ini4j'/>
+    <exclude org = 'net.java.dev.jna' module = 'jna'/>
+#{if}("yes" != ${executable})
+    <exclude org = 'javax.json' module = 'javax.json-api'/>
+    <exclude org = 'org.glassfish' module = 'javax.json'/>
+    <exclude org = 'org.yaml' module = 'snakeyaml'/>
+#{end}
+  </dependencies>
+</ivy-module>

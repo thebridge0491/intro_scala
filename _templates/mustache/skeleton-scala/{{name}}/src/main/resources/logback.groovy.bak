@@ -1,0 +1,44 @@
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder
+import ch.qos.logback.core.ConsoleAppender
+import ch.qos.logback.core.FileAppender
+//import ch.qos.logback.core.rolling.RollingFileAppender
+//import ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy
+//import ch.qos.logback.core.rolling.TimeBasedRollingPolicy
+
+import static ch.qos.logback.classic.Level.DEBUG
+
+/*
+appender("RootRoll", RollingFileAppender) {
+  file = "rootRoll.log"
+  rollingPolicy(TimeBasedRollingPolicy) {
+    fileNamePattern = "%d{YYYYMMddHHmmss}-rootRoll.log"
+  }
+  triggeringPolicy(SizeBasedTriggeringPolicy) {
+    maxFileSize = "20MB"
+  }
+  encoder(PatternLayoutEncoder) {
+    pattern = "%d{YYYY-MM-dd HH:mm:ss} %p:%c:%m%n"
+  }
+}
+*/
+appender("Root2", ConsoleAppender) {
+  target = "System.err"
+  encoder(PatternLayoutEncoder) {
+    pattern = "%d{YYYY-MM-dd HH:mm:ss} - %c - %5p - \(%F:%L\) - %m%n"
+  }
+}
+appender("Root1", FileAppender) {
+  file = "root.log"
+  encoder(PatternLayoutEncoder) {
+    pattern = "%d{YYYY-MM-dd HH:mm:ss} %p:%c:%m%n"
+  }
+}
+appender("A1", FileAppender) {
+  file = "prac.log"
+  encoder(PatternLayoutEncoder) {
+    pattern = "%d{YYYY-MM-dd HH:mm:ss} %p:%c:%m%n"
+  }
+}
+logger("prac", DEBUG, ["A1"])
+//root(DEBUG, ["Root1", "Root2", "RootRoll"])
+root(DEBUG, ["Root1", "Root2"])

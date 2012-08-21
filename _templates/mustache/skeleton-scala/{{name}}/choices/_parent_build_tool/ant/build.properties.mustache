@@ -1,0 +1,16 @@
+# Ant build properties.
+
+prefix=/usr/local
+DEBUG=0
+test.opts=
+app.args=
+#javac.source=1.7
+#javac.target=1.7
+tarext=tar.gz
+subdirs=common,app
+
+ant.project.org={{groupid}}{{^groupid}}org.sandbox{{/groupid}}
+ant.project.parent={{parent}}{{^parent}}intro_scala{{/parent}}
+ant.project.rev={{version}}{{^version}}0.1.0{{/version}}
+
+build.dir=target

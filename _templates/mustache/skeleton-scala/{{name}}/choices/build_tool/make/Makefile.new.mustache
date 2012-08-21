@@ -1,0 +1,36 @@
+# Single package Makefile script.
+.SUFFIXES: .class .java .scala
+help:
+
+groupid = {{groupid}}{{^groupid}}org.sandbox{{/groupid}}
+parent = {{parent}}{{^parent}}intro_scala{{/parent}}
+pkg = {{project}}{{^project}}util{{/project}}
+version = {{version}}{{^version}}0.1.0{{/version}}
+namespace_path = $(shell echo $(groupid).$(parent).$(pkg) | sed 'y|.|/|')
+proj = $(parent)-$(pkg)
+
+dist_jar = target/$(proj)-$(version).jar
+dist_test_jar = target/$(proj)-$(version)-tests.jar
+
+src_java = $(shell ls src/main/java/$(namespace_path)/*.java)
+#src_java = $(shell find src/main/java -name '*.java')
+src_scala = $(shell ls src/main/scala/$(namespace_path)/*.scala)
+
+{{#executable}}
+main_class = $(groupid).$(parent).$(pkg).Main
+{{/executable}}
+
+tests_java = $(shell ls src/test/java/$(namespace_path)/*.java | grep -ve ClassicTest)
+tests_scala = $(shell ls src/test/scala/$(namespace_path)/*.scala | grep -ve ClassicTest)
+
+target/.depend: resolve
+	-@mkdir -p target/lib target/include $(classes_dir) $(classes_test_dir)
+	-@echo '' > target/.depend
+
+.PHONY: all compile testCompile
+all compile: target/.depend $(dist_jar) ## compile
+testCompile: $(dist_test_jar) ## compile test
+
+
+-include ./Makefile-depnmgr.mk ./Makefile-targets.mk
+#-include ./Makefile-auxffi.mk

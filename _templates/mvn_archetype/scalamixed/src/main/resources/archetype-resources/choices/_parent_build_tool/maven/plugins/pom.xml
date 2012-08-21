@@ -1,0 +1,135 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<!-- depn scopes: compile, provided, runtime, test, system, import -->
+<!-- maven cmdln cmds: (1) resolve ; (2) build-classpath ; (3) copy-depns ;
+  (4) install ; (5) w/out pom.xml - get single depn ;
+  (6) w/out pom.xml - install external depn
+(1) mvn [-f pom.xml] [-s settings.xml] dependency:resolve[-plugins]
+(2) mvn [-f pom.xml] [-Dmdep.prefix=lib] [-Dmdep.outputFile=<file.txt>] 
+  [-DincludeScope=compile] dependency:build-classpath
+(3) mvn [-f pom.xml] [-DoutputDirectory=lib] dependency:copy-dependencies
+(4) mvn [-f pom.xml] [-DupdateReleaseInfo=true] install:install
+(5) mvn -DrepoUrl=http://repo.maven.apache.org/maven2 [-Dtransitive=false] 
+  -Dartifact=<groupId>:<artifactId>:<version>[:<packaging>] dependency:get
+(6) mvn [-DgroupId=<groupId> -DartifactId=<artifactId> -Dversion=<version>
+  -Dpackaging=jar] -Dfile=file.jar install:install-file
+-->
+<project xmlns = 'http://maven.apache.org/POM/4.0.0'
+    xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'
+    xsi:schemaLocation = 'http://maven.apache.org/POM/4.0.0
+      http://maven.apache.org/xsd/maven-4.0.0.xsd'>
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>${groupId}</groupId>
+  <artifactId>${parent}-plugins</artifactId>
+  <version>0</version>
+  <packaging>pom</packaging>
+  
+  <name>${parent.substring(0,1).toUpperCase()}${parent.substring(1)}::Plugins</name>
+  <description>Plugins pom: ${parentdescription}</description>
+
+  <properties>
+    <maven.prereq>3.0.4</maven.prereq>
+    <versionplugin.help>2.1.1</versionplugin.help>
+    <versionplugin.versions>1.3.1</versionplugin.versions>
+    <versionplugin.antrun>1.7</versionplugin.antrun>    
+    <versionplugin.clean>2.5</versionplugin.clean>
+    <versionplugin.dependency>2.5</versionplugin.dependency>
+    <versionplugin.resources>2.5</versionplugin.resources>
+    <versionplugin.scala>3.1.0</versionplugin.scala>
+    <versionplugin.compiler>2.5.1</versionplugin.compiler>
+    <versionplugin.surefire>2.12.1</versionplugin.surefire>
+    <versionplugin.exec>1.2.1</versionplugin.exec>
+    <versionplugin.jar>2.4</versionplugin.jar>
+    <versionplugin.source>2.2</versionplugin.source>
+    <versionplugin.assembly>2.3</versionplugin.assembly>
+    <versionplugin.javadoc>2.8.1</versionplugin.javadoc>
+    <versionplugin.scalastyle>0.2.0</versionplugin.scalastyle>
+    <versionplugin.checkstyle>2.9.1</versionplugin.checkstyle>
+    <versionplugin.jacoco>0.5.9.201207300726</versionplugin.jacoco>
+    <versionplugin.install>2.3.1</versionplugin.install>
+    <versionplugin.deploy>2.7</versionplugin.deploy>
+    
+    <package>${symbol_dollar}{project.groupId}.${parent}.bom</package>
+  </properties>
+  
+  <prerequisites>
+    <maven>${symbol_dollar}{maven.prereq}</maven>
+  </prerequisites>
+  
+  <inceptionYear>${date.split("-")[0]}</inceptionYear>
+  <licenses>
+    <license> <name>${license}</name>
+      <url>http://opensource.org/licenses/${license}</url>
+      <distribution>repo</distribution> </license>
+  </licenses>
+  <organization> <name>Coding Sandbox</name>
+    <url>http://sandbox.org/${parent}</url> </organization>
+  <developers>
+    <developer>
+      <id>${repoacct}</id>
+      <name>${author}</name>
+      <email>${email}</email>
+      <url>https://${repohost}/${repoacct}/${parent}</url>
+      <organization>Coding Sandbox</organization>
+      <organizationUrl>http://sandbox.org/${parent}</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>America/New_York</timezone>
+    </developer>
+  </developers>
+  
+  <dependencies>
+    <dependency> <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-help-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.help}</version> </dependency>
+	<dependency> <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-clean-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.clean}</version> </dependency>
+	<dependency> <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-resources-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.resources}</version> </dependency>
+	<dependency> <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-compiler-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.compiler}</version> </dependency>
+	<dependency> <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-surefire-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.surefire}</version> </dependency>
+	<dependency> <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-jar-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.jar}</version> </dependency>
+	<dependency> <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-install-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.install}</version> </dependency>
+	<dependency> <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-deploy-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.deploy}</version> </dependency>
+	<dependency> <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-dependency-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.dependency}</version> </dependency>
+	<dependency> <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-javadoc-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.javadoc}</version> </dependency>
+	<dependency> <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-source-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.source}</version> </dependency>
+	<dependency> <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-checkstyle-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.checkstyle}</version> </dependency>
+	<dependency> <groupId>org.jacoco</groupId>
+	  <artifactId>jacoco-maven-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.jacoco}</version> </dependency>
+	<dependency> <groupId>net.alchim31.maven</groupId>
+	  <artifactId>scala-maven-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.scala}</version> </dependency>
+	<dependency> <groupId>org.scalastyle</groupId>
+	  <artifactId>scalastyle-maven-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.scalastyle}</version> </dependency>
+	<dependency> <groupId>org.codehaus.mojo</groupId>
+	  <artifactId>versions-maven-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.versions}</version> </dependency>
+  </dependencies>
+</project>

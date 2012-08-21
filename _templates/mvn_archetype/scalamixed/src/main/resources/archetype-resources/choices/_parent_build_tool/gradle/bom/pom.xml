@@ -1,0 +1,91 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<project xmlns = 'http://maven.apache.org/POM/4.0.0'
+    xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'
+    xsi:schemaLocation = 'http://maven.apache.org/POM/4.0.0
+      http://maven.apache.org/xsd/maven-4.0.0.xsd'>
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>${groupId}</groupId>
+  <artifactId>${parent}-bom</artifactId>
+  <version>0</version>
+  <packaging>pom</packaging>
+  
+  <name>${parentcap}::BOM</name>
+  <description>BOM pom: ${parentdescription}</description>
+
+  <properties>
+    <scala.compat>2.9</scala.compat>
+    <version.scala>2.9.2</version.scala>
+    <version.scalatest>1.8</version.scalatest>
+    <version.scalacheck>1.8</version.scalacheck>
+    
+    <version.junit>4.10</version.junit>
+    <version.testng>6.7</version.testng>
+    <version.spock>0.6-groovy-1.8</version.spock>
+    
+    <version.slf4j>1.6.5</version.slf4j>
+    <version.logback>1.0.6</version.logback>
+    
+    <version.ini4j>0.5.2</version.ini4j>
+    <version.jna>3.4.0</version.jna>
+    
+    <version.jsonp>1.0</version.jsonp>
+    <version.snakeyaml>1.10</version.snakeyaml>
+  </properties>
+  
+  <dependencyManagement>
+  <dependencies>
+    <dependency> <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>${symbol_dollar}{version.scala}</version>
+      <!--<classifier>sources,javadoc</classifier> <type>jar</type>-->
+      </dependency>
+    <dependency> <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${symbol_dollar}{scala.compat}</artifactId>
+      <version>${symbol_dollar}{version.scalatest}</version> </dependency>
+    <dependency> <groupId>org.scalacheck</groupId>
+      <artifactId>scalacheck_${symbol_dollar}{scala.compat}</artifactId>
+      <version>${symbol_dollar}{version.scalacheck}</version> </dependency>
+
+    <dependency> <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${symbol_dollar}{version.junit}</version> </dependency>
+    <dependency> <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>${symbol_dollar}{version.testng}</version> </dependency>
+    <dependency> <groupId>org.spockframework</groupId>
+      <artifactId>spock-core</artifactId>
+      <version>${symbol_dollar}{version.spock}</version> </dependency>
+    
+    <dependency> <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${symbol_dollar}{version.slf4j}</version> </dependency>
+    <dependency> <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+      <version>${symbol_dollar}{version.slf4j}</version> </dependency>
+    <dependency> <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${symbol_dollar}{version.logback}</version> </dependency>
+    
+    <dependency> <groupId>org.ini4j</groupId>
+      <artifactId>ini4j</artifactId>
+      <version>${symbol_dollar}{version.ini4j}</version> </dependency>
+    <dependency> <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+      <version>${symbol_dollar}{version.jna}</version> </dependency>
+    
+    <dependency> <groupId>javax.json</groupId>
+      <artifactId>javax.json-api</artifactId>
+      <version>${symbol_dollar}{version.jsonp}</version> </dependency>
+    <dependency> <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>${symbol_dollar}{version.jsonp}</version> </dependency>
+    <dependency> <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>${symbol_dollar}{version.snakeyaml}</version> </dependency>
+  </dependencies>
+  </dependencyManagement>
+</project>

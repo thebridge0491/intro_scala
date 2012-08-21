@@ -1,0 +1,6 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+startParameter.offline = true
+//rootProject.buildFileName = 'build.gradle'
+rootProject.name = '${parent}-bom'

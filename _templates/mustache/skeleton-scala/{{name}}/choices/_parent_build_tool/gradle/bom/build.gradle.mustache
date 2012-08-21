@@ -1,0 +1,41 @@
+buildscript {
+	repositories {
+		mavenLocal()
+		if (!gradle.startParameter.offline) {
+			mavenCentral()
+			//jcenter()
+			//maven { url 'https://repo.spring.io/plugins-release' }
+		}
+	}
+	
+	dependencies {
+		classpath 'io.spring.gradle:dependency-management-plugin:+'
+	}
+}
+
+plugins {
+	id 'maven'   	// add support to deploy (Maven repos) artifacts
+	id 'java'
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+group = '{{groupid}}{{^groupid}}org.sandbox{{/groupid}}'
+version = '0'
+
+/*dependencyManagement {
+	dependencies { // version range ex: [0.1.0,)  0.1.+  latest.release
+		dependency 'junit:junit:[4.10,)'
+	}
+}
+def installer = install.repositories.mavenInstaller
+[installer]*.pom*.whenConfigured { pom ->
+	pom.packaging = 'pom'
+}*/
+
+install.doFirst {
+	copy { into buildDir ; from "${projectDir}/pom.xml"
+		rename { 'bom.pom' }
+	}
+}
+artifacts.archives(file("${buildDir}/bom.pom"))

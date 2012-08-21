@@ -1,0 +1,225 @@
+ext {
+    configDir = (new File(buildscript.sourceFile.getParentFile(), 'config')
+		).getAbsolutePath()
+    
+    create_symlink = { target_str, link_str ->
+		//ant.symlink(resource: target_str, link: link_str, failonerror: false)
+		def (target, link) = [new File(target_str), new File(link_str)]
+		if (link.exists())
+			delete link
+		if (target.exists())
+			java.nio.file.Files.createSymbolicLink(link.toPath(), target.toPath())
+	}
+    
+    proc_output = { cmdLn ->
+		def errbuf = new StringBuffer()
+		def proc = cmdLn.execute(["LD_LIBRARY_PATH=${ld_path}"], null)
+		proc.consumeProcessErrorStream(errbuf) ; println errbuf.toString()
+		return proc.text
+    }
+    
+    exec_output = { cmdLn ->
+		def res0 = new ByteArrayOutputStream()
+		exec { ignoreExitValue true
+			environment 'LD_LIBRARY_PATH', ld_path
+			commandLine cmdLn.split() ; standardOutput = res0 }
+		return res0.toString()
+    }
+}
+
+ant.properties['etc.dir'] = System.env.OSTYPE.grep(~/^(?i)linux.*/) ? 
+    '/etc/apache-ant' : '/usr/local/share/java/apache-ant/etc'
+
+task copyDepns {
+    description "Copy depn\'s into libsDir/lib directory [-PdepnSymlink='${depnSymlink}']"
+    switch (depnSymlink) {
+		case 'true':
+			mkdir "${libsDir}/lib"
+			def pathEntries = configurations.testRuntime.collect()
+			//exec_output("ln -s ${pathEntries.join(' ')} ${libsDir}/lib")
+			pathEntries.each {
+				create_symlink(it.getAbsolutePath(), 
+					"${libsDir}/lib/${it.getName()}")
+			}
+			break
+		default:
+			copy { into "${libsDir}/lib" ; from configurations.testRuntime }
+			break
+    }
+}
+
+task jarTests(type: Jar, dependsOn: [jar,testClasses]) { group = 'Build'
+	description 'Assembles a jar archive with the test classes'
+	classifier = 'tests'
+	from(sourceSets.test.output)
+    
+    outputs.upToDateWhen { false }
+    
+    onlyIf { !project.sourceSets.test.allSource.empty }
+    
+    doFirst {
+        manifest {
+            def mfTestClasspath = configurations.testRuntime.collect {
+                'lib/' + it.getName()}.join(' ')
+            attributes 'Main-Class': "${project.pkgname}.Ts_Main",
+				'Class-Path': [mfTestClasspath, jar.archiveName].join(' ')
+        }
+    }
+}
+
+task jarSources(type: Jar) { group = 'Build'
+	description 'Assembles a sources jar archive'
+	classifier = 'sources'
+	if ((new File('exclude.lst')).exists()) {
+		from('.') { exclude (new File('exclude.lst') as String[])
+			exclude '**/build/*', '**/gradle/*' }
+		exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
+	} else {
+		//from sourceSets.main.allSource
+		from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
+		exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
+	}
+}
+
+task jarJavadoc(type: Jar, dependsOn: [javadoc, scaladoc]) {
+	description 'Assembles a javadoc|scaladoc jar archive'
+	group = 'Documentation'
+	classifier = 'javadoc'
+	from(javadoc.destinationDir)
+	from(scaladoc.destinationDir)
+}
+
+task('test-jar', dependsOn: [jarTests]) { group = 'Verification'
+    description "Run tests.jar\'s main [-PtestOpts='${testOpts}']"
+	doLast {
+        /*javaexec { ignoreExitValue true
+            environment 'LD_LIBRARY_PATH', ld_path
+            jvmArgs = defaultJvmArgs
+            main = '-jar'
+            args = [jarTests.archivePath] + toptslist
+        }*/
+        println exec_output("java ${defaultJvmArgs.join(' ')} -jar ${jarTests.archivePath} ${toptslist.join(' ')}")
+    }    
+}
+
+task checkstyle { group = 'Verification'
+    description 'Lint check (checkstyle)'
+    def checkstyleClasspath = project.configurations.checkstyle.asPath
+    def style_cmd = "java -cp ${checkstyleClasspath} com.puppycrawl.tools.checkstyle.Main"
+    //def style_cmd = "checkstyle"
+    
+    doLast {
+        //ant.taskdef(
+		//	resource: 'com/puppycrawl/tools/checkstyle/ant/antlib.xml',
+        //   //classpath: fileTree(dir: ant.properties['java.lib'],
+		//	//	includes: ['checkstyle*.jar']).asPath
+        //    classpath: project.configurations.checkstyle.asPath
+        //)
+        //ant.checkstyle(config: "${configDir}/sun_checks.xml", 
+        //		maxErrors: '500') {
+        //	fileset(dir: "${projectDir}/src/main/java", includes: '**/*.java')
+        //	formatter(type: 'plain',
+		//		toFile: "${buildDir}/checkstyle_errors.txt")
+        //	formatter(type: 'xml',
+		//		toFile: "${buildDir}/checkstyle_errors.xml")
+        //}
+        exec_output(("${style_cmd}".split() + ['-c', 
+            "${configDir}/sun_checks.xml", '-f', 'xml',
+            '-o', "${buildDir}/checkstyle_errors.xml", "${projectDir}/src/main/java"]).join(' '))
+		
+		ant.xslt(
+			style: "${ant.properties['etc.dir']}/checkstyle/checkstyle-frames.xsl",
+			in: "${buildDir}/checkstyle_errors.xml",
+			out: "${buildDir}/checkstyle_rpt/rpt.html") {
+			param(name: 'output.dir', expression: "${buildDir}/checkstyle_rpt")
+		}
+    }
+}
+
+task scalastyle(type: Exec) { ignoreExitValue = true ; group = 'Verification'
+    description 'Lint check (scalastyle)'
+    def scalastyleClasspath = project.configurations.scalastyle.asPath
+    def style_cmd = "java -cp ${scalastyleClasspath} org.scalastyle.Main"
+    
+    commandLine "${style_cmd}".split() +
+		['-c', "${configDir}/scalastyle_config.xml", '--xmlOutput',
+		"${buildDir}/scalastyle_errors.xml", "${projectDir}/src/main/scala"]
+    doFirst {
+        standardOutput = new FileOutputStream(
+			"${buildDir}/scalastyle_errors.txt")
+    }
+    doLast {
+        ant.xslt(
+			style: "${ant.properties['etc.dir']}/checkstyle/checkstyle-frames.xsl",
+			in: "${buildDir}/scalastyle_errors.xml",
+			out: "${buildDir}/scalastyle_rpt/rpt.html") {
+			param(name: 'output.dir', expression: "${buildDir}/scalastyle_rpt")
+		}
+    }
+}
+
+def init_jacoco = {
+    ant.taskdef(uri: 'jacoco', resource: 'org/jacoco/ant/antlib.xml',
+        /*classpath: fileTree(dir: "${System.env.HOME}/.ant/lib",
+            includes: ['org.jacoco.ant*.jar', 'asm-*.jar']).asPath*/
+        classpath: project.configurations.jacoco.asPath
+    )
+}
+
+task cover { group = 'Verification'
+    description "Generate coverage (jacoco) [-PtestOpts='${testOpts}']"
+    doLast {
+        init_jacoco()
+        ant.'jacoco:coverage'(destfile: "${buildDir}/jacoco.exec") {
+            java(jar: jarTests.archivePath, fork: 'true') {
+                classpath { pathelement(location: jarTests.archivePath) }
+                sysproperty(key: 'LD_LIBRARY_PATH', path: ld_path)
+                jvmarg(line: (defaultJvmArgs + ["-Djava.library.path=${ld_path}"]).join(' '))
+                arg(line: toptslist.join(' '))
+            }
+        }
+        /*def agentRuntimeClasspath = fileTree(dir: "${System.env.HOME}/.ant/lib",
+            includes: ['org.jacoco.agent-*-runtime.jar']).asPath*/
+        /*javaexec { ignoreExitValue true
+            environment 'LD_LIBRARY_PATH', ld_path
+            jvmArgs = defaultJvmArgs + ["-Djava.library.path=${ld_path}"] + 
+                ["-javaagent:${agentRuntimeClasspath}=destfile=${buildDir}/jacoco.exec"]
+            main = '-jar'
+            args = [jarTests.archivePath] + toptslist
+        }*/
+        /*exec_output((['java'] + defaultJvmArgs + ["-Djava.library.path=${ld_path}"] + ["-javaagent:${agentRuntimeClasspath}=destfile=${buildDir}/jacoco.exec", '-jar', jarTests.archivePath] + toptslist).join(' '))*/
+    }
+}
+task report { group = 'Verification'
+    description 'Report coverage (jacoco)'
+    doLast {
+        init_jacoco()
+        ant.'jacoco:report' {
+            executiondata { ant.file(file: "${buildDir}/jacoco.exec") }
+            structure(name: 'Jacoco report') {
+                classfiles {
+                    //fileset(dir: "${buildDir}/classes")
+                    zipfileset(src: jar.archivePath)
+                }
+                sourcefiles(encoding: 'UTF-8') {
+                    //fileset(dir: "${projectDir}/src/main")
+                    zipfileset(src: jarSources.archivePath,
+						includes: 'src/main/**/*')
+                }
+            }
+            html(destdir: "${buildDir}/cov")
+            //csv(destfile: "${buildDir}/cov/report.csv")
+            //xml(destfile: "${buildDir}/cov/report.xml")
+        }
+    }
+}
+
+task clean_cov(type: Delete) {
+    description 'Clean coverage data (jacoco)'
+    delete "${buildDir}/cov", "${buildDir}/jacoco.exec"
+}
+
+
+artifacts {
+	testOutput jarTests
+}

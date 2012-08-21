@@ -1,0 +1,51 @@
+# Multi-package project Makefile script.
+.POSIX:
+help:
+
+#MAKE = make # (GNU make variants: make (Linux) gmake (FreeBSD)
+
+parent = {{parent}}{{^parent}}intro_scala{{/parent}}
+SUBDIRS = common app
+
+.PHONY: all clean compile configure help publish testCompile test
+configure: $(SUBDIRS) ## configure [OPTS=""]
+	-for dirX in $^ ; do mkdir -p $$dirX/target ; \
+		(cd $$dirX ; sh ./configure.sh $(OPTS)) ; done
+help: $(SUBDIRS)
+	-for dirX in $^ ; do $(MAKE) -C $$dirX $@ ; done
+	@echo "##### Top-level multiproject: $(parent) #####"
+	@echo "       $(MAKE) [SUBDIRS="$(SUBDIRS)"] configure [OPTS=??]"
+	@echo "Usage: $(MAKE) [SUBDIRS="$(SUBDIRS)"] [target]"
+all compile test testCompile publish: $(SUBDIRS)
+	-for dirX in $^ ; do $(MAKE) -C $$dirX $@ ; done
+clean: $(SUBDIRS)
+	-for dirX in $^ ; do $(MAKE) -C $$dirX $@ ; done
+	-rm -fr core* *~ .*~ target/* *.log */*.log
+
+#----------------------------------------
+FMTS ?= tar.gz
+distdir = $(parent)-0.1.0
+
+.PHONY: dist jar javadoc scaladoc checkstyle scalastyle cover report run debug
+dist: $(SUBDIRS)
+	-@mkdir -p target/$(distdir) ; cp -f exclude.lst target/
+#	#-zip -9 -q --exclude @exclude.lst -r - . | unzip -od target/$(distdir) -
+	-tar --format=posix --dereference --exclude-from=exclude.lst -cf - . | tar -xpf - -C target/$(distdir)
+	
+	-@for fmt in `echo $(FMTS) | tr ',' ' '` ; do \
+		case $$fmt in \
+			zip) echo "### target/$(distdir).zip ###" ; \
+				rm -f target/$(distdir).zip ; \
+				(cd target ; zip -9 -q -r $(distdir).zip $(distdir)) ;; \
+			*) tarext=`echo $$fmt | grep -e '^tar$$' -e '^tar.xz$$' -e '^tar.bz2$$' || echo tar.gz` ; \
+				echo "### target/$(distdir).$$tarext ###" ; \
+				rm -f target/$(distdir).$$tarext ; \
+				(cd target ; tar --posix -L -caf $(distdir).$$tarext $(distdir)) ;; \
+		esac \
+	done
+	-@rm -r target/$(distdir)
+#	-for dirX in $^ ; do $(MAKE) -C $$dirX $@ ; done
+jar javadoc scaladoc checkstyle scalastyle cover report: $(SUBDIRS)
+	-for dirX in $^ ; do $(MAKE) -C $$dirX $@ ; done
+run debug: app
+	-$(MAKE) -C app $@

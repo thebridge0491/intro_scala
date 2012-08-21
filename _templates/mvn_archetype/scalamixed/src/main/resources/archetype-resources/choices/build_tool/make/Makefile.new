@@ -1,0 +1,39 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+${symbol_pound} Single package Makefile script.
+.SUFFIXES: .class .java .scala
+help:
+
+groupid = ${groupId}
+parent = ${parent}
+pkg = ${name}
+version = ${version}
+namespace_path = ${symbol_dollar}(shell echo ${symbol_dollar}(groupid).${symbol_dollar}(parent).${symbol_dollar}(pkg) | sed 'y|.|/|')
+proj = ${symbol_dollar}(parent)-${symbol_dollar}(pkg)
+
+dist_jar = target/${symbol_dollar}(proj)-${symbol_dollar}(version).jar
+dist_test_jar = target/${symbol_dollar}(proj)-${symbol_dollar}(version)-tests.jar
+
+src_java = ${symbol_dollar}(shell ls src/main/java/${symbol_dollar}(namespace_path)/*.java)
+${symbol_pound}src_java = ${symbol_dollar}(shell find src/main/java -name '*.java')
+src_scala = ${symbol_dollar}(shell ls src/main/scala/${symbol_dollar}(namespace_path)/*.scala)
+
+#{if}("yes" == ${executable})
+main_class = ${symbol_dollar}(groupid).${symbol_dollar}(parent).${symbol_dollar}(pkg).Main
+#{end}
+
+tests_java = ${symbol_dollar}(shell ls src/test/java/${symbol_dollar}(namespace_path)/*.java | grep -ve ClassicTest)
+tests_scala = ${symbol_dollar}(shell ls src/test/scala/${symbol_dollar}(namespace_path)/*.scala | grep -ve ClassicTest)
+
+target/.depend: resolve
+	-@mkdir -p target/lib target/include ${symbol_dollar}(classes_dir) ${symbol_dollar}(classes_test_dir)
+	-@echo '' > target/.depend
+
+.PHONY: all compile testCompile
+all compile: target/.depend ${symbol_dollar}(dist_jar) ${symbol_pound}${symbol_pound} compile
+testCompile: ${symbol_dollar}(dist_test_jar) ${symbol_pound}${symbol_pound} compile test
+
+
+-include ./Makefile-depnmgr.mk ./Makefile-targets.mk
+${symbol_pound}-include ./Makefile-auxffi.mk

@@ -1,0 +1,76 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+package ${package};
+
+/** DocComment:
+ * <p>Brief description.</p> */
+public class User {
+    /** Constructor.
+     * @param name - name of the user
+     * @param num - random number assigned to user
+     * @param timeIn - time started for user, in milliseconds */
+    public User(String name, int num, long timeIn) {
+        this.name = name;
+        this.num = num;
+        this.timeIn = timeIn;
+    }
+    public User() { this("World", 5, 0);
+    }
+    
+    /** Accessor for name.
+     * @return name of the user */
+    public String getName() { return this.name;
+    }
+    public int getNum() { return this.num;
+    }
+    public long getTimeIn() { return this.timeIn;
+    }
+    
+    /** Mutator for name. */
+    public void setName(String name) { this.name = name;
+    }
+    public void setNum(int num) { this.num = num;
+    }
+    public void setTimeIn(long timeIn) { this.timeIn = timeIn;
+    }
+    
+    private boolean equalObjects(User other) {
+        return (this.name.equals(other.name) || this.name == other.name) &&
+            this.num == other.num && this.timeIn == other.timeIn; //&&
+            //Double.doubleToLongBits(this.dblNum) ==
+            //        Double.doubleToLongBits(other.dblNum) &&
+            //Arrays.equals(this.intArr, other.intArr);
+    }
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (null == obj || getClass() != obj.getClass())
+            return false;
+        return equalObjects((User)obj);
+    }
+    
+    @Override
+    public int hashCode() {
+        final int primeMul = 31;
+        int primeAdd = 17;
+        //long d_Bits = Double.doubleToLongBits(this.dblNum);
+        return primeMul * (
+            //primeMul * (
+            //    primeMul * (primeAdd + Arrays.hashCode(this.intArr)) +
+            //    primeAdd + (int)(d_Bits ^ (d_Bits >>> 32)) +
+                primeAdd + this.num + (int)this.timeIn) +
+            primeAdd + ((null != this.name) ? this.name.hashCode() : 0);
+    }
+    
+    @Override
+    public String toString() {
+        return String.format("%s{name=%s, num=%d, timeIn=%d}", 
+			this.getClass().getSimpleName(), this.name, this.num, this.timeIn);
+    }
+    
+    private String name;
+    private int num;
+    private long timeIn;
+}

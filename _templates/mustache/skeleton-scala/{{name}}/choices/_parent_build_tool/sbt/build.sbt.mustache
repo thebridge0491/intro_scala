@@ -1,0 +1,22 @@
+import Settings._
+import BuildTasks._
+
+//scalaVersion     in ThisBuild := "2.9.2"
+version          in ThisBuild := "{{version}}{{^version}}0.1.0{{/version}}"
+organization     in ThisBuild := "{{groupid}}{{^groupid}}org.sandbox{{/groupid}}"
+organizationName in ThisBuild := "Coding Sandbox"
+
+lazy val root = (project in file("."))
+	.settings(defaultSettings:_*)
+    .settings(name := "{{parent}}{{^parent}}intro_scala{{/parent}}"
+        , run in Test := { (run in util in Test).evaluated }
+        , run in Compile := { () }
+        )
+	.aggregate(parent, util, intro)
+
+lazy val parent = (project in file("parent"))
+
+lazy val util = (project in file("common"))
+
+lazy val intro = (project in file("app"))
+	//.dependsOn(util)

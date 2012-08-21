@@ -1,0 +1,113 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<project default = 'resolve'
+    xmlns:artifact = 'antlib:org.apache.maven.artifact.ant'>
+  <!--<path id = 'maven-ant.tasks.classpath'>
+	<fileset dir = "${symbol_dollar}{user.home}/.ant/lib" includes = 'maven-ant-tasks*.jar'/>
+  </path>
+  <taskdef uri = 'antlib:org.apache.maven.artifact.ant' 
+    resource = 'org/apache/maven/artifact/ant/antlib.xml'
+    classpathref = 'maven-ant.tasks.classpath'/>-->
+  
+  <description>
+    Dependency manager tasks (Maven) including install Ant script.
+  </description>
+  
+  <!--<dirname property = 'ant.project.dir' file = "${symbol_dollar}{ant.file}"/>-->
+  <condition property = 'java.lib' value = '/usr/share/java'
+      else = '/usr/local/share/java/classes'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${symbol_dollar}{os.name}"/>
+  </condition>
+  <condition property = 'scala.lib' value = '/usr/share/scala/lib'
+      else = '/usr/local/share/scala/lib'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${symbol_dollar}{os.name}"/>
+  </condition>
+  <!--<property name = 'scala.compat' value = '2.9'/>-->
+  <condition property = 'maven.home' value = '/usr/share/maven3'
+      else = '/usr/local/share/java/maven3'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${symbol_dollar}{os.name}"/>
+  </condition>
+  <pathconvert property = 'jar.exists' setonempty = 'false'>
+    <fileset dir = "${symbol_dollar}{basedir}" includes = 'target/*.jar'/>
+  </pathconvert>
+  
+  <property name = 'pom.dep.file' value = "${symbol_dollar}{basedir}/pom.xml"/>
+  <!--<property url = "jar:file:./target/<parent>-<revision>.jar!/versions.properties"/>-->
+  <!--<property file = "${symbol_dollar}{basedir}/src/main/resources/versions.properties"/>-->
+  <property name = 'maven.settings.file'
+    value = "${symbol_dollar}{user.home}/.m2/settings.xml"/>
+  <property name = 'maven.scopes' value = 'compile,runtime,test'/>
+  <property name = 'pom.out.file' value = "${symbol_dollar}{basedir}/target/out-pom.xml"/>
+  
+  <property name = 'echo.pat' value = '^maven\.'/>
+  <property name = 'outputDirectory' value = "${symbol_dollar}{basedir}/target/lib"/>
+  <!--<xmlproperty prefix = 'maven.pom' file = "${symbol_dollar}{pom.dep.file}"/>-->
+  
+  <artifact:pom settingsFile = "${symbol_dollar}{maven.settings.file}" id = 'mypom'
+    file = "${symbol_dollar}{pom.dep.file}"/>
+  
+  <target description = 'Resolve depns (Maven): ant [-Dpom.dep.file=??] resolve'
+      name = 'resolve'>
+    <artifact:dependencies settingsFile = "${symbol_dollar}{maven.settings.file}"
+      pomRefId = 'mypom' scopes = "${symbol_dollar}{maven.scopes}"/>
+  </target>
+  
+  <target description = 'Classpath depns (Maven): ant [-Dpom.dep.file=??] classpath'
+      name = 'classpath' depends = 'resolve'>
+    <artifact:dependencies pomRefId = 'mypom' scopes = 'compile'
+      pathId = 'compile.pathid'/>
+    <artifact:dependencies pomRefId = 'mypom' scopes = 'runtime'
+      pathId = 'runtime.pathid'/>
+    <artifact:dependencies pomRefId = 'mypom' scopes = 'test'
+      pathId = 'test.pathid'/>
+    <echo file = "${symbol_dollar}{basedir}/target/classpath_compile.txt">${symbol_dollar}{toString:compile.pathid}</echo>
+    <echo file = "${symbol_dollar}{basedir}/target/classpath_runtime.txt">${symbol_dollar}{toString:runtime.pathid}</echo>
+    <echo file = "${symbol_dollar}{basedir}/target/classpath_test.txt">${symbol_dollar}{toString:test.pathid}</echo>
+  </target>
+  
+  <target description = 'Echo properties matching pattern [-Decho.pat="^maven\."]'
+      name = 'properties'>
+    <echoproperties>
+      <!--<propertyset> <propertyref prefix = "${symbol_dollar}{echo.pat}"/> </propertyset>-->
+      <propertyset> <propertyref regex = "${symbol_dollar}{echo.pat}"/> </propertyset>
+    </echoproperties>
+    <echo>mypom.properties: ${symbol_dollar}{mypom.properties}</echo>
+    <echo>mypom.build.finalName: ${symbol_dollar}{mypom.build.finalName}</echo>
+  </target>
+  
+  <target description = 'Copy depns (Maven): ant [-DoutputDirectory=??] copy-dependencies'
+      name = 'copy-dependencies' depends = 'classpath'>
+    <artifact:dependencies pomRefId = 'mypom' filesetId = 'dependency.fileset'
+      versionsId = 'dependency.versions' scopes = "${symbol_dollar}{maven.scopes}"/>
+    <copy todir = "${symbol_dollar}{outputDirectory}">
+      <fileset refid = 'dependency.fileset'/>
+      <!--<mapper classname = 'org.apache.maven.artifact.ant.VersionMapper'
+        from = "${symbol_dollar}{dependency.versions}" to = 'flatten'/>-->
+      <mapper type = 'flatten'/>
+    </copy>
+  </target>
+  
+  <target description = 'Write pom file from in-memory pom: ant [-Dpom.dep.file=?? -Dpom.out.file=target/out-pom.xml] writepom'
+      name = 'writepom' depends = 'copy-dependencies'>
+    <artifact:writepom pomRefId = 'mypom' file = "${symbol_dollar}{pom.out.file}"/>
+  </target>
+  
+  <target name = '-install-jar' if = 'jar.exists'>
+    <artifact:install settingsFile = "${symbol_dollar}{maven.settings.file}" pomRefId = 'mypom'
+        file = "${symbol_dollar}{basedir}/target/${symbol_dollar}{mypom.artifactId}-${symbol_dollar}{mypom.version}.jar">
+      <attach classifier = 'sources' type = 'jar'
+        file = "${symbol_dollar}{basedir}/target/${symbol_dollar}{mypom.artifactId}-${symbol_dollar}{mypom.version}-sources.jar"/>
+    </artifact:install>
+  </target>
+  
+  <target name = '-install-pom-only' unless = 'jar.exists'>
+    <artifact:install settingsFile = "${symbol_dollar}{maven.settings.file}" pomRefId = 'mypom'
+        file = "${symbol_dollar}{basedir}/target/${symbol_dollar}{mypom.artifactId}-${symbol_dollar}{mypom.version}.jar"/>
+  </target>
+  
+  <target description = 'Install module artifacts (Maven)' name = 'install'
+      depends = 'writepom,-install-pom-only,-install-jar'>
+  </target>
+</project>

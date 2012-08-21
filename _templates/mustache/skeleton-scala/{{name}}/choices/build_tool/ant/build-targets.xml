@@ -1,0 +1,346 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<project default = 'help'
+    xmlns:ivy = 'antlib:org.apache.ivy.ant'
+    xmlns:jacoco = 'antlib:org.jacoco.ant' >
+  
+  <description>Targets Ant buildfile script.</description>
+  
+  <property name = 'echo.pat' value = '^ant\.'/>
+
+  <target name = 'config'>
+    <loadfile property = 'default_compile.classpath' failonerror = 'false'
+      srcFile = "${build.dir}/classpath_compile.txt"/>
+    <loadfile property = 'default_run.classpath' failonerror = 'false'
+      srcFile = "${build.dir}/classpath_runtime.txt"/>
+    <loadfile property = 'default_test.classpath' failonerror = 'false'
+      srcFile = "${build.dir}/classpath_test.txt"/>
+  
+    <path id = 'compile.pathid'>
+      <!--<path refid = 'default_compile.pathid'/>-->
+      <pathelement path = "${default_compile.classpath}:${proj.jars}"/>
+    </path>
+    <path id = 'runtime.pathid'>
+      <!--<path refid = 'default_runtime.pathid'/>-->
+      <pathelement path = "${default_run.classpath}:${proj.jars}"/>
+    </path>
+    <path id = 'test.pathid'>
+      <!--<path refid = 'default_test.pathid'/>-->
+      <pathelement path = "${default_test.classpath}:${proj.jars}"/>
+    </path>
+  
+    <taskdef resource = 'scala/tools/ant/antlib.xml'>
+      <classpath>
+        <fileset dir = "${scala.lib}" includes = 'scala-library*.jar,scala-reflect*.jar,scala-compiler*.jar'/>
+      </classpath>
+    </taskdef>
+    <echo message = 'Ant Scala tasks now available: &lt;fsc/&gt;, &lt;scalac/&gt;, &lt;scaladoc/&gt;'/>
+  </target>
+  
+  <target description = "Usage: ant [-DDEBUG=${DEBUG}] [target]" name = 'help'>
+    <echo message = 'For help, use command: ant -projecthelp'/>
+    <path id = 'ant.pathid'>
+      <fileset dir = "${ant.home}/lib" includes = 'ant-launcher*.jar,ant*.jar,ivy*.jar'/> </path>
+    <exec executable = 'java'>
+      <arg line = "${java.args} -cp ${toString:ant.pathid} org.apache.tools.ant.Main -buildfile ${ant.file} -projecthelp"/>
+      <env key = 'LD_LIBRARY_PATH' path = "${env.LD_LIBRARY_PATH}"/>
+    </exec>
+  </target>
+  
+  <target description = "Echo properties matching pattern [-Decho.pat='${echo.pat}']"
+      name = 'properties' depends = 'resolve'>
+    <echoproperties>
+      <!--<propertyset> <propertyref prefix = "${echo.pat}"/> </propertyset>-->
+      <propertyset> <propertyref regex = "${echo.pat}"/> </propertyset>
+    </echoproperties>
+  </target>
+  
+  <target description = 'Prep build' name = 'prep' depends = 'retrieve,deliver'>
+    <mkdir dir = "${classes.dir}"/>
+    <mkdir dir = "${classes_test.dir}"/>
+    <mkdir dir = "${build.dir}/lib"/>
+    <!--<copy todir = "${build.dir}/lib" flatten = 'true'>
+      <path> <pathelement path = "${proj.jars}"/> </path> </copy>-->
+    <apply executable = 'ln' dir = "${build.dir}/lib">
+      <arg line = '-s'/>
+      <path> <pathelement path = "${proj.jars}"/> </path>
+    </apply>
+  </target>
+  
+  <target description = 'Remove generated file(s)' name = 'clean'>
+    <!--<delete dir = "${build.dir}"/>-->
+    <delete includeemptydirs = 'true'>
+      <fileset dir = "${build.dir}" includes = '**/*'/> </delete>
+    <delete dir = "${build.dir}/lib"/>
+    <delete >
+      <fileset dir = "${basedir}" includes = '*.log'/> </delete>
+  </target>
+  
+  <target name = 'jar-main' if = 'main.class'>
+    <jar update = 'true' destfile = "${dist.jar}"
+        basedir = 'src/main/resources'>
+      <manifest>
+        <attribute name = 'Main-Class' value = "${main.class}"/> </manifest>
+    </jar>
+  </target>
+  <target description = 'Build target' name = 'compile' depends = 'prep,config'>
+    <!--<scalac srcdir = 'src/main' destdir = "${classes.dir}"
+        classpath = "${toString:compile.pathid}:${classes.dir}"
+        addparams = "${scalac.opts}" scalacdebugging = 'true'> </scalac>-->
+    <pathconvert property = 'srcfiles' pathsep = ' '>
+      <fileset dir = '.' includes = 'src/main/**/*.scala,src/main/**/*.java'/>
+    </pathconvert>
+    <exec executable = 'scalac'>
+      <arg line = "${scalac.opts} -cp ${toString:compile.pathid}:${classes.dir} -d ${classes.dir} ${srcfiles}"/>
+      <env key = 'LD_LIBRARY_PATH' path = "${env.LD_LIBRARY_PATH}"/>
+    </exec>
+    <javac srcdir = 'src/main' destdir = "${classes.dir}"
+        classpath = "${toString:compile.pathid}:${classes.dir}" 
+        createMissingPackageInfoClass = 'false' debug = 'on'>		    
+      <compilerarg line = "${javac.opts}"/>
+    </javac>
+    <delete file = "${dist.jar}"/>
+    <mkdir dir = "${build.dir}"/>
+    
+    <basename property = 'jar.basename' file = "${dist.jar}"/>
+    <pathconvert property = 'runtime.jars' pathsep = ' '
+        refid = 'runtime.pathid'>
+      <!--<map from = "${basedir}/${build.dir}/" to = ''/>-->
+      <chainedmapper>
+        <flattenmapper/>
+        <globmapper from = '*' to = 'lib/*'/>
+      </chainedmapper>
+    </pathconvert>
+    <jar destfile = "${dist.jar}" basedir = "${classes.dir}">
+      <manifest>
+        <attribute name = 'Class-Path'
+          value = "${runtime.jars} ${jar.basename}"/>
+        <attribute name = 'Build-Jdk' value = "${java.version}"/>
+        <attribute name = 'Built-By' value = ''/>
+        <attribute name = 'Package' value = "${ant.project.pkg}"/>
+        <attribute name = 'Implementation-Title' value = "${ant.project.name}"/>
+        <attribute name = 'Implementation-Vendor-Id'
+          value = "${ant.project.org}"/>
+        <attribute name = 'Implmentation-Version' value = "${ant.project.rev}"/>
+      </manifest>
+    </jar>
+    <antcall target = 'jar-main'/>
+  </target>
+  
+  <target description = 'Package project (jar)' name = 'package'>
+    <jar destfile = "${dist.jar}" basedir = '.' update = 'true' 
+        excludes = "${build.dir}/,lib/"> </jar>
+    <jar destfile = "${dist.jar}" basedir = "${build.dir}" update = 'true'
+        includes = 'docs*/'> </jar>
+  </target>
+  
+  <target description = 'Generate documentation (javadoc)' name = 'javadoc'
+      depends = 'config'>
+    <mkdir dir = "${build.dir}/docs/javadoc"/>		
+    <javadoc destdir = "${build.dir}/docs/javadoc">
+      <fileset dir = 'src/main/java'>
+        <filename name = '**/*.java'/>
+        <exclude name = "**/package-info.java"/>
+      </fileset>
+      <arg line = "-classpath ${toString:test.pathid} ${javadoc.opts}"/>
+    </javadoc>
+  </target>
+  <target description = 'Generate documentation (scaladoc)' name = 'scaladoc'
+      depends = 'config'>
+    <mkdir dir = "${build.dir}/docs/scaladoc"/>		
+    <!--<scaladoc destdir = "${build.dir}/docs/scaladoc" srcdir = 'src/main/scala' 
+        classpath = "${toString:test.pathid}:${classes.dir}:${classes_test.dir}"
+        addparams = "${scaladoc.opts}">
+      <include name = "**/*.scala"/>
+      <exclude name = "**/package.scala"/>
+    </scaladoc>-->
+    <pathconvert property = 'srcfiles' pathsep = ' '>
+      <fileset dir = '.' includes = 'src/main/**/*.scala'
+          excludes = '**/package.scala'/>
+    </pathconvert>
+    <exec executable = 'scaladoc'>
+      <arg line = "${scaladoc.opts} -classpath ${toString:test.pathid}:${classes.dir}:${classes_test.dir} -d ${build.dir}/docs/scaladoc ${srcfiles}"/>
+      <env key = 'LD_LIBRARY_PATH' path = "${env.LD_LIBRARY_PATH}"/>
+    </exec>
+  </target>
+  
+  <target description = 'Generate documentation (javadoc &amp; scaladoc)'
+    name = 'doc' depends = 'javadoc,scaladoc'/>
+  <target name = 'clean-build' depends = 'clean,compile'/>
+  <target name = 'main' depends = 'clean,run'/>
+  
+  <target  description = 'Build test' name = 'testCompile' depends = 'config'>
+    <mkdir dir = "${classes_test.dir}"/>
+    
+    <!--<scalac srcdir = 'src/test' destdir = "${classes_test.dir}"
+        excludes = "${testexcludepats}"
+        classpath = "${toString:test.pathid}:${classes.dir}"
+        addparams = "${scalac.opts}" scalacdebugging = 'true'>
+    </scalac>-->
+    <pathconvert property = 'testfiles' pathsep = ' '>
+      <fileset dir = '.' includes = 'src/test/**/*.scala,src/test/**/*.java'
+      excludes = "${testexcludepats}"/>
+    </pathconvert>
+    <exec executable = 'scalac'>
+      <arg line = "${scalac.opts} -cp ${toString:test.pathid}:${classes_test.dir} -d ${classes_test.dir} ${testfiles}"/>
+      <env key = 'LD_LIBRARY_PATH' path = "${env.LD_LIBRARY_PATH}"/>
+    </exec>
+    <javac srcdir = 'src/test' destdir = "${classes_test.dir}"
+        excludes = "${testexcludepats}"
+        classpath = "${toString:test.pathid}:${classes.dir}"
+        createMissingPackageInfoClass = 'false' debug = 'on'>		    
+      <compilerarg line = "${javac.opts}"/>
+    </javac>
+    <basename property = 'jar.basename' file = "${dist.jar}"/>
+    <basename property = 'jar_test.basename' file = "${dist_test.jar}"/>
+    <pathconvert property = 'test.jars' pathsep = ' '
+        refid = 'test.pathid'>
+      <!--<map from = "${basedir}/${build.dir}/" to = ''/>-->
+      <chainedmapper>
+        <flattenmapper/>
+        <globmapper from = '*' to = 'lib/*'/>
+      </chainedmapper>
+    </pathconvert>
+    <jar destfile = "${dist_test.jar}" basedir = "${classes_test.dir}">
+      <manifest>
+        <attribute name = 'Class-Path'
+          value = "${test.jars} ${jar.basename} ${jar_test.basename}"/>
+        <attribute name = 'Build-Jdk' value = "${java.version}"/>
+        <attribute name = 'Built-By' value = ''/>
+        <attribute name = 'Package' value = "${ant.project.pkg}"/>
+        <attribute name = 'Implementation-Title' value = "${ant.project.name}"/>
+        <attribute name = 'Implementation-Vendor-Id'
+            value = "${ant.project.org}"/>
+        <attribute name = 'Implmentation-Version' value = "${ant.project.rev}"/>
+        <attribute name = 'Main-Class' value = "${ant.project.pkg}.Ts_Main"/>
+      </manifest>
+    </jar>	
+  </target>
+  
+  <target description = "Run test: ant [-Dtest.opts='${test.opts}'] test" 
+      name = 'test' depends = 'testCompile'>
+    <exec executable = 'java'>
+      <arg line = "${java.args} -jar ${dist_test.jar} ${test.opts}"/>
+      <env key = 'LD_LIBRARY_PATH' path = "${env.LD_LIBRARY_PATH}"/>
+    </exec>
+  </target>
+  
+  <target description = "Run program: ant [-Dapp.args='${app.args}'] run" name = 'run' 
+      if = 'main.class'>
+    <exec executable = 'java'>
+      <arg line = "${java.args} -jar ${dist.jar} ${app.args}"/>
+      <env key = 'LD_LIBRARY_PATH' path = "${env.LD_LIBRARY_PATH}"/>
+    </exec>
+  </target>
+  <target description = "Debug program: ant [-Dapp.args='${app.args}'] debug" 
+      name = 'debug' if = 'main.class'>
+    <exec executable = 'ddd'>
+      <arg line = "--jdb -classpath ${dist.jar} ${main.class} ${app.args}"/>
+      <env key = 'LD_LIBRARY_PATH' path = "${env.LD_LIBRARY_PATH}"/>
+    </exec>
+  </target>
+    
+  <target description = "Convert xml to html: ant xmlToHtml  [-Dxslt.outDir=${build.dir}/checkstyle_rpt] [-Dxslt.outFile=rpt.html] [-Dxslt.xsl=${ant.home}/etc/checkstyle/checkstyle-frames.xsl] [-Dxslt.in=${build.dir}/checkstyle_errors.xml]" name = 'xmlToHtml'>
+    <property name = 'xslt.outDir' value = "${build.dir}/checkstyle_rpt"/>
+    <property name = 'xslt.outFile' value = 'rpt.html'/>
+    <property name = 'xslt.xsl' value = "${ant.home}/etc/checkstyle/checkstyle-frames.xsl"/>
+    <property name = 'xslt.in' value = "${build.dir}/checkstyle_errors.xml"/>
+    <xslt in = "${xslt.in}" out = "${xslt.outDir}/${xslt.outFile}"
+        style = "${xslt.xsl}">
+      <param name = 'output.dir' expression = "${xslt.outDir}"/> </xslt>
+  </target>
+  
+  <target description = 'Lint check (checkstyle)' name = 'checkstyle'>
+    <!--<taskdef resource = 'com/puppycrawl/tools/checkstyle/ant/antlib.xml'
+      classpath = "${java.lib}/checkstyle.jar"/>-->
+    <ivy:cachepath resolveMode = 'dynamic' inline = 'true' type = 'jar'
+      organisation = 'com.puppycrawl.tools' module = 'checkstyle'
+      revision = '[5.5,)' pathid = 'checkstyle.pathid'/>
+    <taskdef resource = 'com/puppycrawl/tools/checkstyle/ant/antlib.xml'
+      classpathref = 'checkstyle.pathid'/>
+    
+    <!--<exec executable = 'checkstyle'>
+      <arg line = "-c ${basedir}/config/sun_checks.xml -f xml -o ${build.dir}/checkstyle_errors.xml src/main/java"/>
+    </exec>-->
+    <checkstyle config = "${basedir}/config/sun_checks.xml"
+        maxErrors = '500'>
+      <fileset dir = 'src/main/java' includes = '**/*.java'/>
+      <formatter type = 'plain' toFile = "${build.dir}/checkstyle_errors.txt"/>
+      <formatter type = 'xml' toFile = "${build.dir}/checkstyle_errors.xml"/>
+    </checkstyle>
+    <antcall target = 'xmlToHtml'/>
+  </target>
+  <target description = 'Lint check (scalastyle)' name = 'scalastyle'>
+    <ivy:cachepath resolveMode = 'dynamic' inline = 'true' type = 'jar'
+      organisation = 'org.scalastyle' module = "scalastyle_${scala.compat}"
+      revision = '[0.1.0,)' pathid = 'scalastyle.pathid'/>
+    
+    <!--<exec executable = 'scalastyle' output = "${build.dir}/scalastyle_errors.txt">
+      <arg line = "-c ${basedir}/config/scalastyle_config.xml -xmlOutput ${build.dir}/scalastyle_errors.xml src/main/scala"/>
+    </exec>-->
+    <exec executable = 'java' output = "${build.dir}/scalastyle_errors.txt">
+      <arg line = "${java.args} -cp ${toString:scalastyle.pathid} org.scalastyle.Main -c ${basedir}/config/scalastyle_config.xml --xmlOutput ${build.dir}/scalastyle_errors.xml src/main/scala"/>
+    </exec>
+    <antcall target = 'xmlToHtml'>
+      <param name = 'xslt.outDir' value = "${build.dir}/scalastyle_rpt"/>
+      <param name = 'xslt.in' value = "${build.dir}/scalastyle_errors.xml"/>
+    </antcall>
+  </target>
+  
+  <target description = 'Lint check (checkstyle &amp; scalastyle)' name = 'lint'
+      depends = 'checkstyle,scalastyle'> </target>
+  
+  <target name = 'init_jacoco'>
+    <!--<taskdef uri = 'antlib:org.jacoco.ant' resource = 'org/jacoco/ant/antlib.xml'>
+    <classpath path = "${ant.library.dir}/jacocoant.jar"/> </taskdef>-->
+    <ivy:cachepath resolveMode = 'dynamic' inline = 'true' type = 'jar'
+      organisation = 'org.jacoco' module = 'org.jacoco.ant'
+      revision = '[0.5.9.201207300726,)' pathid = 'jacoco_ant.pathid'/>
+    <taskdef uri = 'antlib:org.jacoco.ant' resource = 'org/jacoco/ant/antlib.xml'>
+      <classpath path = "${toString:jacoco_ant.pathid}"/>
+    </taskdef>
+  </target>
+  <target description = "Generate coverage (jacoco): ant [-Dtest.opts='${test.opts}'] cover" name = 'cover' depends = 'init_jacoco'>
+    <!-- Wrap test execution with the JaCoCo coverage task -->
+    <!--<java jar = "${dist_test.jar}" fork = 'true'>
+      <jvmarg line = "-javaagent:${ant.library.dir}/jacocoagent-runtime.jar=destfile=${build.dir}/jacoco.exec ${java.args}"/>
+      <arg line = "${test.opts}"/>
+      <classpath> <pathelement location = "${dist_test.jar}"/>
+          </classpath>
+      <sysproperty key = 'LD_LIBRARY_PATH' path = "${env.LD_LIBRARY_PATH}"/>
+    </java>-->
+    <jacoco:coverage destfile = "${build.dir}/jacoco.exec">
+      <java jar = "${dist_test.jar}" fork = 'true'>
+        <jvmarg line = "${java.args}"/>
+        <arg line = "${test.opts}"/>
+        <classpath> <pathelement location = "${dist_test.jar}"/>
+            </classpath>
+        <sysproperty key = 'LD_LIBRARY_PATH' path = "${env.LD_LIBRARY_PATH}"/>
+      </java>
+    </jacoco:coverage>
+  </target>
+  <target description = 'Report coverage (jacoco): ant report' name = 'report'
+      depends = 'init_jacoco'>
+    <jacoco:report>
+      <executiondata> <file file = "${build.dir}/jacoco.exec"/> </executiondata>
+      <structure name = 'JaCoCo report'>
+        <classfiles>
+          <!--<fileset dir = "${classes.dir}"/>-->
+          <zipfileset src = "${dist.jar}"/>
+        </classfiles>
+        <sourcefiles encoding = 'UTF-8'>
+          <!--<fileset dir = "${user.dir}/src/main"/>-->
+          <zipfileset src = "${dist.jar}" includes = 'src/main/**/*'/>
+        </sourcefiles>
+      </structure>
+      <html destdir = "${build.dir}/cov"/>
+      <!--<csv destfile = "${build.dir}/cov/report.csv"/>-->
+      <!--<xml destfile = "${build.dir}/cov/report.xml"/>-->
+    </jacoco:report>
+  </target>
+  
+  <target description = 'Clean coverage data (jacoco)' name = 'clean_cov'>
+    <delete dir = "${build.dir}/cov" failonerror = 'false'/>
+    <delete file = "${build.dir}/jacoco.exec" failonerror = 'false'/>
+  </target>
+  <target name = 'rebuild_cov' depends = 'clean_cov,cover,report'/>
+</project>

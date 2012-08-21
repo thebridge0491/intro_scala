@@ -1,0 +1,50 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<project name = '{{name}}{{^name}}intro_scala-util{{/name}}' default = 'help' basedir = '.'>
+  <description>Single package Ant buildfile script.</description>
+  
+  <property environment = 'env'/>
+  <property file = 'build.properties'/>
+  
+  <import file = 'depnmgr-ivy.xml'/>
+  <import file = 'build-targets.xml'/>
+  
+  <condition property = 'java.lib' value = '/usr/share/java'
+      else = '/usr/local/share/java/classes'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${os.name}"/>
+  </condition>
+  <condition property = 'scala.lib' value = '/usr/share/scala/lib'
+      else = '/usr/local/share/scala/lib'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${os.name}"/>
+  </condition>
+  
+  <condition property = 'javac.opts' value = "${default.javac.opts} -g"
+      else = "${default.javac.opts}">
+    <equals casesensitive = 'false' arg1 = '1' arg2 = "${DEBUG}"/>
+  </condition>
+  <condition property = 'scalac.opts' value = "${default.scalac.opts} -g:vars"
+      else = "${default.scalac.opts} -optimise">
+    <equals casesensitive = 'false' arg1 = '1' arg2 = "${DEBUG}"/>
+  </condition>
+  
+  <property name = 'java.args' value = "${default.java.args}  -Djava.library.path=${java.library.path}"/>
+  <property name = 'scala.args' value = "${default.scala.args}  -Djava.library.path=${java.library.path}"/>
+  
+  <property name = 'ant.project.pkg'
+      value = "${ant.project.org}.${ant.project.parent}.{{project}}{{^project}}util{{/project}}"/>
+  {{#executable}}
+  <property name = 'main.class' value = "${ant.project.pkg}.Main"/>
+  {{/executable}}
+  <property name = 'testexcludepats'
+    value = '**/ClassicTest.*,**/ClassicProp.*'/>
+  
+  <!--<target description = "Compile FFI auxiliary products: ant [-Dprefix='${prefix}'] auxffi" name = 'auxffi'>
+    <condition property = 'make_cmd' value = 'make' else = 'gmake'>
+      <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${os.name}"/>
+    </condition>
+    <exec executable = "${make_cmd}">
+      <arg line = '-B -f Makefile-auxffi.mk auxffi'/>
+      <env key = 'PREFIX' path = "${prefix}"/>
+      <env key = 'CC' path = 'cc'/>
+    </exec>
+  </target>-->
+</project>

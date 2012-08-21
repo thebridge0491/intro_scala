@@ -1,0 +1,24 @@
+<!-- % versions SYSTEM 'file:./src/main/resources/versions.xml' -->
+<!-- % versions SYSTEM 'jar:file:./{parent}-{revision}.jar!/versions.xml' -->
+<!--<!DOCTYPE ivy-module [
+  <!ENTITY scala.lib '/usr/local/share/scala/lib'>
+  <!ENTITY % versions SYSTEM 'file:./src/main/resources/versions.xml'>
+
+  %versions;
+]>-->
+  <!ENTITY version.scala '2.9.2'>
+  <!ENTITY version.scalatest '1.8'>
+  <!ENTITY version.scalacheck '1.8'>
+  
+  <!ENTITY version.junit '4.10'>
+  <!ENTITY version.testng '6.7'>
+  <!ENTITY version.spock '0.6-groovy-1.8'>
+  
+  <!ENTITY version.slf4j '1.6.5'>
+  <!ENTITY version.logback '1.0.6'>
+  
+  <!ENTITY version.ini4j '0.5.2'>
+  <!ENTITY version.jna '3.4.0'>
+  
+  <!ENTITY version.jsonp '1.0'>
+  <!ENTITY version.snakeyaml '1.10'>

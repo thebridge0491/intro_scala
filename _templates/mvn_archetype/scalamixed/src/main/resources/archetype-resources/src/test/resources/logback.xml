@@ -1,0 +1,56 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version = "1.0" encoding = "UTF-8"?>
+
+<configuration debug = "false">
+ 
+	<!--<appender name = "RootRoll" class = "ch.qos.logback.core.rolling.RollingFileAppender">
+		<param name = "file" value = "rootRoll.log"/>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>%d{YYYYMMddHHmmss}-rootRoll.log</FileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+      		<maxFileSize>20MB</maxFileSize>
+    	</triggeringPolicy>
+
+    	<encoder>
+      		<pattern>%d{YYYY-MM-dd HH:mm:ss} %p:%c:%m%n</pattern>
+    	</encoder>
+	</appender>-->
+	
+	<appender name = "Root2" class = "ch.qos.logback.core.ConsoleAppender">
+		<param name = "target" value = "System.err"/>
+		<!-- encoders are  by default assigned the type
+         ch.qos.logback.classic.encoder.PatternLayoutEncoder -->
+    	<encoder>
+      		<pattern>%d{YYYY-MM-dd HH:mm:ss} - %c - %5p - ${symbol_escape}(%F:%L${symbol_escape}) - %m%n</pattern>
+    	</encoder>
+	</appender>
+
+	<appender name = "Root1" class = "ch.qos.logback.core.FileAppender">
+		<param name = "file" value = "root.log"/>
+    	<encoder>
+      		<pattern>%d{YYYY-MM-dd HH:mm:ss} %p:%c:%m%n</pattern>
+    	</encoder>
+	</appender>
+
+	<appender name = "A1" class = "ch.qos.logback.core.FileAppender">
+		<param name = "file" value = "prac.log"/>
+    	<encoder>
+      		<pattern>%d{YYYY-MM-dd HH:mm:ss} %p:%c:%m%n</pattern>
+    	</encoder>
+	</appender>
+ 
+    <logger name = "prac">
+		<level value = "debug"/>
+		<appender-ref ref = "A1"/>
+    </logger>
+
+	<root>
+		<level value = "debug"/>
+		<appender-ref ref = "Root1"/>
+		<appender-ref ref = "Root2"/>
+		<!--<appender-ref ref="RootRoll"/>-->
+	</root>
+</configuration>

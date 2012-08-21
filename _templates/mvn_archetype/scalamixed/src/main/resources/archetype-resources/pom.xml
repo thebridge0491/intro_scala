@@ -1,0 +1,76 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<!-- depn scopes: compile, provided, runtime, test, system, import -->
+<!-- maven cmdln cmds: (1) resolve ; (2) build-classpath ; (3) copy-depns ;
+  (4) install ; (5) w/out pom.xml - get single depn ;
+  (6) w/out pom.xml - install external depn
+(1) mvn [-f pom.xml] [-s settings.xml] dependency:resolve[-plugins]
+(2) mvn [-f pom.xml] [-Dmdep.prefix=lib] [-Dmdep.outputFile=<file.txt>] 
+  [-DincludeScope=compile] dependency:build-classpath
+(3) mvn [-f pom.xml] [-DoutputDirectory=lib] dependency:copy-dependencies
+(4) mvn [-f pom.xml] [-DupdateReleaseInfo=true] install:install
+(5) mvn -DrepoUrl=https://repo.maven.apache.org/maven2 [-Dtransitive=false] 
+  -Dartifact=<groupId>:<artifactId>:<version>[:<packaging>] dependency:get
+(6) mvn [-DgroupId=<groupId> -DartifactId=<artifactId> -Dversion=<version>
+  -Dpackaging=jar] -Dfile=file.jar install:install-file
+-->
+<project xmlns = 'http://maven.apache.org/POM/4.0.0'
+    xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'
+    xsi:schemaLocation = 'http://maven.apache.org/POM/4.0.0
+      http://maven.apache.org/xsd/maven-4.0.0.xsd'>
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>${groupId}</groupId>
+  <artifactId>${artifactId}</artifactId>
+  <version>${version}</version>
+  
+  <name>${parent.substring(0,1).toUpperCase()}${parent.substring(1)}-${name.substring(0,1).toUpperCase()}${name.substring(1)}</name>
+  <description>${description}</description>
+  <url>https://${repohost}/${repoacct}/${parent}</url>
+  
+  <properties>
+	<!--<scala.compat>2.9</scala.compat>-->
+    <maven.prereq>3.0.4</maven.prereq>
+  </properties>
+  
+  <prerequisites>
+    <maven>${symbol_dollar}{maven.prereq}</maven>
+  </prerequisites>
+  
+  <issueManagement>
+    <!--<system>Github</system>-->
+    <system>Bitbucket</system>
+    <url>${symbol_dollar}{project.url}/issues</url>
+  </issueManagement>
+  
+  <scm>
+    <url>${symbol_dollar}{project.url}</url>
+    <connection>scm:git:http://${repohost}/${repoacct}/${parent}.git</connection>
+    <developerConnection>scm:git:ssh://git@${repohost}/${repoacct}/${parent}.git</developerConnection>
+  </scm>
+  
+  <inceptionYear>${date.split("-")[0]}</inceptionYear>
+  <licenses>
+    <license> <name>${license}</name>
+      <url>http://opensource.org/licenses/${license}</url>
+      <distribution>repo</distribution> </license>
+  </licenses>
+  <organization> <name>Coding Sandbox</name>
+    <url>http://sandbox.org/${parent}</url> </organization>
+  <developers>
+    <developer>
+      <id>${repoacct}</id>
+      <name>${author}</name>
+      <email>${email}</email>
+      <url>${symbol_dollar}{project.url}</url>
+      <organization>Coding Sandbox</organization>
+      <organizationUrl>http://sandbox.org</organizationUrl>
+      <roles>
+        <role>developer</role>
+      </roles>
+      <timezone>America/New_York</timezone>
+    </developer>
+  </developers>
+</project>

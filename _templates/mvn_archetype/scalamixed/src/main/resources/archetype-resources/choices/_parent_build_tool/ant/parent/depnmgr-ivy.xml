@@ -1,0 +1,154 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<project default = 'resolve'
+    xmlns:ivy = 'antlib:org.apache.ivy.ant'>
+  <!--<path id = 'ivy.tasks.classpath'>
+	<fileset dir = "${symbol_dollar}{user.home}/.ant/lib" includes = 'ivy*.jar'/>
+  </path>
+  <taskdef uri = 'antlib:org.apache.ivy.ant' 
+    resource = 'org/apache/ivy/ant/antlib.xml'
+    classpathref = 'ivy.tasks.classpath'/>-->
+  
+  <description>
+    Dependency manager tasks (Ivy) including publish/deliver Ant script.
+  </description>
+  
+  <!--<dirname property = 'ant.project.dir' file = "${symbol_dollar}{ant.file}"/>-->
+  <condition property = 'java.lib' value = '/usr/share/java'
+      else = '/usr/local/share/java/classes'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${symbol_dollar}{os.name}"/>
+  </condition>
+  <condition property = 'scala.lib' value = '/usr/share/scala/lib'
+      else = '/usr/local/share/scala/lib'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${symbol_dollar}{os.name}"/>
+  </condition>
+  <!--<property name = 'scala.compat' value = '2.9'/>-->
+  
+  <!--<property name = 'ivy.dep.file' value = "${symbol_dollar}{basedir}/ivy.xml"/>-->
+  <property name = 'pom.dep.file' value = "${symbol_dollar}{basedir}/pom.xml"/>
+  <!--<property url = "jar:file:./target/<parent>-<revision>.jar!/versions.properties"/>-->
+  <!--<property file = "${symbol_dollar}{basedir}/src/main/resources/versions.properties"/>-->
+  <property name = 'ivy.configurations' value = 'test'/>
+  <property name = 'ivy.lib.dir' value = "${symbol_dollar}{basedir}/target/lib"/>
+  <property name = 'ivy.distrib.dir' value = "${symbol_dollar}{basedir}/target/distrib"/>
+  <property name = 'ivy.build.artifacts.dir'
+    value = "${symbol_dollar}{basedir}/target/artifacts"/>
+  <property name = 'ivy.cache.ttl.default' value = 'eternal'/>
+  <property name = 'ivy.resolve.cache.only' value = 'false'/>
+  <property name = 'ivy.resolve.mode' value = 'default'/>
+  <property name = 'ivy.resolve.log' value = 'download-only'/>
+  <property name = 'ivy.retrieve.types' value = 'jar,bundle'/>
+  <property name = 'ivy.publish.overwrite' value = 'false'/>
+  <property name = 'ivy.out.file' value = "${symbol_dollar}{basedir}/target/out-ivy.xml"/>
+  <property name = 'pom.out.file' value = "${symbol_dollar}{basedir}/target/out-pom.xml"/>
+  
+  <property name = 'echo.pat' value = '^ivy\.'/>
+  <property name = 'cal.offsetyr' value = '0'/>
+  <tstamp>
+    <format property = 'TSTAMP' pattern = 'HHmmss'/>
+    <format property = 'DSTAMP' pattern = 'yyyyMMdd' offset = "${symbol_dollar}{cal.offsetyr}"
+        unit = 'year'/>
+  </tstamp>
+  <property name = 'from.resolver' value = 'default'/>
+  <property name = 'to.resolver' value = 'local'/>
+  
+  <property name = 'ivy.settings.defaultResolver' value = 'default'/>
+  <property name = 'ivy.settings.file'
+    value = "${symbol_dollar}{user.home}/.ivy2/ivysettings.xml"/>
+  <!--<ivy:settings file = "${symbol_dollar}{ivy.settings.file}"/>-->
+  <ivy:settings/>
+  
+  <target description = 'Resolve depns (Ivy): ant [-Divy.dep.file=??] resolve' 
+      name = 'resolve'>
+    <ivy:resolve conf = "${symbol_dollar}{ivy.configurations}"
+        useCacheOnly = "${symbol_dollar}{ivy.resolve.cache.only}"
+        log = "${symbol_dollar}{ivy.resolve.log}" resolveMode = "${symbol_dollar}{ivy.resolve.mode}"/>
+  </target>
+  
+  <target description = 'Cachepath depns (Ivy): ant cachepath'
+      name = 'cachepath' depends = 'resolve'>
+    <!--<ivy:cachepath conf = 'default' pathid = 'default.pathid' keep = 'true'
+      log = "${symbol_dollar}{ivy.resolve.log}"/>-->
+    <ivy:cachepath conf = 'compile' pathid = 'compile.pathid' keep = 'true'
+      log = "${symbol_dollar}{ivy.resolve.log}"/>
+    <ivy:cachepath conf = 'runtime' pathid = 'runtime.pathid' keep = 'true'
+      log = "${symbol_dollar}{ivy.resolve.log}"/>
+    <ivy:cachepath conf = 'test' pathid = 'test.pathid' keep = 'true'
+      log = "${symbol_dollar}{ivy.resolve.log}"/>
+    <echo file = "${symbol_dollar}{basedir}/target/classpath_compile.txt">${symbol_dollar}{toString:compile.pathid}</echo>
+    <echo file = "${symbol_dollar}{basedir}/target/classpath_runtime.txt">${symbol_dollar}{toString:runtime.pathid}</echo>
+    <echo file = "${symbol_dollar}{basedir}/target/classpath_test.txt">${symbol_dollar}{toString:test.pathid}</echo>
+  </target>
+  
+  <target description = 'Echo properties matching pattern [-Decho.pat="^ivy\."]'
+      name = 'properties' depends = 'resolve'>
+    <echoproperties>
+      <!--<propertyset> <propertyref prefix = "${symbol_dollar}{echo.pat}"/> </propertyset>-->
+      <propertyset> <propertyref regex = "${symbol_dollar}{echo.pat}"/> </propertyset>
+    </echoproperties>
+  </target>
+  
+  <target description = 'Report depns resolving (Ivy)' name = 'report_ivy'
+      depends = 'resolve'>
+    <ivy:report graph = 'false' todir = "${symbol_dollar}{basedir}/target/rpt_ivy"/> </target>
+  
+  <target description = 'Build order list (Ivy)' name = 'buildlist'
+      depends = 'resolve'>
+    <dirname property = 'ant.project.dir' file = "${symbol_dollar}{ant.file}"/>
+    <ivy:buildlist reference = 'build-order'>
+      <fileset dir = "${symbol_dollar}{ant.project.dir}" includes = '**/build.xml'/>
+    </ivy:buildlist>
+    <pathconvert property = 'build-files' pathsep = ',' refid = 'build-order'>
+      <map from = "${symbol_dollar}{user.dir}/" to = ''/> </pathconvert>
+    <echo>${symbol_dollar}{build-files}</echo>
+  </target>
+  
+  <target description = 'Retrieve depns (Ivy): ant retrieve' name = 'retrieve'
+      depends = 'cachepath'>
+    <ivy:retrieve conf = "${symbol_dollar}{ivy.configurations}" type = "${symbol_dollar}{ivy.retrieve.types}"
+      symlink = 'true' sync = 'false'/>
+  </target>
+  
+  <target description = 'Deliver module Ivy file' name = 'deliver'
+      depends = 'resolve'>
+    <ivy:deliver pubdate = "${symbol_dollar}{DSTAMP}${symbol_dollar}{TSTAMP}" replacedynamicrev = 'true'/> 
+    <replaceregexp flags = 'gis' match = '!DOCTYPE.*\[.*\]'
+        replace = '!-- !DOCTYPE was deleted --'>
+      <fileset dir = 'target' includes = 'ivy*.xml.bak,ivy*.xml'/>
+    </replaceregexp>
+  </target>
+  
+  <target description = 'Publish module artifacts (Ivy)' name = 'publish'
+      depends = 'deliver'>
+    <ivy:publish resolver = "${symbol_dollar}{to.resolver}" pubdate = "${symbol_dollar}{DSTAMP}${symbol_dollar}{TSTAMP}"
+        overwrite = "${symbol_dollar}{ivy.publish.overwrite}">
+      <artifacts pattern = "${symbol_dollar}{ivy.publish.src.artifacts.pattern}"/>
+      <artifacts pattern = "${symbol_dollar}{basedir}/target/[artifact](-[revision])(-[classifier]).[ext]"/>
+    </ivy:publish>
+  </target>
+  
+  <target description = 'Install depn to destination repo (Ivy): ant [-Dfrom.resolver=default -Dto.resolver=local -Dorganisation=?? -Dmodule=?? -Drevision=??] install-to' 
+      name = 'install-to' depends = 'resolve'>
+    <ivy:install conf = "${symbol_dollar}{ivy.configurations}" overwrite = 'true'
+      from = "${symbol_dollar}{from.resolver}" to = "${symbol_dollar}{to.resolver}" revision = "${symbol_dollar}{revision}"
+      organisation = "${symbol_dollar}{organisation}" module = "${symbol_dollar}{module}"/>
+  </target>
+  
+  <target description = 'Make pom from ivy file: ant [-Dpom.out.file=target/out-pom.xml] makepom'
+      name = 'makepom' depends = 'resolve'>
+    <ivy:makepom ivyfile = "${symbol_dollar}{ivy.dep.file}" pomfile = "${symbol_dollar}{pom.out.file}"
+        conf = 'default,compile,runtime,test'>
+      <mapping conf = 'default' scope = 'compile'/>
+      <mapping conf = 'compile' scope = 'compile'/>
+      <mapping conf = 'runtime' scope = 'runtime'/>
+      <mapping conf = 'test' scope = 'test'/>
+    </ivy:makepom>
+  </target>
+  
+  <target description = 'Convert pom to ivy file: ant [-Dpom.dep.file=?? -Divy.out.file=target/out-ivy.xml] convertpom'
+      name = 'convertpom'>
+    <ivy:convertpom pomFile = "${symbol_dollar}{pom.dep.file}" ivyFile = "${symbol_dollar}{ivy.out.file}"/>
+  </target>
+</project>

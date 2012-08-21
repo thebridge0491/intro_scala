@@ -1,0 +1,36 @@
+{
+  "groupid": "org.sandbox",
+  "category": false,
+  "parent": "intro_scala",
+  "parentdescription": "Multi-package project Intro examples for Scala.",
+  "project": "util",
+  "description": "Utilites sub-package for Scala Intro examples project.",
+  "version": "0.1.0",
+  "separator": "-",
+  "joiner": "-",
+  "parentregex": "^[a-z][-_a-z0-9]+$",
+  "projectregex": "^[a-z][_a-z0-9]+$",
+  
+  "repohost": "bitbucket.org",
+  "repoacct": "imcomputer",
+  "date": "2012-08-21",
+  
+  "readmeext": ".rst",
+  "license": "Apache-2.0",
+  "buildtool": "gradle",
+  "testfrwk": "scalatest",
+  
+  "ffilib": "none",
+  
+  "skeletondir": "Templates/mustache/skeleton-scala",
+  
+  "_choices": {
+    "readmeext": [".rst", ".md", ".adoc"],
+    "license": ["Apache-2.0", "MIT", "BSD-3-Clause", "GPL-3.0+", "ISC", 
+      "Unlicense", "Not open source"],
+    "buildtool": ["gradle", "maven", "ant", "rake", "make", "sbt"],
+    "testfrwk": ["scalatest", "junit", "testng"],
+    "executable": [false, "yes"],
+    "ffilib": ["none", "jna", "swig"]
+  }
+}

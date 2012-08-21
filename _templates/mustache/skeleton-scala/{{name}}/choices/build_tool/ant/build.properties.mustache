@@ -1,0 +1,38 @@
+# Ant build properties.
+
+prefix=/usr/local
+DEBUG=0
+test.opts=
+app.args=
+#javac.source=1.7
+#javac.target=1.7
+tarext=tar.gz
+
+ant.project.org={{groupid}}{{^groupid}}org.sandbox{{/groupid}}
+ant.project.parent={{parent}}{{^parent}}intro_scala{{/parent}}
+ant.project.rev={{version}}{{^version}}0.1.0{{/version}}
+
+default.java.args=-esa -ea -Xmx1024m -Xms16m -Xss16m
+default.scala.args=-J-esa -J-ea -J-Xmx1024m -J-Xms16m -J-Xss16m
+
+# -source ${javac.source} -target ${javac.target}
+default.javac.opts=-Xlint:all -deprecation
+# -target:jvm-${javac.target}
+default.scalac.opts=-deprecation -unchecked -feature
+
+javac.deprecation=true
+
+javadoc.opts=-version -author -private -use
+scaladoc.opts=-author
+
+# directory removed on clean
+build.dir=target
+classes.dir=${build.dir}/classes/main
+classes_test.dir=${build.dir}/classes/test
+dist.jar=${build.dir}/${ant.project.name}-${ant.project.rev}.jar
+dist_test.jar=${build.dir}/${ant.project.name}-${ant.project.rev}-tests.jar
+
+# Only compile against the classpath explicitly listed here:
+build.sysclasspath=ignore
+
+######meta.inf.dir=src/main/META-INF

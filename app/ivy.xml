@@ -76,16 +76,16 @@
   <dependencies defaultconfmapping = '*->compile,master,default'
       defaultconf = 'compile'>
     
-    <!--<dependency org = 'org.sandbox' name = 'intro_scala-util' rev = '0.1.0'
-        revConstraint = '[0.1.0,)'/>-->
+    <dependency org = 'org.sandbox' name = 'intro_scala-util' rev = '0.1.0'
+        revConstraint = '[0.1.0,)'/>
     
-    <exclude org = 'org.scalatest'/>
-    <exclude org = 'org.scalacheck'/>
-    <!--<exclude org = 'junit' module = 'junit'/>-->
+    <!--<exclude org = 'org.scalatest'/>-->
+    <!--<exclude org = 'org.scalacheck'/>-->
+    <exclude org = 'junit' module = 'junit'/>
     <exclude org = 'org.testng' module = 'testng'/>
     <exclude org = 'org.slf4j' module = 'log4j-over-slf4j'/>
     <!--<exclude org = 'ch.qos.logback' module = 'logback-classic'/>-->
-    <exclude org = 'org.ini4j' module = 'ini4j'/>
+    <!--<exclude org = 'org.ini4j' module = 'ini4j'/>-->
     <exclude org = 'net.java.dev.jna' module = 'jna'/>
   </dependencies>
 </ivy-module>

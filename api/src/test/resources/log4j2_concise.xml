@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="debug">
+ 
+	<Appenders>
+		<!--<RollingFile name="RollingFile" filename="root.log"
+			filepattern="%d{YYYYMMddHHmmss}-fargo.log">
+			<PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n"/>
+			<Policies>
+				<SizeBasedTriggeringPolicy size="100 MB"/>
+			</Policies>
+			<DefaultRolloverStrategy max="20"/>
+		</RollingFile>-->
+		
+		<Console name="Root2" target="SYSTEM_ERR">
+			<!--<PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} [%t] %-5p %c{1}:%L - %msg%n"/>-->
+			<PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} - %c - %5p - (%F:%L) - %m%n"/>
+		</Console>
+    	
+    	<File name="Root1" fileName="root.log">
+      		<!--<PatternLayout pattern="%d %p %C{1.} [%t] %m%n"/>-->
+        	<PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} %p:%c:%m%n"/>
+    	</File>
+    	
+    	<File name="A1" fileName="prac.log">
+        	<PatternLayout pattern="%d{YYYY-MM-dd HH:mm:ss} %p:%c:%m%n"/>
+    	</File>
+	</Appenders>
+	<Loggers>
+		<Root level="debug">
+			<AppenderRef ref="Root1"/>
+			<AppenderRef ref="Root2"/>
+			<!--<AppenderRef ref="RollingFile"/>-->
+		</Root>
+		
+		<Logger name="prac" level="debug">
+			<AppenderRef ref="A1"/>
+		</Logger>
+	</Loggers>
+</Configuration>

@@ -74,10 +74,10 @@ sourceSets {
 	}
 	test {
 		scala { srcDirs = ['src/test/java', 'src/test/scala']
-			exclude '**/ClassicTest.*', '**/ClassicProp.*'
+			//exclude '**/ClassicTest.*', '**/ClassicProp.*'
 		}
 		java { srcDirs = [] /*['src/test/java']*/
-			exclude '**/ClassicTest.*', '**/ClassicProp.*'
+			//exclude '**/ClassicTest.*', '**/ClassicProp.*'
 		}
 	}
 }
@@ -297,11 +297,3 @@ if ((new File("${projectDir}/build-targets.gradle")).exists()) {
 	jar.dependsOn([copyDepns])
 	artifacts.archives(tasks.jarTests) //, tasks.jarSources, tasks.jarJavadoc)
 }
-
-//task auxffi(type: Exec) { workingDir projectDir ; ignoreExitValue true
-//	description "Compile FFI auxiliary products [-Pprefix='${prefix}']"
-//	environment PREFIX:prefix, CC:'cc'
-//	def make_cmd = System.env.OSTYPE.grep(~/^(?i)linux.*/) ? 'make' : 'gmake'
-//	commandLine "${make_cmd} -B -f Makefile-auxffi.mk auxffi".split()
-//}
-//assemble.dependsOn auxffi

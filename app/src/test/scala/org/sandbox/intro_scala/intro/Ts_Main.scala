@@ -13,8 +13,6 @@ class Ts_Main extends Suite with BeforeAndAfter with BeforeAndAfterAll {
 	}
 	override def nestedSuites = scala.collection.immutable.IndexedSeq[Suite](
 		new NewTest, new NewProp)
-	//override def nestedSuites = scala.collection.immutable.IndexedSeq[Suite](
-	//	new NewTest, new NewProp, new ClassicTest, new ClassicProp)
 }
 
 object Ts_Main {

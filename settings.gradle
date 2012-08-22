@@ -16,9 +16,11 @@ include 'shared'
 include 'api', 'services:webservice'
 */
 //include ":${rootProject.name}-util", ":${rootProject.name}-intro"
-include ':bom', ':common', ':app'
+include ':bom', ':common', ':foreignc', ':api', ':app'
 
 project(':bom').name = "${rootProject.name}-bom"
 //project(":${rootProject.name}-util").projectDir = file(':common')
 project(':common').name = "${rootProject.name}-util"
+project(':foreignc').name = "${rootProject.name}-foreignc"
+project(':api').name = "${rootProject.name}-practice"
 project(':app').name = "${rootProject.name}-intro"

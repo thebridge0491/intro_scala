@@ -2,6 +2,8 @@ package org.sandbox.intro_scala.intro {
 
 import org.scalatest.{time,concurrent}
 
+import org.sandbox.intro_scala.util.{Library => Util}
+
 class NewTest extends UnitSpec {
     //val tolerance = 2.0f * Float.MinPositiveValue
     val epsilon = 1.0e-7f
@@ -21,23 +23,17 @@ class NewTest extends UnitSpec {
 		System.err.println("... teardown Test")
 	}
 	
-    def in_epsilon(a: Double, b: Double, tolerance: Double = 0.001): Boolean = {
-        val delta = Math.abs(tolerance)
-        //(a - delta) <= b && (a + delta) >= b
-		!((a + delta) < b) && !((b + delta) < a)
-    }
-	
     it should "exist as a class" in {
 		try {
-			Class.forName("%s.Library".format(
+			Class.forName("%s.Intro".format(
                 this.getClass.getPackage.getName))
             assert(true)
 		} catch {
 			case exc: ClassNotFoundException => {
                 //fail("Class(es) not existent: " + 
-                //    classOf[Library].getName)
+                //    classOf[Intro].getName)
                 fail("%s %s".format("Class(es) not existent:", 
-                    Array(classOf[Library].getName).mkString))
+                    Array(classOf[Intro].getName).mkString))
             }
 		}
 	}
@@ -46,7 +42,7 @@ class NewTest extends UnitSpec {
 		assertResult(4) { 2 * 2 }
 	}
 	it should "test dblMethod" in {
-		assertResult(true) { in_epsilon(100.001f, 100.001f, epsilon) }
+		assertResult(true) { Util.in_epsilon(100.001f, 100.001f, epsilon) }
 	}
     it should "test strMethod" in {
 		assertResult("Hello") { "Hello" }

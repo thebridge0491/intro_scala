@@ -5,6 +5,8 @@ import org.scalacheck.Prop._
 
 import scala.collection.mutable.{ListBuffer => M_List}
 
+import org.sandbox.intro_scala.util.{Library => Util}
+
 class NewProp extends UnitPropSpec {
 	import scala.language.implicitConversions
 	import org.scalacheck.{Test => SchkTest}
@@ -41,12 +43,6 @@ object NewProp extends Properties("(props) New examples") {
     
     //val tolerance = 2.0f * Float.MinPositiveValue
     val epsilon = 0.001 //1.0e-7f
-	
-    def in_epsilon(a: Double, b: Double, tolerance: Double = 0.001): Boolean = {
-        val delta = Math.abs(tolerance)
-        //(a - delta) <= b && (a + delta) >= b
-		!((a + delta) < b) && !((b + delta) < a)
-    }
     
     def genTup2Int(gen0: Gen[Int], gen1: Gen[Int]) = 
         for { x <- gen0 ; y <- gen1 } yield (x, y)

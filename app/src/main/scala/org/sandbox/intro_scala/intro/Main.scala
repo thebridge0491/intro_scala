@@ -106,7 +106,7 @@ object Main {
         println("-" * 40)
         
         val ints = Array[Integer](2, 1, 0, 4, 3)
-        val lst = mutable.ListBuffer[Integer](ints: _*)
+        val lst = List[Integer](ints: _*)
         
         if (is_expt2) {
 		    printf("expt(2.0, %.1f) = %.1f\n", 
@@ -126,17 +126,38 @@ object Main {
 		   	
 		   	val res0 = Util.mkString[Integer](lst.asJava)
 		   	val el: Integer = 3
-		   	val idx = Sequenceops.indexOf_lp[Integer](el, lst.asJava, 
-				Util.intCmp)
+		   	val idx = Sequenceops.indexOf_i[Integer](el, lst, Util.intCmp)
 		   	printf("indexOf(%d, %s, intCmp): %d\n", el, res0, idx)
 		   	
 		   	val new_val: Integer = 50
 		   	printf("%s += %d: ", res0, new_val)
-		   	lst += new_val
-		   	println(Util.mkString[Integer](lst.asJava))
+		   	println(Util.mkString[Integer]((lst :+ new_val).asJava))
         }
         println("-" * 40)
+        val rows_pascal = 5
+        val pascal_lst = Classic.pascaltri_add(rows_pascal)
+        printf("pascaltri_add(n:%d) : \n", rows_pascal)
+        pascal_lst.foreach(row => printf("%s\n", row.mkString(" ", "  ", "")))
         
+        println("-" * 40)
+        val ndisks = 4
+        val hanoi_lst = ClassicPuzzles.hanoi(1, 2, 3, 4)
+        printf("hanoi(src:1, dest:2, spare:3, ndisks:%d) : \n", ndisks)
+        for (i <- 0 until hanoi_lst.size)
+			printf("move #%02d: move from %d to %d\n", i + 1, 
+				hanoi_lst(i)._1, hanoi_lst(i)._2)
+        
+        println("-" * 40)
+        val (numqueens, queensNdx) = (8, rnd.nextInt(50))
+        val nqueens_lst = ClassicPuzzles.nqueens(numqueens)
+        val nqueens_grid = ClassicPuzzles.nqueensGrid(numqueens,
+			nqueens_lst(queensNdx))
+		printf("nqueens %d (idx: %d): %s\n\n", numqueens, queensNdx,
+			nqueens_lst(queensNdx).mkString("[", ", ", "]"))
+		nqueens_grid.foreach(row => printf("%s\n", 
+			row.mkString(" ", "-", "")))
+        
+        println("-" * 40)
         val pers = new Person("I.M. Computer", 32)
         assert(pers.isInstanceOf[AnyRef]) 
 									// org.sandbox.intro_scala.intro.Person

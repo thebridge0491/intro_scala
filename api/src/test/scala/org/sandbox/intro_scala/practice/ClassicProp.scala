@@ -4,7 +4,8 @@ import org.scalacheck.{Prop,Properties,Gen}
 import org.scalacheck.Prop._
 
 import org.sandbox.intro_scala.util.{Library => Util}
-import org.sandbox.intro_scala.practice.{ClassicHiorder => ClassicHi}
+import org.sandbox.intro_scala.practice.{ClassicHiorder => ClassicHi,
+	ClassicStreams => ClassicStrm}
 
 class ClassicProp extends UnitPropSpec {
 	import scala.language.implicitConversions
@@ -53,9 +54,15 @@ object ClassicProp extends Properties("(props) Classic functions") {
         val ans = math.pow(n.toFloat, 2.0f).toFloat
 		val funcs = Array[Float => Float](Classic.square_i, Classic.square_r,
             ClassicHi.square_f, ClassicHi.square_u, ClassicHi.square_lc)
+        val funcsStrm = Array[Stream[Float]](ClassicStrm.squares_strm,
+            ClassicStrm.squares_map2, ClassicStrm.squares_u,
+            ClassicStrm.squares_scanl)
         (funcs.foldLeft(true) { (acc, f) => acc && 
 			Util.in_epsilon(ans, f(n.toFloat), ans * epsilon) }).
-			label("===propSquare(%f) : %f===".format(n.toFloat, ans))
+			label("===propSquare(%f) : %f===".format(n.toFloat, ans)) &&
+        (funcsStrm.foldLeft(true) { (acc, f) => acc && 
+			Util.in_epsilon(ans, f(n), ans * epsilon) }).
+			label("===propSquareStrm(%f) : %f===".format(n.toFloat, ans))
 	}
     
     property("exponent b to n") = forAll(genTup2Float(Gen.choose(1, 20),
@@ -65,9 +72,15 @@ object ClassicProp extends Properties("(props) Classic functions") {
 		val funcs = Array[(Float, Float) => Float](Classic_java.expt_i, 
             Classic_java.expt_lp, Classic.expt_i, Classic.expt_r,
             ClassicHi.expt_f, ClassicHi.expt_u, ClassicHi.expt_lc)
+        val funcsStrm = Array[Float => Stream[Float]](ClassicStrm.expts_strm,
+            ClassicStrm.expts_map2, ClassicStrm.expts_u, 
+            ClassicStrm.expts_scanl)
         (funcs.foldLeft(true) { (acc, f) => acc && 
 			Util.in_epsilon(ans, f(b, n), ans * epsilon) }).
-			label("===propExpt(%f, %f) : %f===".format(b, n, ans))
+			label("===propExpt(%f, %f) : %f===".format(b, n, ans)) &&
+        (funcsStrm.foldLeft(true) { (acc, f) => acc && 
+			Util.in_epsilon(ans, f(b)(n.toInt), ans * epsilon) }).
+			label("===propExptStrm(%f, %f) : %f===".format(b, n, ans))
 	}}
     
     property("sum to hi from lo") = forAll(Gen.choose(-50, 50),
@@ -76,8 +89,13 @@ object ClassicProp extends Properties("(props) Classic functions") {
 		val funcs = Array[(Long, Long) => Long](Classic.sumTo_i,
             Classic.sumTo_r, ClassicHi.sumTo_f, ClassicHi.sumTo_u,
 			ClassicHi.sumTo_lc)
+        val funcsStrm = Array[Long => Stream[Long]](ClassicStrm.sums_map2,
+            ClassicStrm.sums_u, ClassicStrm.sums_scanl)
         (funcs.foldLeft(true) { (acc, f) => acc && (ans == f(hi, lo)) }).label(
-			"===propSumTo(%d, %d) : %d===".format(hi, lo, ans))
+			"===propSumTo(%d, %d) : %d===".format(hi, lo, ans)) &&
+        (funcsStrm.foldLeft(true) { (acc, f) => acc &&
+            (ans == (if (hi > lo) f(lo)(math.abs((hi - lo).toInt)) else lo)) 
+            }).label("===propSumToStrm(%d, %d) : %d===".format(hi, lo, ans))
 	}
     
     property("factorial n") = forAll(Gen.choose(0, 18)) { n =>
@@ -85,8 +103,12 @@ object ClassicProp extends Properties("(props) Classic functions") {
 		val funcs = Array[(Long) => Long](Classic_java.fact_i,
             Classic_java.fact_lp, Classic.fact_i, Classic.fact_r,
             ClassicHi.fact_f, ClassicHi.fact_u, ClassicHi.fact_lc)
+        val funcsStrm = Array[Stream[Long]](ClassicStrm.facts_map2, 
+            ClassicStrm.facts_u, ClassicStrm.facts_scanl)
         (funcs.foldLeft(true) { (acc, f) => acc && (ans == f(n)) }).label(
-			"===propFact(%d) : %d===".format(n, ans))
+			"===propFact(%d) : %d===".format(n, ans)) &&
+        (funcsStrm.foldLeft(true) { (acc, f) => acc && (ans == f(n)) }).label(
+			"===propFactStrm(%d) : %d===".format(n, ans))
 	}
     
     property("nth fibonacci number") = forAll(Gen.choose(0, 20)) { n =>
@@ -94,8 +116,12 @@ object ClassicProp extends Properties("(props) Classic functions") {
             (s0_s1._1 + s0_s1._2, s0_s1._1))._2
 		val funcs = Array[Int => Int](Classic.fib_i, Classic.fib_r,
             ClassicHi.fib_f, ClassicHi.fib_u, ClassicHi.fib_lc)
+        val funcsStrm = Array[Stream[Int]](ClassicStrm.fibs_map2, 
+            ClassicStrm.fibs_u, ClassicStrm.fibs_scanl)
         (funcs.foldLeft(true) { (acc, f) => acc && (ans == f(n)) }).label(
-			"===propFib(%d) : %d===".format(n, ans))
+			"===propFib(%d) : %d===".format(n, ans)) &&
+        (funcsStrm.foldLeft(true) { (acc, f) => acc && (ans == f(n)) }).label(
+			"===propFibStrm(%d) : %d===".format(n, ans))
 	}
     
     property("n-rows of Pascal's triangle") = forAll(Gen.choose(0, 20)) { 
@@ -107,11 +133,19 @@ object ClassicProp extends Properties("(props) Classic functions") {
 		val funcs = Array[Int => List[List[Int]]](Classic.pascaltri_add, 
             Classic.pascaltri_mult, ClassicHi.pascaltri_f,
 			ClassicHi.pascaltri_u, ClassicHi.pascaltri_lc)
+        val funcsStrm = Array[Stream[List[Int]]](ClassicStrm.pascalrows_map2,
+			ClassicStrm.pascalrows_u, ClassicStrm.pascalrows_scanl)
         (funcs.foldLeft(true) { (acc, f) => val res = f(rows) ; acc && 
             verifyNumRows(res) && (res.foldLeft(true, 0) { (acc_n, r) => 
             acc_n match { case (acc, n) => (acc && verifyLenRow(n, r) && 
             verifySumRow(n, r), n + 1) } })._1 }).label(
-			"===propPascaltri(%d)===".format(rows))
+			"===propPascaltri(%d)===".format(rows)) &&
+        (funcsStrm.foldLeft(true) { (acc, f) =>
+            val res = f.take(rows + 1).toList ; acc &&
+            verifyNumRows(res) && (res.foldLeft(true, 0) { (acc_n, r) => 
+            acc_n match { case (acc, n) => (acc && verifyLenRow(n, r) && 
+            verifySumRow(n, r), n + 1) } })._1 }).label(
+			"===propPascaltriStrm(%d)===".format(rows))
 	}
     
     property("quotient|remainder") = forAll(Gen.choose(-50, 50),

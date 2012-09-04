@@ -8,7 +8,8 @@ import scala.collection.mutable.Buffer
 
 import org.sandbox.intro_scala.util.{Library => Util}
 import org.sandbox.intro_scala.practice.{Sequenceops => Seqops, 
-	SequenceopsArray => SeqopsArr, SequenceopsHiorder => SeqopsHi}
+	SequenceopsArray => SeqopsArr, SequenceopsHiorder => SeqopsHi,
+	SequenceopsVariadic => SeqopsVar}
 
 class SequenceopsProp extends UnitPropSpec {
 	import scala.language.implicitConversions
@@ -53,6 +54,11 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
 		elems <- Gen.containerOfN[List, Integer](numElems, gen0)
 	} yield elems
     
+    def genNListInts(outerNum: Int) = for {
+        innerNum <- Gen.choose(1, 10)
+        innerElems <- Gen.containerOfN[List, Int](innerNum, Gen.choose(0, 100))
+        outerElems <- Gen.containerOfN[List, List[Int]](outerNum, innerElems)
+    } yield outerElems
     
     // scalacheck-style property define
     property("tabulate sequence") = forAll(Gen.choose(0, 18)) { n =>
@@ -686,6 +692,168 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
             (ansL == f(nss)) }).label(
             "===propConcatL(%s) : %s===".format(
             nss.mkString("[", ", ", "]"), ansL.mkString("[", ", ", "]")))
+    }
+    
+    def zipVar[T, U](xss: List[T]*): List[U] = {
+        def tupOfHeads[T](items: List[T]): Product with Serializable =
+                items match {
+            //case Nil => List[T]()
+            case Nil => 
+                throw new NotImplementedError("not implemented Tuple0")
+            case List(a) => Tuple1[T](a) //.asInstanceOf[Tuple1[T]]
+            case List(a, b) => Tuple2[T, T](a, b)
+            case List(a, b, c) => Tuple3[T, T, T](a, b, c)
+            case List(a, b, c, d) => Tuple4[T, T, T, T](a, b, c, d)
+            case List(a, b, c, d, e) => Tuple5[T, T, T, T, T](a, b, c, d, e)
+            case List(a, b, c, d, e, f) => 
+                Tuple6[T, T, T, T, T, T](a, b, c, d, e, f)
+            case _ => 
+                throw new NotImplementedError("not implemented beyond Tuple6")
+        }
+        xss.exists(e => Nil == e) match {
+            case true => List[U]()
+            case _ =>
+                def iter(rst: Seq[List[T]], acc: List[U]): List[U] =
+                        rst.exists(e => Nil == e) match {
+                    case true => acc.reverse
+                    case _ => iter(rst.map(e => e.tail), 
+                        tupOfHeads(rst.map(e => e.head).toList).asInstanceOf[U] :: acc)
+                }
+                iter(xss, List[U]())
+        }
+	}
+    
+    property("variadic condition exists|forall items") = forAll(
+            genNListInts(5), genNListInts(2)) { 
+            (xss: List[List[Int]], yss: List[List[Int]]) =>
+        def predAny(els: List[Int]*): Boolean = els.exists(e => Nil == e)
+		def predAll(els: List[Int]*): Boolean = els.forall(e => !e.isEmpty)
+        val ansAny = List(xss, yss).exists(xs => predAny(xs: _*))
+        val ansAll = List(xss, yss).forall(xs => predAll(xs: _*))
+        val results = List[(((Seq[List[Int]] => Boolean), List[List[Int]]*) =>
+            Boolean, ((Seq[List[Int]] => Boolean), List[List[Int]]*) => 
+            Boolean)]((SeqopsVar.exists_iv, SeqopsVar.forall_iv),
+			(SeqopsVar.exists_rv, SeqopsVar.forall_rv),
+			(SeqopsVar.exists_fv, SeqopsVar.forall_fv),
+			(SeqopsVar.exists_uv, SeqopsVar.forall_uv)).map(
+                fnAny_fnAll => fnAny_fnAll match { case (fnAny, fnAll) => 
+                (fnAny(predAny, List(xss, yss)),
+                fnAll(predAll, List(xss, yss))) })
+        
+        (results.foldLeft(true) { (acc, resAny_resAll) => 
+                resAny_resAll match { case (resAny, resAll) =>
+            acc && (ansAny == resAny) && (ansAll == resAll) }}).label(
+            "===propExistsForallVar(%s) : %s %s===".format(
+            List(xss, yss).mkString("[", ", ", "]"), ansAny, ansAll))
+    }
+    
+    property("variadic map proc on elems") = forAll(genNListInts(2),
+            genNListInts(3)) {
+            (nss2: List[List[Int]], nss3: List[List[Int]]) =>
+        def proc2(els: Int*): Seq[Int] = els.map(e => e + 2)
+		def proc3(els: Int*): Seq[Int] = Seq(els.product)
+        val ans2 = zipVar[Int, (Int, Int)](nss2: _*).foldRight(List[List[Int]]())(
+            (els, acc) => proc2(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]] :: acc)
+        val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldRight(List[List[Int]]())(
+            (els, acc) => proc3(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]] :: acc)
+        val results = List[((Seq[Int] => Seq[Int]), List[Int]*) => 
+            List[Seq[Int]]](SeqopsVar.map_iv, SeqopsVar.map_rv,
+            SeqopsVar.map_fv, SeqopsVar.map_uv).map(f => 
+                (f(proc2, nss2: _*), f(proc3, nss3: _*)))
+        
+        (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
+                case (res2, res3) => acc && (ans2 == res2) &&
+            (ans3 == res3) }}).label("===propMapVar(%s) : %s===".format(
+            nss2.mkString("[", ", ", "]"), ans2.mkString("[", ", ", "]")))
+    }
+    
+    property("variadic foreach elem") = forAll(genNListInts(2),
+            genNListInts(3)) {
+            (nss2: List[List[Int]], nss3: List[List[Int]]) =>
+        def proc2(els: Int*): Unit = 
+            Console.err.println(els.mkString("[", ", ", "]"))
+		def proc3(els: Int*): Unit = 
+            Console.err.println(els.mkString("[", ", ", "]"))
+        val ans2 = zipVar[Int, (Int, Int)](nss2: _*).foldLeft(())(
+            (_, els) => proc2(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]])
+        val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldLeft(())(
+            (_, els) => proc3(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]])
+        val results = List[((Seq[Int] => Unit), List[Int]*) => Unit](
+            SeqopsVar.foreach_iv, SeqopsVar.foreach_rv, SeqopsVar.foreach_fv,
+            SeqopsVar.foreach_uv).map(f => 
+                (f(proc2, nss2: _*), f(proc3, nss3: _*)))
+        
+        (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
+                case (res2, res3) => acc && (ans2 == res2) &&
+            (ans3 == res3) }}).label("===propForeachVar(%s) : %s===".format(
+            nss2.mkString("[", ", ", "]"), ans2))
+    }
+    
+    property("variadic fold left over sequences") = forAll(genNListInts(2),
+            genNListInts(3)) {
+            (nss2: List[List[Int]], nss3: List[List[Int]]) =>
+        def corp2(acc: Int, els: Int*): Int = acc + els.sum
+		def corp3(acc: Int, els: Int*): Int = acc - els.sum
+        val ans2 = zipVar[Int, (Int, Int)](nss2: _*).foldLeft(0)(
+            (acc, els) => corp2(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldLeft(0)(
+            (acc, els) => corp3(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val results = List[(((Int, Seq[Int]) => Int), Int, List[Int]*) => 
+            Int](SeqopsVar.foldLeft_iv, SeqopsVar.foldLeft_rv).map(f => 
+                (f(corp2, 0, nss2: _*), f(corp3, 0, nss3: _*)))
+        
+        (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
+                case (res2, res3) => acc && (ans2 == res2) &&
+            (ans3 == res3) }}).label("===propFoldLeftVar(%s) : %s===".format(
+            nss2.mkString("[", ", ", "]"), ans2))
+    }
+    
+    property("variadic fold right over sequences") = forAll(genNListInts(2),
+            genNListInts(3)) {
+            (nss2: List[List[Int]], nss3: List[List[Int]]) =>
+        def proc2(acc: Int, els: Int*): Int = els.sum + acc
+		def proc3(acc: Int, els: Int*): Int = els.sum - acc
+        val ans2 = zipVar[Int, (Int, Int)](nss2: _*).foldRight(0)(
+            (els, acc) => proc2(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldRight(0)(
+            (els, acc) => proc3(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val results = List[(((Int, Seq[Int]) => Int), Int, List[Int]*) => 
+            Int](SeqopsVar.foldRight_rv, SeqopsVar.foldRight_iv).map(f => 
+                (f(proc2, 0, nss2: _*), f(proc3, 0, nss3: _*)))
+        
+        (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
+                case (res2, res3) => acc && (ans2 == res2) &&
+            (ans3 == res3) }}).label("===propFoldRightVar(%s) : %s===".format(
+            nss2.mkString("[", ", ", "]"), ans2))
+    }
+    
+    property("variadic append sequences") = forAll(genNListInts(3)) {
+        (nss: List[List[Int]]) =>
+        val ans = List.concat(nss: _*)
+        val results = List[(List[Int]*) => List[Int]](SeqopsVar.append_iv,
+            SeqopsVar.append_rv, SeqopsVar.append_fv, SeqopsVar.append_uv
+            ).map(f => f(nss: _*))
+        
+        (results.foldLeft(true) { (acc, res) => acc && (ans == res) }).label(
+            "===propAppendVar(%s) : %s===".format(
+            nss.mkString("[", ", ", "]"), ans.mkString("[", ", ", "]")))
+    }
+    
+    property("variadic zip sequences") = forAll(genNListInts(2),
+            genNListInts(3)) {
+            (nss2: List[List[Int]], nss3: List[List[Int]]) =>
+        val ans2 = zipVar[Int, (Int, Int)](nss2: _*).foldRight(List[List[Int]]())(
+            (els, acc) => els.productIterator.toList.asInstanceOf[List[Int]] :: acc)
+        val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldRight(List[List[Int]]())(
+            (els, acc) => els.productIterator.toList.asInstanceOf[List[Int]] :: acc)
+        val results = List[(List[Int]*) => List[List[Int]]](SeqopsVar.zip_iv,
+            SeqopsVar.zip_rv, SeqopsVar.zip_fv, SeqopsVar.zip_uv).map(f => 
+                (f(nss2: _*), f(nss3: _*)))
+        
+        (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
+                case (res2, res3) => acc && (ans2 == res2) &&
+            (ans3 == res3) }}).label("===propZipVar(%s) : %s===".format(
+            nss3.mkString("[", ", ", "]"), ans2.mkString("[", ", ", "]")))
     }
 }
 

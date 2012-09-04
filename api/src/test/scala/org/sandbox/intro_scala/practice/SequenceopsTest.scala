@@ -7,7 +7,8 @@ import scala.collection.JavaConverters._
 
 import org.sandbox.intro_scala.util.{Library => Util}
 import org.sandbox.intro_scala.practice.{Sequenceops => Seqops, 
-	SequenceopsArray => SeqopsArr, SequenceopsHiorder => SeqopsHi}
+	SequenceopsArray => SeqopsArr, SequenceopsHiorder => SeqopsHi,
+	SequenceopsVariadic => SeqopsVar}
 
 class SequenceopsTest extends UnitSpec {
     //val tolerance = 2.0f * Float.MinPositiveValue
@@ -524,7 +525,151 @@ class SequenceopsTest extends UnitSpec {
                 f => 
 			assertResult(List.concat(nlst1: _*)) { 
 				f(List(lst_ints, lst_ints_rev)) } }
-    } 
+    }
+    
+    def zipVar[T, U](xss: List[T]*): List[U] = {
+        def tupOfHeads[T](items: List[T]): Product with Serializable =
+                items match {
+            //case Nil => List[T]()
+            case List(a) => Tuple1[T](a) //.asInstanceOf[Tuple1[T]]
+            case List(a, b) => Tuple2[T, T](a, b)
+            case List(a, b, c) => Tuple3[T, T, T](a, b, c)
+            case List(a, b, c, d) => Tuple4[T, T, T, T](a, b, c, d)
+            case List(a, b, c, d, e) => Tuple5[T, T, T, T, T](a, b, c, d, e)
+            case List(a, b, c, d, e, f) => 
+                Tuple6[T, T, T, T, T, T](a, b, c, d, e, f)
+            case _ => 
+                throw new NotImplementedError("not implemented beyond Tuple6")
+        }
+        xss.exists(e => Nil == e) match {
+            case true => List[U]()
+            case _ =>
+                def iter(rst: Seq[List[T]], acc: List[U]): List[U] =
+                        rst.exists(e => Nil == e) match {
+                    case true => acc.reverse
+                    case _ => iter(rst.map(e => e.tail), 
+                        tupOfHeads(rst.map(e => e.head).toList).asInstanceOf[U] :: acc)
+                }
+                iter(xss, List[U]())
+        }
+	}
+    
+    it should "variadic condition exists|forall items" in {
+		def predAny(els: List[Int]*): Boolean = els.exists(e => Nil == e)
+		def predAll(els: List[Int]*): Boolean = els.forall(e => !e.isEmpty)
+		val lstAny = List(List(List(), List(0, 1, 2)),
+            List(List(9), List(11)))
+		val lstAll = List(List(List(3), List(33)), List(List(55), List(5)))
+        val ansAny = lstAny.exists(xs => predAny(xs: _*))
+        val ansAll = lstAll.forall(xs => predAll(xs: _*))
+        List[(((Seq[List[Int]] => Boolean), List[List[Int]]*) => Boolean,
+            ((Seq[List[Int]] => Boolean), List[List[Int]]*) => Boolean)](
+			(SeqopsVar.exists_iv, SeqopsVar.forall_iv),
+			(SeqopsVar.exists_rv, SeqopsVar.forall_rv),
+			(SeqopsVar.exists_fv, SeqopsVar.forall_fv),
+			(SeqopsVar.exists_uv, SeqopsVar.forall_uv)).foreach { 
+                fnExists_fnForall => fnExists_fnForall match {
+                case (fnExists, fnForall) =>
+            assertResult(ansAny) { fnExists(predAny, lstAny) }
+            assertResult(ansAll) { fnExists(predAll, lstAll) }
+        }}
+    }
+    
+    it should "variadic map proc on elems" in {
+		def proc2(els: Int*): Seq[Int] = els.map(e => e + 2)
+		def proc3(els: Int*): Seq[Int] = Seq(els.product)
+		val lst2 = List(List(0, 1, 5), List(2, 3))
+		val lst3 = List(List(0, 1), List(2, 3), List(4, 5, 6))
+        val ans2 = zipVar[Int, (Int, Int)](lst2: _*).foldRight(List[List[Int]]())(
+            (els, acc) => proc2(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]] :: acc)
+        val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldRight(List[List[Int]]())(
+            (els, acc) => proc3(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]] :: acc)
+		List[((Seq[Int] => Seq[Int]), List[Int]*) => List[Seq[Int]]](
+			SeqopsVar.map_iv, SeqopsVar.map_rv, SeqopsVar.map_fv,
+                SeqopsVar.map_uv).foreach { f =>
+            assertResult(ans2) { f(proc2, lst2: _*) }
+            assertResult(ans3) { f(proc3, lst3: _*) }
+		}
+    }
+    
+    it should "variadic foreach elem" in {
+		def proc2(els: Int*): Unit = 
+            Console.err.println(els.mkString("[", ", ", "]"))
+		def proc3(els: Int*): Unit = 
+            Console.err.println(els.mkString("[", ", ", "]"))
+		val lst2 = List(List(0, 1, 5), List(2, 3))
+		val lst3 = List(List(0, 1), List(2, 3), List(4, 5, 6))
+        val ans2 = zipVar[Int, (Int, Int)](lst2: _*).foldLeft(())(
+            (_, els) => proc2(els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldLeft(())(
+            (_, els) => proc3(els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+		List[((Seq[Int] => Unit), List[Int]*) => Unit](SeqopsVar.foreach_iv,
+            SeqopsVar.foreach_rv, SeqopsVar.foreach_fv, SeqopsVar.foreach_uv
+                ).foreach { f =>
+            assertResult(ans2) { f(proc2, lst2: _*) }
+            assertResult(ans3) { f(proc3, lst3: _*) }
+		}
+    }
+    
+    it should "variadic fold left over sequences" in {
+		def corp2(acc: Int, els: Int*): Int = acc + els.sum
+		def corp3(acc: Int, els: Int*): Int = acc - els.sum
+		val lst2 = List(List(0, 1, 2), List(2, 3))
+		val lst3 = List(List(0, 1, 2), List(2, 3), List(3, 4))
+        val ans2 = zipVar[Int, (Int, Int)](lst2: _*).foldLeft(0)(
+            (acc, els) => corp2(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldLeft(0)(
+            (acc, els) => corp3(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+		List[(((Int, Seq[Int]) => Int), Int, List[Int]*) => Int](
+                SeqopsVar.foldLeft_iv, SeqopsVar.foldLeft_rv).foreach { f =>
+            assertResult(ans2) { f(corp2, 0, lst2: _*) }
+            assertResult(ans3) { f(corp3, 0, lst3: _*) }
+		}
+    }
+    
+    it should "variadic fold right over sequences" in {
+		def proc2(acc: Int, els: Int*): Int = els.sum + acc
+		def proc3(acc: Int, els: Int*): Int = els.sum - acc
+		val lst2 = List(List(0, 1, 2), List(2, 3))
+		val lst3 = List(List(0, 1, 2), List(2, 3), List(3, 4))
+        val ans2 = zipVar[Int, (Int, Int)](lst2: _*).foldRight(0)(
+            (els, acc) => proc2(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldRight(0)(
+            (els, acc) => proc3(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+		List[(((Int, Seq[Int]) => Int), Int, List[Int]*) => Int](
+                SeqopsVar.foldRight_rv, SeqopsVar.foldRight_iv).foreach { f =>
+            assertResult(ans2) { f(proc2, 0, lst2: _*) }
+            assertResult(ans3) { f(proc3, 0, lst3: _*) }
+		}
+    }
+    
+    it should "variadic append sequences" in {
+		val lst1 = List(List(1), List(2, 3), List(4))
+		val lst2 = List(List(1), List(2, 3), List(4), List(5, 6))
+        val (ans1, ans2) = (List.concat(lst1: _*), List.concat(lst2: _*))
+		List[(List[Int]*) => List[Int]](SeqopsVar.append_iv,
+            SeqopsVar.append_rv, SeqopsVar.append_fv, SeqopsVar.append_uv
+                ).foreach { f =>
+            assertResult(ans1) { f(lst1: _*) }
+            assertResult(ans2) { f(lst2: _*) }
+		}
+    }
+    
+    it should "variadic zip sequences" in {
+		val lst3 = List(List(0, 1, 2), List(20, 30), List(97, 98))
+		val lst4 = List(List(0, 1, 2), List(20, 30), List(97, 98), 
+			List(149, 148))
+        val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldRight(List[List[Int]]())(
+            (els, acc) => els.productIterator.toList.asInstanceOf[List[Int]] :: acc)
+        val ans4 = zipVar[Int, (Int, Int, Int, Int)](lst4: _*).foldRight(List[List[Int]]())(
+            (els, acc) => els.productIterator.toList.asInstanceOf[List[Int]] :: acc)
+		List[(List[Int]*) => List[List[Int]]](SeqopsVar.zip_iv,
+            SeqopsVar.zip_rv, SeqopsVar.zip_fv, SeqopsVar.zip_uv).foreach {
+                f =>
+            assertResult(ans3) { f(lst3: _*) }
+            assertResult(ans4) { f(lst4: _*) }
+		}
+    }
 }
 
 object SequenceopsTest {

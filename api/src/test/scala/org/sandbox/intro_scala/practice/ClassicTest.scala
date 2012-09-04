@@ -3,7 +3,8 @@ package org.sandbox.intro_scala.practice {
 //import org.scalatest._
 
 import org.sandbox.intro_scala.util.{Library => Util}
-import org.sandbox.intro_scala.practice.{ClassicHiorder => ClassicHi}
+import org.sandbox.intro_scala.practice.{ClassicHiorder => ClassicHi,
+	ClassicStreams => ClassicStrm}
 
 class ClassicTest extends UnitSpec {
     //val tolerance = 2.0f * Float.MinPositiveValue
@@ -32,6 +33,11 @@ class ClassicTest extends UnitSpec {
                     foreach(f => 
                 assertResult(true) { Util.in_epsilon(ans, f(n),
 					ans * epsilon) })
+            Array[Stream[Float]](ClassicStrm.squares_strm,
+                ClassicStrm.squares_map2, ClassicStrm.squares_u,
+                    ClassicStrm.squares_scanl).foreach(f => 
+                assertResult(true) {
+                    Util.in_epsilon(ans, f(n.toInt), ans * epsilon) })
         }
 	}
     
@@ -43,9 +49,13 @@ class ClassicTest extends UnitSpec {
                 Classic_java.expt_lp, Classic.expt_i, Classic.expt_r,
                 Classic.fastExpt_i, Classic.fastExpt_r, ClassicHi.expt_f,
                 ClassicHi.expt_u, ClassicHi.expt_lc).foreach(f =>
-                
                 assertResult(true) {
                     Util.in_epsilon(ans, f(b_n(0), b_n(1)), ans * epsilon) })
+            Array[Float => Stream[Float]](ClassicStrm.expts_strm,
+                ClassicStrm.expts_map2, ClassicStrm.expts_u, 
+                    ClassicStrm.expts_scanl).foreach(f =>
+                assertResult(true) {
+                    Util.in_epsilon(ans, f(b_n(0))(b_n(1).toInt), ans * epsilon) })
         }
     }
 	
@@ -57,6 +67,11 @@ class ClassicTest extends UnitSpec {
                     ClassicHi.sumTo_f, ClassicHi.sumTo_u, ClassicHi.sumTo_lc
                         ).foreach(f => 
                     assertResult(ans) { f(hi_lo(0), hi_lo(1)) } )
+                Array[Long => Stream[Long]](ClassicStrm.sums_map2,
+                    ClassicStrm.sums_u, ClassicStrm.sums_scanl).foreach(f => 
+                    assertResult(ans) { 
+                        if (hi_lo(0) > hi_lo(1)) f(hi_lo(1))(math.abs((hi_lo(0) - hi_lo(1)).toInt))
+						else hi_lo(1) } )
         }
     }
 	
@@ -67,6 +82,9 @@ class ClassicTest extends UnitSpec {
                 Classic.fact_i, Classic.fact_r, ClassicHi.fact_f,
                     ClassicHi.fact_u, ClassicHi.fact_lc).foreach(f => 
                 assertResult(ans) { f(n) })
+            Array[Stream[Long]](ClassicStrm.facts_map2, ClassicStrm.facts_u,
+                    ClassicStrm.facts_scanl).foreach(f => 
+                assertResult(ans) { f(n.toInt) })
 		}
     }
 	
@@ -76,6 +94,9 @@ class ClassicTest extends UnitSpec {
 				(s0_s1._1 + s0_s1._2, s0_s1._1))._2
 			Array[Int => Int](Classic.fib_i, Classic.fib_r, ClassicHi.fib_f,
                     ClassicHi.fib_u, ClassicHi.fib_lc).foreach(f =>
+                assertResult(ans) { f(n) })
+            Array[Stream[Int]](ClassicStrm.fibs_map2, ClassicStrm.fibs_u,
+                    ClassicStrm.fibs_scanl).foreach(f =>
                 assertResult(ans) { f(n) })
 		}
     }
@@ -88,6 +109,10 @@ class ClassicTest extends UnitSpec {
             Classic.pascaltri_mult, ClassicHi.pascaltri_f,
                 ClassicHi.pascaltri_u, ClassicHi.pascaltri_lc).foreach(f => 
             assertResult(ans) { f(rows) })
+        Array[Stream[List[Int]]](ClassicStrm.pascalrows_map2,
+			ClassicStrm.pascalrows_u, ClassicStrm.pascalrows_scanl).foreach(
+                f => 
+            assertResult(ans) { f.take(rows + 1).toList })
     }
 	
     it should "compute quotient|remainder" in {

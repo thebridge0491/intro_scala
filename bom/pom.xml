@@ -22,7 +22,7 @@
 
     <version.groovy>3.0.4</version.groovy>
 
-    <version.junit>4.13</version.junit>
+    <version.junit>4.13.1</version.junit>
     <version.testng>7.1.0</version.testng>
     <version.spock>1.3-groovy-2.5</version.spock>
     <version.jacoco>0.8.5</version.jacoco>

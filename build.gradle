@@ -40,24 +40,25 @@ allprojects {
 		ant.defaultexcludes remove: '**/.gitignore'
 		main { baseName = project.name
 			if ((new File('exclude.lst')).exists()) {
-			contents {
-				//from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
-				from('.') { exclude (new File('exclude.lst') as String[])
-					exclude '**/build/*', '**/gradle/*' }
-				exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
-			}
+			  contents {
+				  //from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
+				  from('.') { exclude (new File('exclude.lst') as String[])
+					  exclude '**/build/*', '**/gradle/*' }
+				  exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
+			  }
 			} else {
-			contents {
-				from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
-				exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
-			}
+			  contents {
+				  from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
+				  exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
+			  }
 			}
 		}
 	}
 }
 
 subprojects {
-    apply plugin: 'maven'   // add support to deploy (Maven repos) artifacts
+  apply plugin: 'maven'   // add support to deploy (Maven repos) artifacts
+	//apply plugin: 'groovy'    // extend Java plugin with Groovy support
 	apply plugin: 'scala'    // extend Java plugin with Scala support
 
 	//sourceCompatibility = javacSource

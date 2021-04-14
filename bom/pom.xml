@@ -4,35 +4,38 @@
     xsi:schemaLocation = 'http://maven.apache.org/POM/4.0.0
       http://maven.apache.org/xsd/maven-4.0.0.xsd'>
   <modelVersion>4.0.0</modelVersion>
-  
+
   <groupId>org.sandbox</groupId>
   <artifactId>intro_scala-bom</artifactId>
   <version>0</version>
   <packaging>pom</packaging>
-  
+
   <name>Intro_scala::BOM</name>
   <description>BOM pom: Multi-package project Intro examples for Scala.</description>
 
   <properties>
-    <scala.compat>2.9</scala.compat>
-    <version.scala>2.9.2</version.scala>
-    <version.scalatest>1.8</version.scalatest>
-    <version.scalacheck>1.8</version.scalacheck>
-    
-    <version.junit>4.10</version.junit>
-    <version.testng>6.7</version.testng>
-    <version.spock>0.6-groovy-1.8</version.spock>
-    
-    <version.slf4j>1.6.5</version.slf4j>
-    <version.logback>1.0.6</version.logback>
-    
-    <version.ini4j>0.5.2</version.ini4j>
-    <version.jna>3.4.0</version.jna>
-    
-    <version.jsonp>1.0</version.jsonp>
-    <version.snakeyaml>1.10</version.snakeyaml>
+    <scala.compat>2.13</scala.compat>
+    <version.scala>2.13.2</version.scala>
+    <version.scalatest>3.2.0</version.scalatest>
+    <version.scalacheck>1.14.3</version.scalacheck>
+    <version.scalastyle>1.4.0</version.scalastyle>
+
+    <version.groovy>3.0.4</version.groovy>
+
+    <version.junit>4.13</version.junit>
+    <version.testng>7.1.0</version.testng>
+    <version.spock>1.3-groovy-2.5</version.spock>
+    <version.jacoco>0.8.5</version.jacoco>
+    <version.checkstyle>8.33</version.checkstyle>
+    <version.codenarc>1.6</version.codenarc>
+    <version.slf4j>1.7.30</version.slf4j>
+    <version.logback>1.2.3</version.logback>
+    <version.ini4j>0.5.4</version.ini4j>
+    <version.jna>5.5.0</version.jna>
+    <version.jsonp>1.1.4</version.jsonp>
+    <version.snakeyaml>1.26</version.snakeyaml>
   </properties>
-  
+
   <dependencyManagement>
   <dependencies>
     <dependency> <groupId>org.scala-lang</groupId>
@@ -46,6 +49,16 @@
     <dependency> <groupId>org.scalacheck</groupId>
       <artifactId>scalacheck_${scala.compat}</artifactId>
       <version>${version.scalacheck}</version> </dependency>
+    <dependency> <groupId>com.beautiful-scala</groupId>
+      <artifactId>scalastyle_${scala.compat}</artifactId>
+      <version>${version.scalastyle}</version> </dependency>
+	  <dependency> <optional>true</optional> <groupId>net.alchim31.maven</groupId>
+	    <artifactId>scala-maven-plugin</artifactId>
+	    <version>${versionplugin.scala}</version> </dependency>
+
+    <dependency> <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-all</artifactId> <type>pom</type>
+      <version>${version.groovy}</version> </dependency>
 
     <dependency> <groupId>junit</groupId>
       <artifactId>junit</artifactId>
@@ -56,7 +69,16 @@
     <dependency> <groupId>org.spockframework</groupId>
       <artifactId>spock-core</artifactId>
       <version>${version.spock}</version> </dependency>
-    
+    <dependency> <groupId>org.jacoco</groupId>
+		  <artifactId>org.jacoco.ant</artifactId>
+		  <version>${version.jacoco}</version> </dependency>
+    <dependency> <groupId>com.puppycrawl.tools</groupId>
+      <artifactId>checkstyle</artifactId>
+      <version>${version.checkstyle}</version> </dependency>
+    <dependency> <groupId>org.codenarc</groupId>
+      <artifactId>CodeNarc</artifactId>
+      <version>${version.codenarc}</version> </dependency>
+
     <dependency> <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${version.slf4j}</version> </dependency>
@@ -66,14 +88,14 @@
     <dependency> <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
       <version>${version.logback}</version> </dependency>
-    
+
     <dependency> <groupId>org.ini4j</groupId>
       <artifactId>ini4j</artifactId>
       <version>${version.ini4j}</version> </dependency>
     <dependency> <groupId>net.java.dev.jna</groupId>
       <artifactId>jna</artifactId>
       <version>${version.jna}</version> </dependency>
-    
+
     <dependency> <groupId>javax.json</groupId>
       <artifactId>javax.json-api</artifactId>
       <version>${version.jsonp}</version> </dependency>

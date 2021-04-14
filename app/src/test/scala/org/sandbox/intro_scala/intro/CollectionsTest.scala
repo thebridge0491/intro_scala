@@ -1,7 +1,7 @@
 package org.sandbox.intro_scala.intro {
 
 import scala.collection.immutable.{Queue, List, HashMap, TreeMap}
-import scala.collection.mutable.{Queue => M_Queue, ListBuffer => M_List 
+import scala.collection.mutable.{Queue => M_Queue, ListBuffer => M_List
 	, HashMap => M_HashMap, PriorityQueue => M_PriorityQueue
     }
 
@@ -10,13 +10,13 @@ import org.sandbox.intro_scala.util.{Library => Util}
 class CollectionsTest extends UnitSpec {
     //val tolerance = 2.0f * Float.MinPositiveValue
     val epsilon = 1.0e-7f
-    
+
     val ints: Array[Integer] = Array(2, 1, 0, 4, 3)
     val floats: Array[Float] = Array(25.7f, 0.1f, 78.5f, 52.3f)
     val chars: Array[Char] = Array('a', 'e', 'k', 'p', 'u', 'k', 'a')
-    
+
     behavior of "Collections ops test(s)"
-    
+
     before {
 		System.err.println("###setup TestCase###")
 	}
@@ -29,14 +29,14 @@ class CollectionsTest extends UnitSpec {
 	override def afterEach() : Unit = {
 		System.err.println("... teardown Test")
 	}
-	
+
     it should "test deques" in {
 		// collection.immutable
 		var queue1 = Queue[Float]()
 		assertResult(true, "isEmpty") { queue1.isEmpty }
-		queue1 = queue1.enqueue(floats.toList)
+		queue1 = queue1.enqueueAll(floats.toList)
 		assertResult(floats.length, "length") { queue1.size }
-		assertResult(true, "peek") { Util.in_epsilon(epsilon, floats(0), 
+		assertResult(true, "peek") { Util.in_epsilon(epsilon, floats(0),
 			queue1.headOption.getOrElse(0.0f): Float) }
 		val len_old = queue1.size
 		queue1 = queue1.enqueue(-0.5f)
@@ -46,26 +46,26 @@ class CollectionsTest extends UnitSpec {
 		assertResult(true, "poll") { Util.in_epsilon(epsilon, floats(0), el) }
 		assertResult("[0.1, 78.5, 52.3, -0.5]", "toString")
 			{ queue1.mkString("[", ", ", "]") }
-		
+
 		// collection.mutable
 		val m_queue1 = M_Queue[Float]()
 		assertResult(true, "isEmpty") { m_queue1.isEmpty }
-		m_queue1.enqueue(floats: _*)
+		m_queue1.enqueueAll(floats)
 		assertResult(floats.length, "length") { m_queue1.size }
-		assertResult(true, "peek") { Util.in_epsilon(epsilon, floats(0), 
+		assertResult(true, "peek") { Util.in_epsilon(epsilon, floats(0),
 			m_queue1.headOption.getOrElse(0.0f): Float) }
 		val len_oldM = m_queue1.size
 		m_queue1.enqueue(-0.5f)
 		assertResult(len_oldM + 1, "offer") { m_queue1.size }
-		assertResult(true, "poll") { Util.in_epsilon(epsilon, floats(0), 
+		assertResult(true, "poll") { Util.in_epsilon(epsilon, floats(0),
             m_queue1.dequeue) }
 		assertResult("[0.1, 78.5, 52.3, -0.5]", "toString")
 			{ m_queue1.mkString("[", ", ", "]") }
 	}
-    
+
 	it should "test lists" in {
 		val nines: Array[Integer] = Array(9, 9, 9, 9)
-		
+
 		// collection.immutable
 		var lst1 = List[Integer]()
 		assertResult(true, "isEmpty") { lst1.isEmpty }
@@ -79,22 +79,22 @@ class CollectionsTest extends UnitSpec {
 		lst1 = lst1.sortWith((e1, e2) => (e2 compareTo e1) < 0)
 		assertResult("[9, 9, 9, 9, 4, 3, 2, 1, 0]", "toString")
 			{ lst1.mkString("[", ", ", "]") }
-		
+
 		// collection.mutable
 		var m_lst1 = M_List[Integer]()
 		assertResult(true, "isEmpty") { m_lst1.isEmpty }
-		m_lst1.append(ints: _*)
+		m_lst1.appendAll(ints)
 		assertResult(ints.length, "length") { m_lst1.size }
 		assertResult(ints(0), "first") { m_lst1(0) }
 		assertResult(ints(2), "nth") { m_lst1(2) }
 		assertResult(1, "indexOf") { m_lst1.indexOf(ints(1)) }
-		m_lst1.append(nines: _*)
+		m_lst1.appendAll(nines)
 		assertResult(nines.length + ints.length, "append") { m_lst1.size }
 		m_lst1 = m_lst1.sortWith((e1, e2) => (e2 compareTo e1) < 0)
 		assertResult("[9, 9, 9, 9, 4, 3, 2, 1, 0]", "toString")
 			{ m_lst1.mkString("[", ", ", "]") }
 	}
-    
+
     it should "test maps" in {
 		// collection.immutable
 		var map1 = HashMap[String, Character]()
@@ -107,7 +107,7 @@ class CollectionsTest extends UnitSpec {
         assertResult('k', "find") { map1("ltr 2") }
 		map1 = map1 - ("ltr 2")
 		assertResult(false, "remove") { map1.contains("ltr 2") }
-		
+
 		// collection.mutable
 		val m_map1 = M_HashMap[String, Character]()
 		assertResult(true, "isEmpty") { m_map1.isEmpty }
@@ -120,7 +120,7 @@ class CollectionsTest extends UnitSpec {
 		m_map1 -= ("ltr 2")
 		assertResult(false, "remove") { m_map1.contains("ltr 2") }
 	}
-    
+
     it should "test priorqs" in {
 		// collection.mutable
 		var floats2 = floats.map(identity)
@@ -133,12 +133,12 @@ class CollectionsTest extends UnitSpec {
 		}
 		floats2 = floats.sorted
 		assertResult(floats2.length, "length") { pri_q1.size }
-		assertResult(true, "peek") { Util.in_epsilon(epsilon, floats2(0), 
+		assertResult(true, "peek") { Util.in_epsilon(epsilon, floats2(0),
 			pri_q1.headOption.getOrElse(0.0f): Float) }
 		assertResult(true, "peek (rev)") { Util.in_epsilon(epsilon,
             floats2(floats2.length - 1),
             pri_q2.headOption.getOrElse(0.0f): Float) }
-		assertResult(true, "poll") { Util.in_epsilon(epsilon, floats2(0), 
+		assertResult(true, "poll") { Util.in_epsilon(epsilon, floats2(0),
             pri_q1.dequeue) }
 		assertResult(true, "poll (rev)") { Util.in_epsilon(epsilon,
             floats2(floats2.length - 1), pri_q2.dequeue) }
@@ -152,7 +152,7 @@ class CollectionsTest extends UnitSpec {
 		assertResult("[52.3, 0.1, 25.7, -0.5]", "toString (rev)")
 			{ pri_q2.mkString("[", ", ", "]") }
 	}
-    
+
     it should "test treemaps" in {
 		// collection.immutable
 		var tree1 = TreeMap[String, Character]()
@@ -169,7 +169,7 @@ class CollectionsTest extends UnitSpec {
 }
 
 object CollectionsTest {
-    
+
 }
 
 }

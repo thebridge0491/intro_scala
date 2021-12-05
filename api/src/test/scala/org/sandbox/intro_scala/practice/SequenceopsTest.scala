@@ -7,7 +7,8 @@ import scala.collection.JavaConverters._
 
 import org.sandbox.intro_scala.util.{Library => Util}
 import org.sandbox.intro_scala.practice.{Sequenceops => Seqops, 
-	SequenceopsArray => SeqopsArr}
+	SequenceopsArray => SeqopsArr, SequenceopsHiorder => SeqopsHi,
+	SequenceopsVariadic => SeqopsVar}
 
 class SequenceopsTest extends UnitSpec {
     //val tolerance = 2.0f * Float.MinPositiveValue
@@ -48,7 +49,8 @@ class SequenceopsTest extends UnitSpec {
 			val ansL2 = List.range(0, n).foldLeft(List[Int]())(
 				(a, e) => (e + 2) :: a).reverse
             List[((Int => Int), Int) => List[Int]](Seqops.tabulate_i, 
-                    Seqops.tabulate_r).foreach { f =>
+                Seqops.tabulate_r, SeqopsHi.tabulate_f, SeqopsHi.tabulate_u,
+                    SeqopsHi.tabulate_lc).foreach { f =>
                 assertResult(ansL1) { f(identity, n) }
 				assertResult(ansL2) { f((i => i + 2), n) } }
         }
@@ -60,8 +62,9 @@ class SequenceopsTest extends UnitSpec {
             Array[Array[Int] => Int](SeqopsArr.length_i, SeqopsArr.length_r).
                 foreach { f => assertResult(arr1.size) { f(arr1) } }
             val lst1 = List.range(0, n).map(e => e)
-            List[List[Int] => Int](Seqops.length_i, Seqops.length_r).
-                foreach { f => assertResult(lst1.size) { f(lst1) } }
+            List[List[Int] => Int](Seqops.length_i, Seqops.length_r,
+                    SeqopsHi.length_f, SeqopsHi.length_u).foreach { f =>
+                assertResult(lst1.size) { f(lst1) } }
         }
     }
     
@@ -72,7 +75,8 @@ class SequenceopsTest extends UnitSpec {
                     SeqopsArr.nth_r).foreach { f =>
                 assertResult(Some(arr(3))) { f(3, arr) } }
 			List[(Int, List[Integer]) => Option[Integer]](Seqops.nth_i,
-                    Seqops.nth_r).foreach { f => 
+                Seqops.nth_r, SeqopsHi.nth_f, SeqopsHi.nth_u, SeqopsHi.nth_lc
+                    ).foreach { f => 
                 assertResult(Some(lst(3))) { f(3, lst) } }
         }}
     }
@@ -104,7 +108,10 @@ class SequenceopsTest extends UnitSpec {
         List[((Integer, List[Integer], Comparator[Integer]) => Int,
             (Integer, List[Integer], Comparator[Integer]) => 
             Option[Integer])]((Seqops.indexOf_r, Seqops.find_r),
-                (Seqops.indexOf_i, Seqops.find_i)).foreach {
+                (Seqops.indexOf_i, Seqops.find_i),
+                (SeqopsHi.indexOf_f, SeqopsHi.find_f),
+                (SeqopsHi.indexOf_u, SeqopsHi.find_u),
+                (SeqopsHi.indexOf_lc, SeqopsHi.find_lc)).foreach {
                     fnI_fnF => fnI_fnF match { case (fnI, fnF) =>
             assertResult(3) { fnI(el, lst_ints, Util.intCmp) }
             assertResult(1) { fnI(el, lst_ints_rev, Util.intCmp) }
@@ -125,8 +132,10 @@ class SequenceopsTest extends UnitSpec {
                 assertResult(arr.max) { fnMax(arr) } }
             }
 			List[(List[Integer] => Integer, List[Integer] => Integer)](
-                    (Seqops.min_i[Integer], Seqops.max_i[Integer]),
-                    (Seqops.min_r[Integer], Seqops.max_r[Integer])).foreach {
+                (Seqops.min_i[Integer], Seqops.max_i[Integer]),
+                (Seqops.min_r[Integer], Seqops.max_r[Integer]),
+                (SeqopsHi.min_f[Integer], SeqopsHi.max_f[Integer]),
+                (SeqopsHi.min_u[Integer], SeqopsHi.max_u[Integer])).foreach {
                         fnMin_fnMax => fnMin_fnMax match {
                         case (fnMin, fnMax) =>
                 assertResult(lst.min) { fnMin(lst) }
@@ -152,12 +161,14 @@ class SequenceopsTest extends UnitSpec {
             assertResult(ints_rev) { f(ints) } }
         
         List[Buffer[Integer] => Unit](Seqops.reverse_mut_lp, 
-                Seqops.reverse_mut_i).foreach { f =>
+            Seqops.reverse_mut_i, SeqopsHi.reverse_mut_f,
+                SeqopsHi.reverse_mut_u).foreach { f =>
             val tmp = lst_ints.map(identity).toBuffer
         	f(tmp)
         	assertResult(lst_ints_rev) { tmp } }
         List[List[Integer] => List[Integer]](Seqops.reverse_r, 
-                Seqops.reverse_i).foreach { f =>
+            Seqops.reverse_i, SeqopsHi.reverse_f, SeqopsHi.reverse_u
+                ).foreach { f =>
             assertResult(lst_ints_rev) { f(lst_ints) } }
 	}
     
@@ -168,7 +179,8 @@ class SequenceopsTest extends UnitSpec {
                     SeqopsArr.copyOf_r).foreach { f => 
                 assertResult(true) { arr sameElements f(arr) } }
 			List[List[Integer] => List[Integer]](Seqops.copyOf_i,
-                    Seqops.copyOf_r).foreach { f => 
+                Seqops.copyOf_r, SeqopsHi.copyOf_f, SeqopsHi.copyOf_u, 
+                    SeqopsHi.copyOf_lc).foreach { f => 
                 assertResult(lst) { f(lst) } }
         }}
     }
@@ -186,7 +198,10 @@ class SequenceopsTest extends UnitSpec {
 			}
 			List[((Int, List[Integer]) => List[Integer],
                 (Int, List[Integer]) => List[Integer])](
-                    (Seqops.take_i[Integer], Seqops.drop_i[Integer])).
+                (Seqops.take_i[Integer], Seqops.drop_i[Integer]),
+                (SeqopsHi.take_f[Integer], SeqopsHi.drop_f[Integer]),
+                (SeqopsHi.take_u[Integer], SeqopsHi.drop_u[Integer]),
+                (SeqopsHi.take_lc[Integer], SeqopsHi.drop_lc[Integer])).
                         foreach { fnTake_fnDrop => fnTake_fnDrop match {
                         case (fnTake, fnDrop) =>
                 assertResult(lst.take(3)) { fnTake(3, lst) }
@@ -227,8 +242,10 @@ class SequenceopsTest extends UnitSpec {
 		val lst4 = List(List[Int](1, 2), List[Int](5), List[Int](3, 4))
         List[(((Int => Boolean), List[Int]) => Boolean, 
             ((Int => Boolean), List[Int]) => Boolean)](
-                (Seqops.exists_i, Seqops.forall_i),
-                (Seqops.exists_r, Seqops.forall_r)).foreach { 
+            (Seqops.exists_i, Seqops.forall_i),
+            (Seqops.exists_r, Seqops.forall_r),
+            (SeqopsHi.exists_f, SeqopsHi.forall_f),
+            (SeqopsHi.exists_u, SeqopsHi.forall_u)).foreach { 
                     fnExists_fnForall => fnExists_fnForall match {
                     case (fnExists, fnForall) =>
             assertResult(lst1.exists(boolOp1)) { fnExists(boolOp1, lst1) }
@@ -236,8 +253,10 @@ class SequenceopsTest extends UnitSpec {
         }}
         List[(((List[Int] => Boolean), List[List[Int]]) => Boolean, 
             ((List[Int] => Boolean), List[List[Int]]) => Boolean)](
-                (Seqops.exists_i, Seqops.forall_i),
-                (Seqops.exists_r, Seqops.forall_r)).foreach {
+            (Seqops.exists_i, Seqops.forall_i),
+            (Seqops.exists_r, Seqops.forall_r),
+            (SeqopsHi.exists_f, SeqopsHi.forall_f),
+            (SeqopsHi.exists_u, SeqopsHi.forall_u)).foreach {
                     fnExists_fnForall => fnExists_fnForall match {
                     case (fnExists, fnForall) =>
             assertResult(lst2.forall(boolOp2)) { fnForall(boolOp2, lst2) }
@@ -253,7 +272,8 @@ class SequenceopsTest extends UnitSpec {
                     SeqopsArr.map_i, SeqopsArr.map_r).foreach { f =>
 				assertResult(true) { arr.map(proc1) sameElements f(proc1, arr) } }
 			List[((Integer => Integer), List[Integer]) => List[Integer]](
-                    Seqops.map_i, Seqops.map_r).foreach { f =>
+                Seqops.map_i, Seqops.map_r, SeqopsHi.map_f, SeqopsHi.map_u
+                    ).foreach { f =>
 				assertResult(lst.map(proc1)) { f(proc1, lst) } }
 		}}
     }
@@ -266,7 +286,8 @@ class SequenceopsTest extends UnitSpec {
                     SeqopsArr.foreach_i, SeqopsArr.foreach_r).foreach { f =>
 				assertResult(arr.foreach(proc1)) { f(proc1, arr) } }
 			List[((Integer => Unit), List[Integer]) => Unit](Seqops.foreach_i,
-                    Seqops.foreach_r).foreach { f => 
+                Seqops.foreach_r, SeqopsHi.foreach_f, SeqopsHi.foreach_u
+                    ).foreach { f => 
 				assertResult(lst.foreach(proc1)) { f(proc1, lst) } }
 		}}
     } 
@@ -288,8 +309,10 @@ class SequenceopsTest extends UnitSpec {
             }
 			List[(((Integer => Boolean), List[Integer]) => List[Integer], 
 				((Integer => Boolean), List[Integer]) => List[Integer])](
-                    (Seqops.filter_i, Seqops.remove_i),
-                    (Seqops.filter_r, Seqops.remove_r)).foreach { 
+                (Seqops.filter_i, Seqops.remove_i),
+                (Seqops.filter_r, Seqops.remove_r),
+                (SeqopsHi.filter_f, SeqopsHi.remove_f),
+                (SeqopsHi.filter_u, SeqopsHi.remove_u)).foreach { 
                         fnFilter_fnRemove => fnFilter_fnRemove match {
                         case (fnFilter, fnRemove) =>
                 assertResult(lst.filter(boolOp1)) { fnFilter(boolOp1, lst) }
@@ -398,7 +421,8 @@ class SequenceopsTest extends UnitSpec {
 		val lst_ints1 = Buffer[Integer](9, 9, 9, 0, 3, 4)
 		val lst_ints2 = Buffer[Integer](4, 0, 9, 9, 9, 3)
 		List[(Iterable[Integer], Boolean) => Boolean](Seqops.isOrdered_i,
-                Seqops.isOrdered_r).foreach { f =>
+            Seqops.isOrdered_r, SeqopsHi.isOrdered_f, SeqopsHi.isOrdered_u,
+                SeqopsHi.isOrdered_lc).foreach { f =>
 			assertResult(verifyfn[Integer]((_ <= _), lst_ints)) {
 				f(lst_ints, false) }
 			assertResult(verifyfn[Integer]((_ >= _), lst_ints_rev)) { 
@@ -422,7 +446,8 @@ class SequenceopsTest extends UnitSpec {
 				assertResult(true) {
                     (arr ++ nines) sameElements f(arr, nines) } }
 			List[(List[Integer], List[Integer]) => List[Integer]](
-                    Seqops.append_i, Seqops.append_r).foreach { f => 
+                Seqops.append_i, Seqops.append_r, SeqopsHi.append_f,
+                    SeqopsHi.append_u).foreach { f => 
 				assertResult(lst ++ lst_nines) { f(lst, lst_nines) } }
 		}}
     }
@@ -437,7 +462,8 @@ class SequenceopsTest extends UnitSpec {
         val lst_nines = List[Integer](9, 9, 9, 9)
 		val ansL = List[Integer](0, 9, 1, 9, 2, 9, 3, 9, 4)
 		List[(List[Integer], List[Integer]) => List[Integer]](
-                Seqops.interleave_i, Seqops.interleave_r).foreach { f =>
+            Seqops.interleave_i, Seqops.interleave_r, SeqopsHi.interleave_f,
+                SeqopsHi.interleave_u, SeqopsHi.interleave_lc).foreach { f =>
 			assertResult(ansL) { f(lst_ints, lst_nines) } }
     } 
     
@@ -452,8 +478,9 @@ class SequenceopsTest extends UnitSpec {
                     e1_e2._1 + e1_e2._2 + 2)) sameElements
                     f(proc1, arr, arr) } }
 			List[((Integer, Integer) => Integer, List[Integer],
-                List[Integer]) => List[Integer]](Seqops.map2_i,
-                    Seqops.map2_r).foreach { f =>
+                List[Integer]) => List[Integer]](Seqops.map2_i, Seqops.map2_r,
+                SeqopsHi.map2_f, SeqopsHi.map2_u, SeqopsHi.map2_lc).
+                    foreach { f =>
                 assertResult(lst.zip(lst).map((e1_e2 => 
                     e1_e2._1 + e1_e2._2 + 2))) { f(proc1, lst, lst) } }
 		}}
@@ -466,7 +493,8 @@ class SequenceopsTest extends UnitSpec {
                     SeqopsArr.zip_i, SeqopsArr.zip_r).foreach { f => 
 				assertResult(true) { arr.zip(arr) sameElements f(arr, arr) } }
 			List[(List[Integer], List[Integer]) => List[(Integer, Integer)]](
-                    Seqops.zip_i, Seqops.zip_r).foreach { f => 
+                Seqops.zip_i, Seqops.zip_r, SeqopsHi.zip_f, SeqopsHi.zip_u,
+                    SeqopsHi.zip_lc).foreach { f => 
                 assertResult(lst.zip(lst)) { f(lst, lst) } }
 		}}
     } 
@@ -479,7 +507,8 @@ class SequenceopsTest extends UnitSpec {
 			assertResult(true) { arrs1.unzip._1 sameElements f(arrs1)._1 }
 			assertResult(true) { arrs1.unzip._2 sameElements f(arrs1)._2 } }
 		List[List[(Integer, Integer)] => (List[Integer], List[Integer])](
-				Seqops.unzip_i).foreach { f => 
+            Seqops.unzip_i, SeqopsHi.unzip_f, SeqopsHi.unzip_u).foreach { 
+                f => 
 			assertResult(nlst1.unzip._1) { f(nlst1)._1 }
 			assertResult(nlst1.unzip._2) { f(nlst1)._2 } }
     } 
@@ -492,10 +521,155 @@ class SequenceopsTest extends UnitSpec {
 			assertResult(true) {
                 Array.concat(arrs1: _*) sameElements f(arrs1) } }
 		List[List[List[Integer]] => List[Integer]](Seqops.concat_i,
-                Seqops.concat_r).foreach { f => 
+            Seqops.concat_r, SeqopsHi.concat_f, SeqopsHi.concat_u).foreach {
+                f => 
 			assertResult(List.concat(nlst1: _*)) { 
 				f(List(lst_ints, lst_ints_rev)) } }
-    } 
+    }
+    
+    def zipVar[T, U](xss: List[T]*): List[U] = {
+        def tupOfHeads[T](items: List[T]): Product with Serializable =
+                items match {
+            //case Nil => List[T]()
+            case List(a) => Tuple1[T](a) //.asInstanceOf[Tuple1[T]]
+            case List(a, b) => Tuple2[T, T](a, b)
+            case List(a, b, c) => Tuple3[T, T, T](a, b, c)
+            case List(a, b, c, d) => Tuple4[T, T, T, T](a, b, c, d)
+            case List(a, b, c, d, e) => Tuple5[T, T, T, T, T](a, b, c, d, e)
+            case List(a, b, c, d, e, f) => 
+                Tuple6[T, T, T, T, T, T](a, b, c, d, e, f)
+            case _ => 
+                throw new NotImplementedError("not implemented beyond Tuple6")
+        }
+        xss.exists(e => Nil == e) match {
+            case true => List[U]()
+            case _ =>
+                def iter(rst: Seq[List[T]], acc: List[U]): List[U] =
+                        rst.exists(e => Nil == e) match {
+                    case true => acc.reverse
+                    case _ => iter(rst.map(e => e.tail), 
+                        tupOfHeads(rst.map(e => e.head).toList).asInstanceOf[U] :: acc)
+                }
+                iter(xss, List[U]())
+        }
+	}
+    
+    it should "variadic condition exists|forall items" in {
+		def predAny(els: List[Int]*): Boolean = els.exists(e => Nil == e)
+		def predAll(els: List[Int]*): Boolean = els.forall(e => !e.isEmpty)
+		val lstAny = List(List(List(), List(0, 1, 2)),
+            List(List(9), List(11)))
+		val lstAll = List(List(List(3), List(33)), List(List(55), List(5)))
+        val ansAny = lstAny.exists(xs => predAny(xs: _*))
+        val ansAll = lstAll.forall(xs => predAll(xs: _*))
+        List[(((Seq[List[Int]] => Boolean), List[List[Int]]*) => Boolean,
+            ((Seq[List[Int]] => Boolean), List[List[Int]]*) => Boolean)](
+			(SeqopsVar.exists_iv, SeqopsVar.forall_iv),
+			(SeqopsVar.exists_rv, SeqopsVar.forall_rv),
+			(SeqopsVar.exists_fv, SeqopsVar.forall_fv),
+			(SeqopsVar.exists_uv, SeqopsVar.forall_uv)).foreach { 
+                fnExists_fnForall => fnExists_fnForall match {
+                case (fnExists, fnForall) =>
+            assertResult(ansAny) { fnExists(predAny, lstAny) }
+            assertResult(ansAll) { fnExists(predAll, lstAll) }
+        }}
+    }
+    
+    it should "variadic map proc on elems" in {
+		def proc2(els: Int*): Seq[Int] = els.map(e => e + 2)
+		def proc3(els: Int*): Seq[Int] = Seq(els.product)
+		val lst2 = List(List(0, 1, 5), List(2, 3))
+		val lst3 = List(List(0, 1), List(2, 3), List(4, 5, 6))
+        val ans2 = zipVar[Int, (Int, Int)](lst2: _*).foldRight(List[List[Int]]())(
+            (els, acc) => proc2(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]] :: acc)
+        val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldRight(List[List[Int]]())(
+            (els, acc) => proc3(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]] :: acc)
+		List[((Seq[Int] => Seq[Int]), List[Int]*) => List[Seq[Int]]](
+			SeqopsVar.map_iv, SeqopsVar.map_rv, SeqopsVar.map_fv,
+                SeqopsVar.map_uv).foreach { f =>
+            assertResult(ans2) { f(proc2, lst2: _*) }
+            assertResult(ans3) { f(proc3, lst3: _*) }
+		}
+    }
+    
+    it should "variadic foreach elem" in {
+		def proc2(els: Int*): Unit = 
+            Console.err.println(els.mkString("[", ", ", "]"))
+		def proc3(els: Int*): Unit = 
+            Console.err.println(els.mkString("[", ", ", "]"))
+		val lst2 = List(List(0, 1, 5), List(2, 3))
+		val lst3 = List(List(0, 1), List(2, 3), List(4, 5, 6))
+        val ans2 = zipVar[Int, (Int, Int)](lst2: _*).foldLeft(())(
+            (_, els) => proc2(els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldLeft(())(
+            (_, els) => proc3(els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+		List[((Seq[Int] => Unit), List[Int]*) => Unit](SeqopsVar.foreach_iv,
+            SeqopsVar.foreach_rv, SeqopsVar.foreach_fv, SeqopsVar.foreach_uv
+                ).foreach { f =>
+            assertResult(ans2) { f(proc2, lst2: _*) }
+            assertResult(ans3) { f(proc3, lst3: _*) }
+		}
+    }
+    
+    it should "variadic fold left over sequences" in {
+		def corp2(acc: Int, els: Int*): Int = acc + els.sum
+		def corp3(acc: Int, els: Int*): Int = acc - els.sum
+		val lst2 = List(List(0, 1, 2), List(2, 3))
+		val lst3 = List(List(0, 1, 2), List(2, 3), List(3, 4))
+        val ans2 = zipVar[Int, (Int, Int)](lst2: _*).foldLeft(0)(
+            (acc, els) => corp2(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldLeft(0)(
+            (acc, els) => corp3(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+		List[(((Int, Seq[Int]) => Int), Int, List[Int]*) => Int](
+                SeqopsVar.foldLeft_iv, SeqopsVar.foldLeft_rv).foreach { f =>
+            assertResult(ans2) { f(corp2, 0, lst2: _*) }
+            assertResult(ans3) { f(corp3, 0, lst3: _*) }
+		}
+    }
+    
+    it should "variadic fold right over sequences" in {
+		def proc2(acc: Int, els: Int*): Int = els.sum + acc
+		def proc3(acc: Int, els: Int*): Int = els.sum - acc
+		val lst2 = List(List(0, 1, 2), List(2, 3))
+		val lst3 = List(List(0, 1, 2), List(2, 3), List(3, 4))
+        val ans2 = zipVar[Int, (Int, Int)](lst2: _*).foldRight(0)(
+            (els, acc) => proc2(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldRight(0)(
+            (els, acc) => proc3(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+		List[(((Int, Seq[Int]) => Int), Int, List[Int]*) => Int](
+                SeqopsVar.foldRight_rv, SeqopsVar.foldRight_iv).foreach { f =>
+            assertResult(ans2) { f(proc2, 0, lst2: _*) }
+            assertResult(ans3) { f(proc3, 0, lst3: _*) }
+		}
+    }
+    
+    it should "variadic append sequences" in {
+		val lst1 = List(List(1), List(2, 3), List(4))
+		val lst2 = List(List(1), List(2, 3), List(4), List(5, 6))
+        val (ans1, ans2) = (List.concat(lst1: _*), List.concat(lst2: _*))
+		List[(List[Int]*) => List[Int]](SeqopsVar.append_iv,
+            SeqopsVar.append_rv, SeqopsVar.append_fv, SeqopsVar.append_uv
+                ).foreach { f =>
+            assertResult(ans1) { f(lst1: _*) }
+            assertResult(ans2) { f(lst2: _*) }
+		}
+    }
+    
+    it should "variadic zip sequences" in {
+		val lst3 = List(List(0, 1, 2), List(20, 30), List(97, 98))
+		val lst4 = List(List(0, 1, 2), List(20, 30), List(97, 98), 
+			List(149, 148))
+        val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldRight(List[List[Int]]())(
+            (els, acc) => els.productIterator.toList.asInstanceOf[List[Int]] :: acc)
+        val ans4 = zipVar[Int, (Int, Int, Int, Int)](lst4: _*).foldRight(List[List[Int]]())(
+            (els, acc) => els.productIterator.toList.asInstanceOf[List[Int]] :: acc)
+		List[(List[Int]*) => List[List[Int]]](SeqopsVar.zip_iv,
+            SeqopsVar.zip_rv, SeqopsVar.zip_fv, SeqopsVar.zip_uv).foreach {
+                f =>
+            assertResult(ans3) { f(lst3: _*) }
+            assertResult(ans4) { f(lst4: _*) }
+		}
+    }
 }
 
 object SequenceopsTest {

@@ -116,7 +116,7 @@ object Classic {
 	
 	def rem_m(n: Int, d: Int): Int = quot_rem(n, d)._2
 	
-	private def euclid_i(m: Int, n: Int): Int = {
+	def euclid_i(m: Int, n: Int): Int = {
 		def iter(a: Int, b: Int): Int = b match {
 			case 0 => math.abs(a)
 			case _ => iter(b, a % b)
@@ -124,7 +124,7 @@ object Classic {
 		iter(m, n)
 	}
 	
-	private def euclid_r(m: Int, n: Int): Int = n match {
+	def euclid_r(m: Int, n: Int): Int = n match {
 		case 0 => math.abs(m)
 		case _ => euclid_r(n, m % n)
 	}

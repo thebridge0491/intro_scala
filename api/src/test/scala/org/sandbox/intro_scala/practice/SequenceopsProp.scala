@@ -8,7 +8,8 @@ import scala.collection.mutable.Buffer
 
 import org.sandbox.intro_scala.util.{Library => Util}
 import org.sandbox.intro_scala.practice.{Sequenceops => Seqops, 
-	SequenceopsArray => SeqopsArr}
+	SequenceopsArray => SeqopsArr, SequenceopsHiorder => SeqopsHi,
+	SequenceopsVariadic => SeqopsVar}
 
 class SequenceopsProp extends UnitPropSpec {
 	import scala.language.implicitConversions
@@ -53,6 +54,11 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
 		elems <- Gen.containerOfN[List, Integer](numElems, gen0)
 	} yield elems
     
+    def genNListInts(outerNum: Int) = for {
+        innerNum <- Gen.choose(1, 10)
+        innerElems <- Gen.containerOfN[List, Int](innerNum, Gen.choose(0, 100))
+        outerElems <- Gen.containerOfN[List, List[Int]](outerNum, innerElems)
+    } yield outerElems
     
     // scalacheck-style property define
     property("tabulate sequence") = forAll(Gen.choose(0, 18)) { n =>
@@ -64,7 +70,8 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val ansL = List.range(0, n).foldLeft(List[Int]())(
             (a, e) => func1(e) :: a).reverse
         val funcsL = List[(Int => Int, Int) => List[Int]](
-            Seqops.tabulate_i, Seqops.tabulate_r)
+            Seqops.tabulate_i, Seqops.tabulate_r, SeqopsHi.tabulate_f, 
+            SeqopsHi.tabulate_u, SeqopsHi.tabulate_lc)
         
         (funcsA.foldLeft(true) { (acc, f) => acc && 
             (ansA sameElements f(func1, n)) }).
@@ -81,7 +88,7 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val funcsA = Array[Array[Integer] => Int](SeqopsArr.length_i,
             SeqopsArr.length_r)
         val funcsL = List[List[Integer] => Int](Seqops.length_i,
-            Seqops.length_r)
+            Seqops.length_r, SeqopsHi.length_f, SeqopsHi.length_u)
         
         (funcsA.foldLeft(true) { (acc, f) => acc && (arr.size == f(arr)) }).
             label("===propLengthA(%s) : %d===".format(
@@ -97,7 +104,8 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val funcsA = Array[(Int, Array[Integer]) => Option[Integer]](
             SeqopsArr.nth_i, SeqopsArr.nth_r)
         val funcsL = List[(Int, List[Integer]) => Option[Integer]](
-            Seqops.nth_i, Seqops.nth_r)
+            Seqops.nth_i, Seqops.nth_r, SeqopsHi.nth_f, SeqopsHi.nth_u,
+            SeqopsHi.nth_lc)
         
         (funcsA.foldLeft(true) { (acc, f) => acc && 
             (Some(arr(n)) == f(n, arr)) }).
@@ -122,7 +130,10 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val funcsL = List[((Integer, List[Integer], Comparator[Integer]) =>
                 Int, (Integer, List[Integer], Comparator[Integer]) => 
                 Option[Integer])]((Seqops.indexOf_r, Seqops.find_r),
-            (Seqops.indexOf_i, Seqops.find_i))
+            (Seqops.indexOf_i, Seqops.find_i),
+            (SeqopsHi.indexOf_f, SeqopsHi.find_f),
+            (SeqopsHi.indexOf_u, SeqopsHi.find_u),
+            (SeqopsHi.indexOf_lc, SeqopsHi.find_lc))
         
         (ansIA == Sequenceops_java.indexOf_lp[Integer](el, arr,
             Util.intCmp)).label(
@@ -154,7 +165,9 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val funcsL = List[(List[Integer] => Integer, List[Integer] => 
                 Integer)](
             (Seqops.min_i[Integer], Seqops.max_i[Integer]),
-            (Seqops.min_r[Integer], Seqops.max_r[Integer]))
+            (Seqops.min_r[Integer], Seqops.max_r[Integer]),
+            (SeqopsHi.min_f[Integer], SeqopsHi.max_f[Integer]),
+            (SeqopsHi.min_u[Integer], SeqopsHi.max_u[Integer]))
         
         (funcsA.foldLeft(true) { (acc, fnMin_fnMax) => 
                 (acc, fnMin_fnMax) match { case (acc, (fnMin, fnMax)) =>
@@ -178,11 +191,13 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val funcsMutA = Array[(Array[Integer]) => Unit](
             SeqopsArr.reverse_mut_lp, SeqopsArr.reverse_mut_i)
         val funcsMutL = List[(Buffer[Integer]) => Unit](
-            Seqops.reverse_mut_lp, Seqops.reverse_mut_i)
+            Seqops.reverse_mut_lp, Seqops.reverse_mut_i,
+            SeqopsHi.reverse_mut_f, SeqopsHi.reverse_mut_u)
         val funcsImmA = Array[Array[Integer] => Array[Integer]](
             SeqopsArr.reverse_r, SeqopsArr.reverse_i)
         val funcsImmL = List[List[Integer] => List[Integer]](
-            Seqops.reverse_r, Seqops.reverse_i)
+            Seqops.reverse_r, Seqops.reverse_i, SeqopsHi.reverse_f,
+            SeqopsHi.reverse_u)
         
         ({ mutCopyA = arr.map(identity) ; 
             Sequenceops_java.reverse_lp[Integer](mutCopyA) ;
@@ -225,7 +240,8 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val funcsA = Array[(Array[Integer]) => Array[Integer]](
             SeqopsArr.copyOf_i, SeqopsArr.copyOf_r)
         val funcsL = List[List[Integer] => List[Integer]](Seqops.copyOf_i,
-            Seqops.copyOf_r)
+            Seqops.copyOf_r, SeqopsHi.copyOf_f, SeqopsHi.copyOf_u, 
+            SeqopsHi.copyOf_lc)
         
         (funcsA.foldLeft(true) { (acc, f) => acc && 
             (ansA sameElements f(arr)) }).
@@ -246,7 +262,10 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
             (SeqopsArr.take_i[Integer], SeqopsArr.drop_i[Integer]))
         val funcsL = List[((Int, List[Integer]) => List[Integer],
                 (Int, List[Integer]) => List[Integer])](
-            (Seqops.take_i[Integer], Seqops.drop_i[Integer]))
+            (Seqops.take_i[Integer], Seqops.drop_i[Integer]),
+            (SeqopsHi.take_f[Integer], SeqopsHi.drop_f[Integer]),
+            (SeqopsHi.take_u[Integer], SeqopsHi.drop_u[Integer]),
+            (SeqopsHi.take_lc[Integer], SeqopsHi.drop_lc[Integer]))
         
         (funcsA.foldLeft(true) { (acc, fnTake_fnDrop) => 
                 (acc, fnTake_fnDrop) match { case (acc, (fnTake, fnDrop)) =>
@@ -276,7 +295,9 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val funcsL = List[(((Integer => Boolean), List[Integer]) => Boolean, 
                 ((Integer => Boolean), List[Integer]) => Boolean)](
             (Seqops.exists_i, Seqops.forall_i),
-            (Seqops.exists_r, Seqops.forall_r))
+            (Seqops.exists_r, Seqops.forall_r),
+            (SeqopsHi.exists_f, SeqopsHi.forall_f),
+            (SeqopsHi.exists_u, SeqopsHi.forall_u))
         
         (funcsA.foldLeft(true) { (acc, fnExists_fnForall) => 
                 (acc, fnExists_fnForall) match { 
@@ -299,9 +320,10 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val (proc1, arr) = (((n: Integer) => n + 2 : Integer), xs.toArray)
         val (ansA, ansL) = (arr.map(proc1), xs.map(proc1))
         val funcsA = Array[((Integer => Integer), Array[Integer]) => 
-                Array[Integer]](SeqopsArr.map_i, SeqopsArr.map_r)
+            Array[Integer]](SeqopsArr.map_i, SeqopsArr.map_r)
         val funcsL = List[((Integer => Integer), List[Integer]) => 
-                List[Integer]](Seqops.map_i, Seqops.map_r)
+            List[Integer]](Seqops.map_i, Seqops.map_r, SeqopsHi.map_f,
+            SeqopsHi.map_u)
         
         (funcsA.foldLeft(true) { (acc, f) => acc && 
             (ansA sameElements f(proc1, arr)) }).label(
@@ -322,7 +344,8 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val funcsA = Array[((Integer => Unit), Array[Integer]) => Unit](
             SeqopsArr.foreach_i, SeqopsArr.foreach_r)
         val funcsL = List[((Integer => Unit), List[Integer]) => Unit](
-            Seqops.foreach_i, Seqops.foreach_r)
+            Seqops.foreach_i, Seqops.foreach_r, SeqopsHi.foreach_f,
+            SeqopsHi.foreach_u)
         
         (funcsA.foldLeft(true) { (acc, f) => acc && 
             (ansA.getClass == f(proc1, arr).getClass) }).label(
@@ -348,7 +371,9 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
                 List[Integer], ((Integer => Boolean), List[Integer]) => 
                 List[Integer])](
             (Seqops.filter_i, Seqops.remove_i),
-            (Seqops.filter_r, Seqops.remove_r))
+            (Seqops.filter_r, Seqops.remove_r),
+            (SeqopsHi.filter_f, SeqopsHi.remove_f),
+            (SeqopsHi.filter_u, SeqopsHi.remove_u))
         
         (funcsA.foldLeft(true) { (acc, fnFilter_fnRemove) => 
                 (acc, fnFilter_fnRemove) match { 
@@ -497,7 +522,8 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val funcsA = Array[(Array[Integer], Boolean) => Boolean](
             SeqopsArr.isOrdered_i, SeqopsArr.isOrdered_r)
         val funcsL = List[(Iterable[Integer], Boolean) => Boolean](
-            Seqops.isOrdered_i, Seqops.isOrdered_r)
+            Seqops.isOrdered_i, Seqops.isOrdered_r, SeqopsHi.isOrdered_f,
+            SeqopsHi.isOrdered_u, SeqopsHi.isOrdered_lc)
         
         (funcsA.foldLeft(true) { (acc, f) => acc && (ansA == f(arr, false)) &&
             ansSortedA && f(tmpA, false) }).
@@ -517,7 +543,8 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val funcsA = Array[(Array[Integer], Array[Integer]) =>
                 Array[Integer]](SeqopsArr.append_i, SeqopsArr.append_r)
         val funcsL = List[(List[Integer], List[Integer]) => List[Integer]](
-            Seqops.append_i, Seqops.append_r)
+            Seqops.append_i, Seqops.append_r, SeqopsHi.append_f,
+            SeqopsHi.append_u)
         
         (funcsA.foldLeft(true) { (acc, f) => acc && 
             (ansA sameElements f(arr1, arr2)) }).label(
@@ -547,7 +574,8 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val funcsA = Array[(Array[Integer], Array[Integer]) =>
             Array[Integer]](SeqopsArr.interleave_i, SeqopsArr.interleave_r)
         val funcsL = List[(List[Integer], List[Integer]) => List[Integer]](
-            Seqops.interleave_i, Seqops.interleave_r)
+            Seqops.interleave_i, Seqops.interleave_r, SeqopsHi.interleave_f,
+            SeqopsHi.interleave_u, SeqopsHi.interleave_lc)
         
         (funcsA.foldLeft(true) { (acc, f) => acc && 
             (ansA sameElements f(arr1, arr2)) }).label(
@@ -573,7 +601,8 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
                 Array[Integer]) => Array[Integer]](SeqopsArr.map2_i, 
             SeqopsArr.map2_r)
         val funcsL = List[((Integer, Integer) => Integer, List[Integer],
-            List[Integer]) => List[Integer]](Seqops.map2_i, Seqops.map2_r)
+            List[Integer]) => List[Integer]](Seqops.map2_i, Seqops.map2_r,
+                SeqopsHi.map2_f, SeqopsHi.map2_u, SeqopsHi.map2_lc)
         
         (funcsA.foldLeft(true) { (acc, f) => acc && 
             (ansA sameElements f(proc1, arr1, arr2)) }).label(
@@ -596,7 +625,8 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val funcsA = Array[(Array[Integer], Array[Integer]) => 
             Array[(Integer, Integer)]](SeqopsArr.zip_i, SeqopsArr.zip_r)
         val funcsL = List[(List[Integer], List[Integer]) => 
-            List[(Integer, Integer)]](Seqops.zip_i, Seqops.zip_r)
+            List[(Integer, Integer)]](Seqops.zip_i, Seqops.zip_r,
+                SeqopsHi.zip_f, SeqopsHi.zip_u, SeqopsHi.zip_lc)
         
         (funcsA.foldLeft(true) { (acc, f) => acc && 
             (ansA sameElements f(arr1, arr2)) }).label(
@@ -623,7 +653,7 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val funcsA = Array[Array[(Int, Int)] => (Array[Int], Array[Int])](
             SeqopsArr.unzip_i)
         val funcsL = List[List[(Int, Int)] => (List[Int], List[Int])](
-            Seqops.unzip_i)
+            Seqops.unzip_i, SeqopsHi.unzip_f, SeqopsHi.unzip_u)
         
         (funcsA.foldLeft(true) { (acc, f) => acc && 
             (ansA._1 sameElements f(arr)._1) && 
@@ -651,8 +681,8 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
         val (ansL, ansA) = (List.concat(nss: _*), Array.concat(arrs: _*))
         val funcsA = Array[Array[Array[Int]] => Array[Int]](
             SeqopsArr.concat_i, SeqopsArr.concat_r)
-        val funcsL = List[List[List[Int]] => List[Int]](
-            Seqops.concat_i, Seqops.concat_r)
+        val funcsL = List[List[List[Int]] => List[Int]](Seqops.concat_i,
+            Seqops.concat_r, SeqopsHi.concat_f, SeqopsHi.concat_u)
         
         (funcsA.foldLeft(true) { (acc, f) => acc && 
             (ansA sameElements f(arrs)) }).label(
@@ -662,6 +692,168 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
             (ansL == f(nss)) }).label(
             "===propConcatL(%s) : %s===".format(
             nss.mkString("[", ", ", "]"), ansL.mkString("[", ", ", "]")))
+    }
+    
+    def zipVar[T, U](xss: List[T]*): List[U] = {
+        def tupOfHeads[T](items: List[T]): Product with Serializable =
+                items match {
+            //case Nil => List[T]()
+            case Nil => 
+                throw new NotImplementedError("not implemented Tuple0")
+            case List(a) => Tuple1[T](a) //.asInstanceOf[Tuple1[T]]
+            case List(a, b) => Tuple2[T, T](a, b)
+            case List(a, b, c) => Tuple3[T, T, T](a, b, c)
+            case List(a, b, c, d) => Tuple4[T, T, T, T](a, b, c, d)
+            case List(a, b, c, d, e) => Tuple5[T, T, T, T, T](a, b, c, d, e)
+            case List(a, b, c, d, e, f) => 
+                Tuple6[T, T, T, T, T, T](a, b, c, d, e, f)
+            case _ => 
+                throw new NotImplementedError("not implemented beyond Tuple6")
+        }
+        xss.exists(e => Nil == e) match {
+            case true => List[U]()
+            case _ =>
+                def iter(rst: Seq[List[T]], acc: List[U]): List[U] =
+                        rst.exists(e => Nil == e) match {
+                    case true => acc.reverse
+                    case _ => iter(rst.map(e => e.tail), 
+                        tupOfHeads(rst.map(e => e.head).toList).asInstanceOf[U] :: acc)
+                }
+                iter(xss, List[U]())
+        }
+	}
+    
+    property("variadic condition exists|forall items") = forAll(
+            genNListInts(5), genNListInts(2)) { 
+            (xss: List[List[Int]], yss: List[List[Int]]) =>
+        def predAny(els: List[Int]*): Boolean = els.exists(e => Nil == e)
+		def predAll(els: List[Int]*): Boolean = els.forall(e => !e.isEmpty)
+        val ansAny = List(xss, yss).exists(xs => predAny(xs: _*))
+        val ansAll = List(xss, yss).forall(xs => predAll(xs: _*))
+        val results = List[(((Seq[List[Int]] => Boolean), List[List[Int]]*) =>
+            Boolean, ((Seq[List[Int]] => Boolean), List[List[Int]]*) => 
+            Boolean)]((SeqopsVar.exists_iv, SeqopsVar.forall_iv),
+			(SeqopsVar.exists_rv, SeqopsVar.forall_rv),
+			(SeqopsVar.exists_fv, SeqopsVar.forall_fv),
+			(SeqopsVar.exists_uv, SeqopsVar.forall_uv)).map(
+                fnAny_fnAll => fnAny_fnAll match { case (fnAny, fnAll) => 
+                (fnAny(predAny, List(xss, yss)),
+                fnAll(predAll, List(xss, yss))) })
+        
+        (results.foldLeft(true) { (acc, resAny_resAll) => 
+                resAny_resAll match { case (resAny, resAll) =>
+            acc && (ansAny == resAny) && (ansAll == resAll) }}).label(
+            "===propExistsForallVar(%s) : %s %s===".format(
+            List(xss, yss).mkString("[", ", ", "]"), ansAny, ansAll))
+    }
+    
+    property("variadic map proc on elems") = forAll(genNListInts(2),
+            genNListInts(3)) {
+            (nss2: List[List[Int]], nss3: List[List[Int]]) =>
+        def proc2(els: Int*): Seq[Int] = els.map(e => e + 2)
+		def proc3(els: Int*): Seq[Int] = Seq(els.product)
+        val ans2 = zipVar[Int, (Int, Int)](nss2: _*).foldRight(List[List[Int]]())(
+            (els, acc) => proc2(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]] :: acc)
+        val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldRight(List[List[Int]]())(
+            (els, acc) => proc3(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]] :: acc)
+        val results = List[((Seq[Int] => Seq[Int]), List[Int]*) => 
+            List[Seq[Int]]](SeqopsVar.map_iv, SeqopsVar.map_rv,
+            SeqopsVar.map_fv, SeqopsVar.map_uv).map(f => 
+                (f(proc2, nss2: _*), f(proc3, nss3: _*)))
+        
+        (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
+                case (res2, res3) => acc && (ans2 == res2) &&
+            (ans3 == res3) }}).label("===propMapVar(%s) : %s===".format(
+            nss2.mkString("[", ", ", "]"), ans2.mkString("[", ", ", "]")))
+    }
+    
+    property("variadic foreach elem") = forAll(genNListInts(2),
+            genNListInts(3)) {
+            (nss2: List[List[Int]], nss3: List[List[Int]]) =>
+        def proc2(els: Int*): Unit = 
+            Console.err.println(els.mkString("[", ", ", "]"))
+		def proc3(els: Int*): Unit = 
+            Console.err.println(els.mkString("[", ", ", "]"))
+        val ans2 = zipVar[Int, (Int, Int)](nss2: _*).foldLeft(())(
+            (_, els) => proc2(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]])
+        val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldLeft(())(
+            (_, els) => proc3(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]])
+        val results = List[((Seq[Int] => Unit), List[Int]*) => Unit](
+            SeqopsVar.foreach_iv, SeqopsVar.foreach_rv, SeqopsVar.foreach_fv,
+            SeqopsVar.foreach_uv).map(f => 
+                (f(proc2, nss2: _*), f(proc3, nss3: _*)))
+        
+        (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
+                case (res2, res3) => acc && (ans2 == res2) &&
+            (ans3 == res3) }}).label("===propForeachVar(%s) : %s===".format(
+            nss2.mkString("[", ", ", "]"), ans2))
+    }
+    
+    property("variadic fold left over sequences") = forAll(genNListInts(2),
+            genNListInts(3)) {
+            (nss2: List[List[Int]], nss3: List[List[Int]]) =>
+        def corp2(acc: Int, els: Int*): Int = acc + els.sum
+		def corp3(acc: Int, els: Int*): Int = acc - els.sum
+        val ans2 = zipVar[Int, (Int, Int)](nss2: _*).foldLeft(0)(
+            (acc, els) => corp2(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldLeft(0)(
+            (acc, els) => corp3(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val results = List[(((Int, Seq[Int]) => Int), Int, List[Int]*) => 
+            Int](SeqopsVar.foldLeft_iv, SeqopsVar.foldLeft_rv).map(f => 
+                (f(corp2, 0, nss2: _*), f(corp3, 0, nss3: _*)))
+        
+        (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
+                case (res2, res3) => acc && (ans2 == res2) &&
+            (ans3 == res3) }}).label("===propFoldLeftVar(%s) : %s===".format(
+            nss2.mkString("[", ", ", "]"), ans2))
+    }
+    
+    property("variadic fold right over sequences") = forAll(genNListInts(2),
+            genNListInts(3)) {
+            (nss2: List[List[Int]], nss3: List[List[Int]]) =>
+        def proc2(acc: Int, els: Int*): Int = els.sum + acc
+		def proc3(acc: Int, els: Int*): Int = els.sum - acc
+        val ans2 = zipVar[Int, (Int, Int)](nss2: _*).foldRight(0)(
+            (els, acc) => proc2(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldRight(0)(
+            (els, acc) => proc3(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
+        val results = List[(((Int, Seq[Int]) => Int), Int, List[Int]*) => 
+            Int](SeqopsVar.foldRight_rv, SeqopsVar.foldRight_iv).map(f => 
+                (f(proc2, 0, nss2: _*), f(proc3, 0, nss3: _*)))
+        
+        (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
+                case (res2, res3) => acc && (ans2 == res2) &&
+            (ans3 == res3) }}).label("===propFoldRightVar(%s) : %s===".format(
+            nss2.mkString("[", ", ", "]"), ans2))
+    }
+    
+    property("variadic append sequences") = forAll(genNListInts(3)) {
+        (nss: List[List[Int]]) =>
+        val ans = List.concat(nss: _*)
+        val results = List[(List[Int]*) => List[Int]](SeqopsVar.append_iv,
+            SeqopsVar.append_rv, SeqopsVar.append_fv, SeqopsVar.append_uv
+            ).map(f => f(nss: _*))
+        
+        (results.foldLeft(true) { (acc, res) => acc && (ans == res) }).label(
+            "===propAppendVar(%s) : %s===".format(
+            nss.mkString("[", ", ", "]"), ans.mkString("[", ", ", "]")))
+    }
+    
+    property("variadic zip sequences") = forAll(genNListInts(2),
+            genNListInts(3)) {
+            (nss2: List[List[Int]], nss3: List[List[Int]]) =>
+        val ans2 = zipVar[Int, (Int, Int)](nss2: _*).foldRight(List[List[Int]]())(
+            (els, acc) => els.productIterator.toList.asInstanceOf[List[Int]] :: acc)
+        val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldRight(List[List[Int]]())(
+            (els, acc) => els.productIterator.toList.asInstanceOf[List[Int]] :: acc)
+        val results = List[(List[Int]*) => List[List[Int]]](SeqopsVar.zip_iv,
+            SeqopsVar.zip_rv, SeqopsVar.zip_fv, SeqopsVar.zip_uv).map(f => 
+                (f(nss2: _*), f(nss3: _*)))
+        
+        (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
+                case (res2, res3) => acc && (ans2 == res2) &&
+            (ans3 == res3) }}).label("===propZipVar(%s) : %s===".format(
+            nss3.mkString("[", ", ", "]"), ans2.mkString("[", ", ", "]")))
     }
 }
 

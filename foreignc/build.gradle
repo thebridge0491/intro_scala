@@ -137,7 +137,7 @@ tasks.withType(ScalaCompile) {
     options.compilerArgs += ['-g']    // << '-g' OR += ['-g']
     scalaCompileOptions.additionalParameters = ['-g:vars']
   } else {
-    scalaCompileOptions.additionalParameters = ['-optimise']
+    scalaCompileOptions.additionalParameters = ['-opt:l:method', '-opt:l:inline']
   }
   options.compilerArgs += ['-Xlint:all', '-deprecation']
   scalaCompileOptions.additionalParameters += ['-deprecation', '-unchecked',
@@ -290,4 +290,4 @@ task auxffi(type: Exec) { workingDir projectDir ; ignoreExitValue true
 	def make_cmd = System.env.OSTYPE.grep(~/^(?i)linux.*/) ? 'make' : 'gmake'
 	commandLine "${make_cmd} -B -f Makefile-auxffi.mk auxffi".split()
 }
-assemble.dependsOn auxffi
+//assemble.dependsOn auxffi

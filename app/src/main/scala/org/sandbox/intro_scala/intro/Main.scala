@@ -1,7 +1,7 @@
 package org.sandbox.intro_scala.intro {
 
 import scala.util._
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.Date
@@ -106,7 +106,7 @@ object Main {
         println("-" * 40)
         
         val ints = Array[Integer](2, 1, 0, 4, 3)
-        val lst = List[Integer](ints: _*)
+        val lst = List[Integer](ints.toSeq: _*)
         
         if (is_expt2) {
 		    printf("expt(2.0, %.1f) = %.1f\n", 
@@ -208,7 +208,7 @@ object Main {
 			}
         }
         //nextOption(optsMap, args.toList)
-        nextOption(optsMap, List[String](args: _*))
+        nextOption(optsMap, List[String](args.toSeq: _*))
     }
     
     def main(args: Array[String]): Unit = {

@@ -1,7 +1,7 @@
 package org.sandbox.intro_scala.util {
 
 import java.util.Comparator
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 /** DocComment:
  * Brief description. <p> */
@@ -58,7 +58,8 @@ object Library {
 			sep: String, stop: String, mapsep: String): String = {
 		val coll = new java.util.ArrayList[String]()
 
-		map1.asScala.foreach { case (k, v) => coll.add(k + mapsep + v) }
+		map1.asScala.foreach { case (k, v) => 
+			coll.add(k.toString + mapsep + v.toString) }
 		mkStringInit(coll, beg, sep, stop)
 	}
 

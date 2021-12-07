@@ -107,8 +107,10 @@ object CollectionsProp extends Properties("(props) Collections ops") {
             xsMap.mkString("[", ", ", "]"), xs.mkString("[", ", ", "]")))
     }
     
-    def isOrdered_i[T <% Ordered[T]](coll: Iterable[T],
-            isRev: Boolean = false): Boolean = {
+    //def isOrdered_i[T <% Ordered[T]](coll: Iterable[T],
+    //        isRev: Boolean = false): Boolean = {
+    def isOrdered_i[T](coll: Iterable[T],
+            isRev: Boolean = false)(implicit ev: T => Ordered[T]): Boolean = {
         def iter(acc: Boolean, rst: Iterable[T]): Boolean = rst match {
             case Nil | _ :: Nil => acc
             case x :: y :: ys => if (!isRev) iter(acc && x <= y, y :: ys) else iter(acc && x >= y, y :: ys)

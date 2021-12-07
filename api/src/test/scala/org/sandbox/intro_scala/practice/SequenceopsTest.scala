@@ -3,7 +3,7 @@ package org.sandbox.intro_scala.practice {
 //import org.scalatest._
 import java.util.Comparator
 import scala.collection.mutable.Buffer
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 import org.sandbox.intro_scala.util.{Library => Util}
 import org.sandbox.intro_scala.practice.{Sequenceops => Seqops, 
@@ -16,8 +16,8 @@ class SequenceopsTest extends UnitSpec {
     
     val (ints, ints_rev) = (Array[Integer](0, 1, 2, 3, 4),
     	Array[Integer](4, 3, 2, 1, 0))
-    val (lst_ints, lst_ints_rev) = (List[Integer](ints: _*),
-    	List[Integer](ints_rev: _*))
+    val (lst_ints, lst_ints_rev) = (List[Integer](ints.toSeq: _*),
+    	List[Integer](ints_rev.toSeq: _*))
     
     behavior of "Sequence ops test(s)"
     
@@ -519,7 +519,7 @@ class SequenceopsTest extends UnitSpec {
 		Array[Array[Array[Integer]] => Array[Integer]](SeqopsArr.concat_i,
                 SeqopsArr.concat_r).foreach { f => 
 			assertResult(true) {
-                Array.concat(arrs1: _*) sameElements f(arrs1) } }
+                Array.concat(arrs1.toSeq: _*) sameElements f(arrs1) } }
 		List[List[List[Integer]] => List[Integer]](Seqops.concat_i,
             Seqops.concat_r, SeqopsHi.concat_f, SeqopsHi.concat_u).foreach {
                 f => 

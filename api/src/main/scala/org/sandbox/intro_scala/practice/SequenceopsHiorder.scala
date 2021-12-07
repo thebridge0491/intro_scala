@@ -58,7 +58,8 @@ object SequenceopsHiorder {
 	def find_f[T](data: T, lst: List[T], cmp: Comparator[T]): Option[T] = 
 		index_find_f(0, data, lst, cmp)._2
 	
-	def min_max_f[T <% Ordered[T]](lst: List[T]): (T, T) = {
+	//def min_max_f[T <% Ordered[T]](lst: List[T]): (T, T) = {
+	def min_max_f[T](lst: List[T])(implicit ev: T => Ordered[T]): (T, T) = {
 		def corp(lo_hi: (T, T), e: T): (T, T) = 
 				(e < lo_hi._1, e > lo_hi._2) match {
 			case (true, _) => (e, lo_hi._2)
@@ -71,9 +72,13 @@ object SequenceopsHiorder {
 		}
 	}
 	
-	def min_f[T <% Ordered[T]](lst: List[T]): T = min_max_f(lst)._1
+	//def min_f[T <% Ordered[T]](lst: List[T]): T = min_max_f(lst)._1
+	def min_f[T](lst: List[T])(implicit ev: T => Ordered[T]): T = 
+		min_max_f(lst)._1
 	
-	def max_f[T <% Ordered[T]](lst: List[T]): T = min_max_f(lst)._2
+	//def max_f[T <% Ordered[T]](lst: List[T]): T = min_max_f(lst)._2
+	def max_f[T](lst: List[T])(implicit ev: T => Ordered[T]): T = 
+		min_max_f(lst)._2
 	
 	def reverse_f[T](lst: List[T]): List[T] = 
 		lst.foldLeft(List[T]())((a, e) => e :: a)
@@ -139,8 +144,10 @@ object SequenceopsHiorder {
 	def remove_f[T](pred: (T => Boolean), lst: List[T]): List[T] = 
 		partition_f(pred, lst)._2
     
-	def isOrdered_f[T <% Ordered[T]](coll: Iterable[T],
-            isRev: Boolean = false): Boolean = (isRev, coll.toList) match {
+	//def isOrdered_f[T <% Ordered[T]](coll: Iterable[T],
+    //        isRev: Boolean = false): Boolean = (isRev, coll.toList) match {
+	def isOrdered_f[T](coll: Iterable[T], isRev: Boolean = false
+            )(implicit ev: T => Ordered[T]): Boolean = (isRev, coll.toList) match {
 		case (_, Nil) => true
 		case (false, x :: xs) => 
 			xs.foldLeft((true, x))((acc_cur, e) => acc_cur match {
@@ -261,7 +268,9 @@ object SequenceopsHiorder {
 	def find_u[T](data: T, lst: List[T], cmp: Comparator[T]): 
 		Option[T] = index_find_u(0, data, lst, cmp)._2
 	
-	def min_max_u[T <% Ordered[T]](lst: List[T]): (T, T) = 
+	//def min_max_u[T <% Ordered[T]](lst: List[T]): (T, T) = 
+	//		lst match {
+	def min_max_u[T](lst: List[T])(implicit ev: T => Ordered[T]): (T, T) = 
 			lst match {
 		case Nil => throw new NoSuchElementException("empty list")
 		case x :: xs => 
@@ -283,9 +292,13 @@ object SequenceopsHiorder {
 				func, ((x, x), lst)).headOption).getOrElse((x, x))
 	}
 	
-	def min_u[T <% Ordered[T]](lst: List[T]): T = min_max_u(lst)._1
+	//def min_u[T <% Ordered[T]](lst: List[T]): T = min_max_u(lst)._1
+	def min_u[T](lst: List[T])(implicit ev: T => Ordered[T]): T = 
+		min_max_u(lst)._1
 	
-	def max_u[T <% Ordered[T]](lst: List[T]): T = min_max_u(lst)._2
+	//def max_u[T <% Ordered[T]](lst: List[T]): T = min_max_u(lst)._2
+	def max_u[T](lst: List[T])(implicit ev: T => Ordered[T]): T = 
+		min_max_u(lst)._2
 	
 	def reverse_u[T](lst: List[T]): List[T] = {
 		val func = (rst: List[T]) => rst match { 
@@ -391,8 +404,10 @@ object SequenceopsHiorder {
 	def remove_u[T](pred: (T => Boolean), lst: List[T]): List[T] = 
 		partition_u(pred, lst)._2
 	
-	def isOrdered_u[T <% Ordered[T]](coll: Iterable[T],
-            isRev: Boolean = false): Boolean = {
+	//def isOrdered_u[T <% Ordered[T]](coll: Iterable[T],
+    //        isRev: Boolean = false): Boolean = {
+	def isOrdered_u[T](coll: Iterable[T], isRev: Boolean = false
+            )(implicit ev: T => Ordered[T]): Boolean = {
 		val func = (acc_cur_rst: (Boolean, (T, List[T]))) => 
 				acc_cur_rst match { case (acc, cur_rst) => 
 			(isRev, acc, cur_rst) match {
@@ -505,8 +520,10 @@ object SequenceopsHiorder {
 		List.range(0, lst.size).zip(lst).filter(i_e => !(n > i_e._1)).map(
 			i_e => i_e._2)
 	
-	def isOrdered_lc[T <% Ordered[T]](coll: Iterable[T],
-            isRev: Boolean = false): Boolean = (isRev, coll.toList) match {
+	//def isOrdered_lc[T <% Ordered[T]](coll: Iterable[T],
+    //        isRev: Boolean = false): Boolean = (isRev, coll.toList) match {
+	def isOrdered_lc[T](coll: Iterable[T], isRev: Boolean = false
+            )(implicit ev: T => Ordered[T]): Boolean = (isRev, coll.toList) match {
 		case (_, Nil) => true
 		case (false, x :: xs) => (x :: xs).zip(xs).forall(
 			a_b => a_b._1 <= a_b._2)

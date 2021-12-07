@@ -97,7 +97,8 @@ object Sequenceops {
 	def find_r[T](data: T, lst: List[T], cmp: Comparator[T]): Option[T] = 
 		index_find_r(0, data, lst, cmp)._2
 	
-	def min_max_i[T <% Ordered[T]](lst: List[T]): (T, T) = lst match {
+	//def min_max_i[T <% Ordered[T]](lst: List[T]): (T, T) = lst match {
+	def min_max_i[T](lst: List[T])(implicit ev: T => Ordered[T]): (T, T) = lst match {
 		case Nil => throw new NoSuchElementException("empty list")
 		case x :: xs =>
 			def iter(lo: T, hi: T, rst: List[T]): (T, T) = rst match {
@@ -111,7 +112,8 @@ object Sequenceops {
 			iter(x, x, xs)
 	}
 	
-	def min_max_r[T <% Ordered[T]](lst: List[T]): (T, T) = {
+	//def min_max_r[T <% Ordered[T]](lst: List[T]): (T, T) = {
+	def min_max_r[T](lst: List[T])(implicit ev: T => Ordered[T]): (T, T) = {
 		def _helper(boolOp: ((T, T) => Boolean), rst: List[T]): T = 
 				rst match {
 			case Nil => throw new NoSuchElementException("empty list")
@@ -124,13 +126,21 @@ object Sequenceops {
 		(_helper((_ < _), lst), _helper((_ > _), lst))
 	}
 	
-	def min_i[T <% Ordered[T]](lst: List[T]): T = min_max_i(lst)._1
+	//def min_i[T <% Ordered[T]](lst: List[T]): T = min_max_i(lst)._1
+	def min_i[T](lst: List[T])(implicit ev: T => Ordered[T]): T = 
+		min_max_i(lst)._1
 	
-	def min_r[T <% Ordered[T]](lst: List[T]): T = min_max_r(lst)._1
+	//def min_r[T <% Ordered[T]](lst: List[T]): T = min_max_r(lst)._1
+	def min_r[T](lst: List[T])(implicit ev: T => Ordered[T]): T = 
+		min_max_r(lst)._1
 	
-	def max_i[T <% Ordered[T]](lst: List[T]): T = min_max_i(lst)._2
+	//def max_i[T <% Ordered[T]](lst: List[T]): T = min_max_i(lst)._2
+	def max_i[T](lst: List[T])(implicit ev: T => Ordered[T]): T = 
+		min_max_i(lst)._2
 	
-	def max_r[T <% Ordered[T]](lst: List[T]): T = min_max_r(lst)._2
+	//def max_r[T <% Ordered[T]](lst: List[T]): T = min_max_r(lst)._2
+	def max_r[T](lst: List[T])(implicit ev: T => Ordered[T]): T = 
+		min_max_r(lst)._2
 	
 	def reverse_i[T](lst: List[T]): List[T] = {
 		def iter(rst: List[T], acc: List[T]): List[T] = 
@@ -331,26 +341,33 @@ object Sequenceops {
 		case Some((a, new_seed)) => a :: unfoldLeft_r(func, new_seed)
 	}
     
-    def isOrdered_i[T <% Ordered[T]](coll: Iterable[T],
-            isRev: Boolean = false): Boolean = {
+    //def isOrdered_i[T <% Ordered[T]](coll: Iterable[T],
+    //        isRev: Boolean = false): Boolean = {
+    def isOrdered_i[T](coll: Iterable[T], isRev: Boolean = false
+            )(implicit ev: T => Ordered[T]): Boolean = {
         def iter(acc: Boolean, rst: Iterable[T]): Boolean = (isRev, rst) match {
             case (_, Nil) | (_, _ :: Nil) => acc
             case (false, x :: y :: ys) => iter(acc && x <= y, y :: ys)
             case (true, x :: y :: ys) => iter(acc && x >= y, y :: ys)
+            case (false, _) | (true, _) => acc
         }
         iter(true, coll.toList)
     }
 	
-	def isOrdered_r[T <% Ordered[T]](coll: Iterable[T],
-            isRev: Boolean = false): Boolean = (isRev, coll.toList) match {
+	//def isOrdered_r[T <% Ordered[T]](coll: Iterable[T],
+    //        isRev: Boolean = false): Boolean = (isRev, coll.toList) match {
+	def isOrdered_r[T](coll: Iterable[T], isRev: Boolean = false
+            )(implicit ev: T => Ordered[T]): Boolean = (isRev, coll.toList) match {
 		case (_, Nil) | (_, _ :: Nil) => true
 		case (false, x :: y :: ys) => x <= y && isOrdered_r(y :: ys, isRev)
 		case (true, x :: y :: ys) => x >= y && isOrdered_r(y :: ys, isRev)
 	}
 	
 	
-	private def qpartition_lp[T <% Ordered[T]](lst: Buffer[T], lo: Int, 
-			hi: Int): Int = {
+	//private def qpartition_lp[T <% Ordered[T]](lst: Buffer[T], lo: Int, 
+	//		hi: Int): Int = {
+	private def qpartition_lp[T](lst: Buffer[T], lo: Int, hi: Int
+			)(implicit ev: T => Ordered[T]): Int = {
 		var (lwr, upr) = (lo, hi)
 		
 		while (lwr < upr) {
@@ -368,7 +385,9 @@ object Sequenceops {
 		upr
 	}
 	
-	def quickSort_lp[T <% Ordered[T]](lst: Buffer[T], lo: Int, hi: Int): 
+	//def quickSort_lp[T <% Ordered[T]](lst: Buffer[T], lo: Int, hi: Int): 
+	//		Unit = {
+	def quickSort_lp[T](lst: Buffer[T], lo: Int, hi: Int)(implicit ev: T => Ordered[T]): 
 			Unit = {
 		val rnd = new scala.util.Random(System.currentTimeMillis().toInt)
 		if (hi > lo) {

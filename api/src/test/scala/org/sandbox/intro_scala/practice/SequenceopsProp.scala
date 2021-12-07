@@ -3,7 +3,7 @@ package org.sandbox.intro_scala.practice {
 import org.scalacheck.{Prop,Properties,Gen}
 import org.scalacheck.Prop._
 import java.util.Comparator
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.collection.mutable.Buffer
 
 import org.sandbox.intro_scala.util.{Library => Util}
@@ -678,7 +678,8 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
             } yield outerElems) {
             (nss: List[List[Int]]) =>
         val arrs = nss.map(lst => lst.toArray).toArray
-        val (ansL, ansA) = (List.concat(nss: _*), Array.concat(arrs: _*))
+        val (ansL, ansA) = (List.concat(nss.toSeq: _*),
+        	Array.concat(arrs.toSeq: _*))
         val funcsA = Array[Array[Array[Int]] => Array[Int]](
             SeqopsArr.concat_i, SeqopsArr.concat_r)
         val funcsL = List[List[List[Int]] => List[Int]](Seqops.concat_i,

@@ -95,7 +95,9 @@ object SequenceopsArray {
 	def find_r[T](data: T, arr: Array[T], cmp: Comparator[T]): Option[T] = 
 		index_find_r(0, data, arr, cmp)._2
 	
-	def min_max_i[T <% Ordered[T]](arr: Array[T]): (T, T) = 
+	//def min_max_i[T <% Ordered[T]](arr: Array[T]): (T, T) = 
+	//		arr.isEmpty match {
+	def min_max_i[T](arr: Array[T])(implicit ev: T => Ordered[T]): (T, T) = 
 			arr.isEmpty match {
 		case true => throw new NoSuchElementException("empty array")
 		case _ =>
@@ -109,7 +111,9 @@ object SequenceopsArray {
 			iter(arr(0), arr(0), arr.drop(1))
 	}
 	
-	def min_max_r[T <% Ordered[T]: Manifest](arr: Array[T]): (T, T) = 
+	//def min_max_r[T <% Ordered[T]: Manifest](arr: Array[T]): (T, T) = 
+	//		arr.isEmpty match {
+	def min_max_r[T: Manifest](arr: Array[T])(implicit ev: T => Ordered[T]): (T, T) = 
 			arr.isEmpty match {
 		case true => throw new NoSuchElementException("empty array")
 		case _ =>
@@ -124,13 +128,17 @@ object SequenceopsArray {
 			(_helper((_ < _), arr), _helper((_ > _), arr))
 	}
 	
-	def min_i[T <% Ordered[T]](arr: Array[T]): T = min_max_i(arr)._1
+	//def min_i[T <% Ordered[T]](arr: Array[T]): T = min_max_i(arr)._1
+	def min_i[T](arr: Array[T])(implicit ev: T => Ordered[T]): T = min_max_i(arr)._1
 	
-	def min_r[T <% Ordered[T]: Manifest](arr: Array[T]): T = min_max_r(arr)._1
+	//def min_r[T <% Ordered[T]: Manifest](arr: Array[T]): T = min_max_r(arr)._1
+	def min_r[T: Manifest](arr: Array[T])(implicit ev: T => Ordered[T]): T = min_max_r(arr)._1
 	
-	def max_i[T <% Ordered[T]](arr: Array[T]): T = min_max_i(arr)._2
+	//def max_i[T <% Ordered[T]](arr: Array[T]): T = min_max_i(arr)._2
+	def max_i[T ](arr: Array[T])(implicit ev: T => Ordered[T]): T = min_max_i(arr)._2
 	
-	def max_r[T <% Ordered[T]: Manifest](arr: Array[T]): T = min_max_r(arr)._2
+	//def max_r[T <% Ordered[T]: Manifest](arr: Array[T]): T = min_max_r(arr)._2
+	def max_r[T: Manifest](arr: Array[T])(implicit ev: T => Ordered[T]): T = min_max_r(arr)._2
 	
 	def reverse_i[T: Manifest](arr: Array[T]): Array[T] = {
 		def iter(rst: Array[T], acc: Array[T]): Array[T] = rst.isEmpty match {
@@ -335,8 +343,10 @@ object SequenceopsArray {
 		case Some((a, new_seed)) => a +: unfoldLeft_r(func, new_seed)
 	}
 	
-	def isOrdered_i[T <% Ordered[T]](arr: Array[T], isRev: Boolean = false): 
-			Boolean = {
+	//def isOrdered_i[T <% Ordered[T]](arr: Array[T], isRev: Boolean = false): 
+	//		Boolean = {
+	def isOrdered_i[T](arr: Array[T], isRev: Boolean = false
+			)(implicit ev: T => Ordered[T]): Boolean = {
 		def iter(acc: Boolean, rst: Array[T]): Boolean = (isRev, rst.size) match {
             case (_, 0) | (_, 1) => acc
             case (false, _) => iter(acc && rst(0) <= rst(1), rst.drop(1))
@@ -345,16 +355,20 @@ object SequenceopsArray {
         iter(true, arr)
 	}
 	
-	def isOrdered_r[T <% Ordered[T]](arr: Array[T], isRev: Boolean = false): 
-			Boolean = (isRev, arr.size) match {
+	//def isOrdered_r[T <% Ordered[T]](arr: Array[T], isRev: Boolean = false): 
+	//		Boolean = (isRev, arr.size) match {
+	def isOrdered_r[T](arr: Array[T], isRev: Boolean = false
+			)(implicit ev: T => Ordered[T]): Boolean = (isRev, arr.size) match {
 		case (_, 0) | (_, 1) => true
 		case (false, _) => arr(0) <= arr(1) && isOrdered_r(arr.drop(1), isRev)
 		case (true, _) => arr(0) >= arr(1) && isOrdered_r(arr.drop(1), isRev)
 	}
 	
 	
-	private def qpartition_lp[T <% Ordered[T]](arr: Array[T], lo: Int, 
-			hi: Int): Int = {
+	//private def qpartition_lp[T <% Ordered[T]](arr: Array[T], lo: Int, 
+	//		hi: Int): Int = {
+	private def qpartition_lp[T](arr: Array[T], lo: Int, hi: Int
+			)(implicit ev: T => Ordered[T]): Int = {
 		var (lwr, upr) = (lo, hi)
 		
 		while (lwr < upr) {
@@ -372,8 +386,10 @@ object SequenceopsArray {
 		upr
 	}
 	
-	def quickSort_lp[T <% Ordered[T]](arr: Array[T], lo: Int,
-			hi: Int): Unit = {
+	//def quickSort_lp[T <% Ordered[T]](arr: Array[T], lo: Int,
+	//		hi: Int): Unit = {
+	def quickSort_lp[T](arr: Array[T], lo: Int, hi: Int
+			)(implicit ev: T => Ordered[T]): Unit = {
 		val rnd = new scala.util.Random(System.currentTimeMillis().toInt)
 		if (hi > lo) {
 			val rNdx = rnd.nextInt(hi - lo + 1) + lo

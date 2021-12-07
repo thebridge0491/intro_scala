@@ -225,7 +225,7 @@ object ClassicHiorder {
 	
 	private def numSeqMath_lc(op: ((Long, Long) => Long), init: Long, 
 			hi: Long, lo: Long): Long = {
-		lazy val _helper_lc: Stream[Long] = 
+		lazy val _helper_lc: LazyList[Long] = 
 			init #:: _helper_lc.zip(lo to hi).map(acc_e =>
 				op(acc_e._1, acc_e._2))
 		_helper_lc.reverse.headOption.getOrElse(lo)
@@ -237,7 +237,7 @@ object ClassicHiorder {
 	def fact_lc(n: Long): Long = numSeqMath_lc((_ * _), 1, n, 1)
 	
 	def fib_lc(n: Int): Int = {
-		lazy val _helper_lc: Stream[Int] = 
+		lazy val _helper_lc: LazyList[Int] = 
 			0 #:: 1 #:: _helper_lc.zip(_helper_lc.tail).map(
 				s0_s1 => s0_s1._1 + s0_s1._2)
 		_helper_lc(n)
@@ -246,7 +246,7 @@ object ClassicHiorder {
 	def pascaltri_lc(rows: Int): List[List[Int]] = {
 		def nextRow(xs: List[Int]): List[Int] = 
 			(0 :: xs).zip(xs ++ List(0)).map(a_b => a_b._1 + a_b._2)
-		lazy val _helper_lc: Stream[List[Int]] =
+		lazy val _helper_lc: LazyList[List[Int]] =
 			List(1) #:: _helper_lc.map(row => nextRow(row))
 		_helper_lc.take(rows + 1).toList
 	}

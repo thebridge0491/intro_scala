@@ -4,6 +4,8 @@ package org.sandbox.intro_scala.practice {
 
 //import scala.collection.JavaConverters._
 
+trait *=>[-A, +B] { def apply(is: A*): B }
+
 object SequenceopsVariadic {
 	/*private def unfoldRight_i[T, U](func: (U => Option[(T, U)]), seed: U): 
 			List[T] = {
@@ -31,7 +33,9 @@ object SequenceopsVariadic {
 			throw new NotImplementedError("not implemented beyond Tuple6")
 	}
 	
-	def exists_forall_iv[T](pred: ((T*) => Boolean), xss: List[T]*):
+	//def exists_forall_iv[T](pred: ((T*) => Boolean), xss: List[T]*):
+	//		(Boolean, Boolean) = {
+	def exists_forall_iv[T](pred: (T *=> Boolean), xss: List[T]*):
 			(Boolean, Boolean) = {
 		def iter(a0: Boolean, a1: Boolean, rst: Seq[List[T]]):
 				(Boolean, Boolean) = rst.exists(e => Nil == e) match {
@@ -42,13 +46,13 @@ object SequenceopsVariadic {
 		iter(false, true, xss)
 	}
 	
-	def exists_iv[T](pred: ((T*) => Boolean), xss: List[T]*): Boolean = 
+	def exists_iv[T](pred: (T *=> Boolean), xss: List[T]*): Boolean = 
 		exists_forall_iv(pred, xss: _*)._1
 	
-	def forall_iv[T](pred: ((T*) => Boolean), xss: List[T]*): Boolean = 
+	def forall_iv[T](pred: (T *=> Boolean), xss: List[T]*): Boolean = 
 		exists_forall_iv(pred, xss: _*)._2
 	
-	def exists_forall_rv[T](pred: ((T*) => Boolean), xss: List[T]*):
+	def exists_forall_rv[T](pred: (T *=> Boolean), xss: List[T]*):
 			(Boolean, Boolean) = xss.exists(e => Nil == e) match {
 		case true => (false, true)
 		case _ => 
@@ -58,13 +62,13 @@ object SequenceopsVariadic {
 			exists_forall_rv(pred, xss.map(e => e.tail): _*)._2)
 	}
 	
-	def exists_rv[T](pred: ((T*) => Boolean), xss: List[T]*): Boolean = 
+	def exists_rv[T](pred: (T *=> Boolean), xss: List[T]*): Boolean = 
 		exists_forall_rv(pred, xss: _*)._1
 	
-	def forall_rv[T](pred: ((T*) => Boolean), xss: List[T]*): Boolean = 
+	def forall_rv[T](pred: (T *=> Boolean), xss: List[T]*): Boolean = 
 		exists_forall_rv(pred, xss: _*)._2
 	
-	def map_iv[T, U](proc: ((T*) => U), xss: List[T]*): List[U] = {
+	def map_iv[T, U](proc: (T *=> U), xss: List[T]*): List[U] = {
 		def iter(rst: Seq[List[T]], acc: List[U]): List[U] =
 				rst.exists(e => Nil == e) match {
 			case true => acc.reverse
@@ -74,14 +78,14 @@ object SequenceopsVariadic {
 		iter(xss, List[U]())
 	}
 	
-	def map_rv[T, U](proc: ((T*) => U), xss: List[T]*): List[U] = 
+	def map_rv[T, U](proc: (T *=> U), xss: List[T]*): List[U] = 
 			xss.exists(e => Nil == e) match {
 		case true => Nil
 		case _ => proc(xss.map(e => e.head): _*) :: 
 			map_rv(proc, xss.map(e => e.tail): _*)
 	}
 	
-	def foreach_iv[T](proc: ((T*) => Unit), xss: List[T]*): Unit = {
+	def foreach_iv[T](proc: (T *=> Unit), xss: List[T]*): Unit = {
 		def iter(rst: Seq[List[T]]): Unit =
 				rst.exists(e => Nil == e) match {
 			case true => ()
@@ -91,49 +95,50 @@ object SequenceopsVariadic {
 		iter(xss)
 	}
 	
-	def foreach_rv[T](proc: ((T*) => Unit), xss: List[T]*): Unit = 
+	def foreach_rv[T](proc: (T *=> Unit), xss: List[T]*): Unit = 
 			xss.exists(e => Nil == e) match {
 		case true => ()
 		case _ => proc(xss.map(e => e.head): _*)
 			foreach_rv(proc, xss.map(e => e.tail): _*)
 	}
 	
-	def foldLeft_iv[T, U](corp: ((U, T*) => U), init: U, xss: List[T]*): U = 
+	//def foldLeft_iv[T, U](corp: ((U, T*) => U), init: U, xss: List[T]*): U = 
+	def foldLeft_iv[T, U](corp: ((U, Seq[T]) => U), init: U, xss: List[T]*): U = 
         {
 		def iter(rst: Seq[List[T]], acc: U): U = 
 				rst.exists(e => Nil == e) match {
 			case true => acc
 			case _ => iter(rst.map(e => e.tail),
-				corp(acc, rst.map(e => e.head): _*))
+				corp(acc, rst.map(e => e.head)))
 		}
 		iter(xss, init)
 	}
 	
-	def foldLeft_rv[T, U](corp: ((U, T*) => U), init: U, xss: List[T]*): U = 
+	def foldLeft_rv[T, U](corp: ((U, Seq[T]) => U), init: U, xss: List[T]*): U = 
 			xss.exists(e => Nil == e) match {
 		case true => init
-		case _ => foldLeft_rv(corp, corp(init, xss.map(e => e.head): _*), 
+		case _ => foldLeft_rv(corp, corp(init, xss.map(e => e.head)), 
 			xss.map(e => e.tail): _*)
 	}
 	
-	def foldRight_iv[T, U](proc: ((U, T*) => U), init: U, xss: List[T]*): U = 
+	def foldRight_iv[T, U](proc: ((U, Seq[T]) => U), init: U, xss: List[T]*): U = 
         {
 		def iter(rst: Seq[List[T]], acc: U): U = 
 				rst.exists(e => Nil == e) match {
 			case true => acc
 			case _ => iter(rst.map(e => e.tail),
-				proc(acc, rst.map(e => e.head): _*))
+				proc(acc, rst.map(e => e.head)))
 		}
         val len_short = xss.map(e => e.size).min
 		iter(xss.map(e => e.take(len_short).reverse), init)
 	}
 	
-	def foldRight_rv[T, U](proc: ((U, T*) => U), init: U, xss: List[T]*): U =
+	def foldRight_rv[T, U](proc: ((U, Seq[T]) => U), init: U, xss: List[T]*): U =
         {
 		def _helper(acc: U, rst: List[T]*): U = 
 				rst.exists(e => Nil == e) match {
 			case true => acc
-			case _ => _helper(proc(acc, rst.map(e => e.head): _*), 
+			case _ => _helper(proc(acc, rst.map(e => e.head)), 
 				rst.map(e => e.tail): _*)
 		}
         val len_short = xss.map(e => e.size).min
@@ -174,26 +179,26 @@ object SequenceopsVariadic {
 	
 	
 	
-	/*def exists_forall_fv[T](pred: ((T*) => Boolean), xss: List[T]*):
+	/*def exists_forall_fv[T](pred: (T *=> Boolean), xss: List[T]*):
 			(Boolean, Boolean) = {
 		def corp(a0_a1: (Boolean, Boolean), els: List[T]): (Boolean, Boolean) 
 			= (a0_a1._1 || pred(els: _*), a0_a1._2 && pred(els: _*))
 		xss.foldLeft((false, true))(corp)
 	}*/
 	
-	def exists_fv[T](pred: ((T*) => Boolean), xss: List[T]*): Boolean = 
+	def exists_fv[T](pred: (T *=> Boolean), xss: List[T]*): Boolean = 
 		//exists_forall_fv(pred, xss: _*)._1
 		xss.foldLeft(false)((acc, els) => acc || pred(els: _*))
 	
-	def forall_fv[T](pred: ((T*) => Boolean), xss: List[T]*): Boolean = 
+	def forall_fv[T](pred: (T *=> Boolean), xss: List[T]*): Boolean = 
 		//exists_forall_fv(pred, xss: _*)._2
 		xss.foldLeft(true)((acc, els) => acc && pred(els: _*))
 	
-	def map_fv[T, U](proc: ((T*) => U), xss: List[T]*): List[U] = 
+	def map_fv[T, U](proc: (T *=> U), xss: List[T]*): List[U] = 
 		SequenceopsVariadic.zip_iv[T, List[T]](xss: _*).foldRight(List[U]())(
 			(els, acc) => proc(els: _*) :: acc)
 	
-	def foreach_fv[T](proc: ((T*) => Unit), xss: List[T]*): Unit = 
+	def foreach_fv[T](proc: (T *=> Unit), xss: List[T]*): Unit = 
 		SequenceopsVariadic.zip_iv[T, List[T]](xss: _*).foldLeft(())(
 			(_, els) => proc(els: _*))
 	
@@ -206,7 +211,7 @@ object SequenceopsVariadic {
 	
 	
 	
-	def exists_forall_uv[T](pred: ((T*) => Boolean), xss: List[T]*):
+	def exists_forall_uv[T](pred: (T *=> Boolean), xss: List[T]*):
 			(Boolean, Boolean) = {
 		def func(a0_a1_rst: (Boolean, Boolean, Seq[List[T]])): 
 				Option[((Boolean, Boolean), (Boolean, Boolean, Seq[List[T]]))] =
@@ -224,13 +229,13 @@ object SequenceopsVariadic {
             func, (false, true, xss)).headOption.getOrElse(false, true)
 	}
 	
-	def exists_uv[T](pred: ((T*) => Boolean), xss: List[T]*): Boolean = 
+	def exists_uv[T](pred: (T *=> Boolean), xss: List[T]*): Boolean = 
 		exists_forall_uv(pred, xss: _*)._1
 	
-	def forall_uv[T](pred: ((T*) => Boolean), xss: List[T]*): Boolean = 
+	def forall_uv[T](pred: (T *=> Boolean), xss: List[T]*): Boolean = 
 		exists_forall_uv(pred, xss: _*)._2
 	
-	def map_uv[T, U](proc: ((T*) => U), xss: List[T]*): List[U] = {
+	def map_uv[T, U](proc: (T *=> U), xss: List[T]*): List[U] = {
 		val func = (rst: Seq[List[T]]) => rst.exists(e => Nil == e) match { 
 			case true => None
 			case _ => Some(proc(rst.map(e => e.head): _*), 
@@ -239,7 +244,7 @@ object SequenceopsVariadic {
 		unfoldRight_i[U, Seq[List[T]]](func, xss).reverse
 	}
 	
-	def foreach_uv[T](proc: ((T*) => Unit), xss: List[T]*): Unit = {
+	def foreach_uv[T](proc: (T *=> Unit), xss: List[T]*): Unit = {
 		val func = (rst: Seq[List[T]]) => rst.exists(e => Nil == e) match { 
 			case true => None
 			case _ => Some(proc(rst.map(e => e.head): _*), 

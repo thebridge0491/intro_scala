@@ -730,8 +730,10 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
 		def predAll(els: List[Int]*): Boolean = els.forall(e => !e.isEmpty)
         val ansAny = List(xss, yss).exists(xs => predAny(xs: _*))
         val ansAll = List(xss, yss).forall(xs => predAll(xs: _*))
-        val results = List[(((Seq[List[Int]] => Boolean), List[List[Int]]*) =>
-            Boolean, ((Seq[List[Int]] => Boolean), List[List[Int]]*) => 
+        //val results = List[(((Seq[List[Int]] => Boolean), List[List[Int]]*) =>
+        //    Boolean, ((Seq[List[Int]] => Boolean), List[List[Int]]*) => 
+        val results = List[(((List[Int] *=> Boolean), Seq[List[List[Int]]]) =>
+            Boolean, ((List[Int] *=> Boolean), Seq[List[List[Int]]]) => 
             Boolean)]((SeqopsVar.exists_iv, SeqopsVar.forall_iv),
 			(SeqopsVar.exists_rv, SeqopsVar.forall_rv),
 			(SeqopsVar.exists_fv, SeqopsVar.forall_fv),
@@ -756,10 +758,18 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
             (els, acc) => proc2(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]] :: acc)
         val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldRight(List[List[Int]]())(
             (els, acc) => proc3(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]] :: acc)
-        val results = List[((Seq[Int] => Seq[Int]), List[Int]*) => 
+        /*val results = List[((Seq[Int] => Seq[Int]), Seq[List[Int]]) => 
             List[Seq[Int]]](SeqopsVar.map_iv, SeqopsVar.map_rv,
             SeqopsVar.map_fv, SeqopsVar.map_uv).map(f => 
-                (f(proc2, nss2: _*), f(proc3, nss3: _*)))
+                (f(proc2, nss2: _*), f(proc3, nss3: _*)))*/
+        val results = List((SeqopsVar.map_iv(proc2, nss2: _*),
+        	SeqopsVar.map_iv(proc3, nss3: _*)),
+        	(SeqopsVar.map_rv(proc2, nss2: _*),
+        	SeqopsVar.map_rv(proc3, nss3: _*)),
+        	(SeqopsVar.map_fv(proc2, nss2: _*),
+        	SeqopsVar.map_fv(proc3, nss3: _*)),
+        	(SeqopsVar.map_uv(proc2, nss2: _*),
+        	SeqopsVar.map_uv(proc3, nss3: _*)))
         
         (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
                 case (res2, res3) => acc && (ans2 == res2) &&
@@ -778,14 +788,22 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
             (_, els) => proc2(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]])
         val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldLeft(())(
             (_, els) => proc3(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]])
-        val results = List[((Seq[Int] => Unit), List[Int]*) => Unit](
+        /*val results = List[((Seq[Int] => Unit), Seq[List[Int]]) => Unit](
             SeqopsVar.foreach_iv, SeqopsVar.foreach_rv, SeqopsVar.foreach_fv,
             SeqopsVar.foreach_uv).map(f => 
-                (f(proc2, nss2: _*), f(proc3, nss3: _*)))
+                (f(proc2, nss2: _*), f(proc3, nss3: _*)))*/
+        val results = List((SeqopsVar.foreach_iv(proc2, nss2: _*), 
+        	SeqopsVar.foreach_iv(proc3, nss3: _*)),
+        	(SeqopsVar.foreach_rv(proc2, nss2: _*), 
+        	SeqopsVar.foreach_rv(proc3, nss3: _*)),
+        	(SeqopsVar.foreach_fv(proc2, nss2: _*), 
+        	SeqopsVar.foreach_fv(proc3, nss3: _*)),
+        	(SeqopsVar.foreach_uv(proc2, nss2: _*), 
+        	SeqopsVar.foreach_uv(proc3, nss3: _*)))
         
         (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
-                case (res2, res3) => acc && (ans2 == res2) &&
-            (ans3 == res3) }}).label("===propForeachVar(%s) : %s===".format(
+                case (res2, res3) => acc && (ans2.equals(res2)) &&
+            (ans3.equals(res3)) }}).label("===propForeachVar(%s) : %s===".format(
             nss2.mkString("[", ", ", "]"), ans2))
     }
     
@@ -798,9 +816,13 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
             (acc, els) => corp2(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
         val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldLeft(0)(
             (acc, els) => corp3(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
-        val results = List[(((Int, Seq[Int]) => Int), Int, List[Int]*) => 
+        /*val results = List[(((Int, Seq[Int]) => Int), Int, Seq[List[Int]]) => 
             Int](SeqopsVar.foldLeft_iv, SeqopsVar.foldLeft_rv).map(f => 
-                (f(corp2, 0, nss2: _*), f(corp3, 0, nss3: _*)))
+                (f(corp2, 0, nss2: _*), f(corp3, 0, nss3: _*)))*/
+        val results = List((SeqopsVar.foldLeft_iv(corp2, 0, nss2: _*),
+        	SeqopsVar.foldLeft_iv(corp3, 0, nss3: _*)),
+        	(SeqopsVar.foldLeft_rv(corp2, 0, nss2: _*),
+        	SeqopsVar.foldLeft_rv(corp3, 0, nss3: _*)))
         
         (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
                 case (res2, res3) => acc && (ans2 == res2) &&
@@ -817,9 +839,13 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
             (els, acc) => proc2(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
         val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldRight(0)(
             (els, acc) => proc3(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
-        val results = List[(((Int, Seq[Int]) => Int), Int, List[Int]*) => 
+        /*val results = List[(((Int, Seq[Int]) => Int), Int, Seq[List[Int]]) => 
             Int](SeqopsVar.foldRight_rv, SeqopsVar.foldRight_iv).map(f => 
-                (f(proc2, 0, nss2: _*), f(proc3, 0, nss3: _*)))
+                (f(proc2, 0, nss2: _*), f(proc3, 0, nss3: _*)))*/
+        val results = List((SeqopsVar.foldRight_rv(proc2, 0, nss2: _*),
+        	SeqopsVar.foldRight_rv(proc3, 0, nss3: _*)),
+        	(SeqopsVar.foldRight_iv(proc2, 0, nss2: _*),
+        	SeqopsVar.foldRight_iv(proc3, 0, nss3: _*)))
         
         (results.foldLeft(true) { (acc, res2_res3) => res2_res3 match {
                 case (res2, res3) => acc && (ans2 == res2) &&
@@ -828,9 +854,9 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
     }
     
     property("variadic append sequences") = forAll(genNListInts(3)) {
-        (nss: List[List[Int]]) =>
+        	(nss: List[List[Int]]) =>
         val ans = List.concat(nss: _*)
-        val results = List[(List[Int]*) => List[Int]](SeqopsVar.append_iv,
+        val results = List[List[Int] *=> List[Int]](SeqopsVar.append_iv,
             SeqopsVar.append_rv, SeqopsVar.append_fv, SeqopsVar.append_uv
             ).map(f => f(nss: _*))
         
@@ -846,7 +872,7 @@ object SequenceopsProp extends Properties("(props) Sequence ops") {
             (els, acc) => els.productIterator.toList.asInstanceOf[List[Int]] :: acc)
         val ans3 = zipVar[Int, (Int, Int, Int)](nss3: _*).foldRight(List[List[Int]]())(
             (els, acc) => els.productIterator.toList.asInstanceOf[List[Int]] :: acc)
-        val results = List[(List[Int]*) => List[List[Int]]](SeqopsVar.zip_iv,
+        val results = List[List[Int] *=> List[List[Int]]](SeqopsVar.zip_iv,
             SeqopsVar.zip_rv, SeqopsVar.zip_fv, SeqopsVar.zip_uv).map(f => 
                 (f(nss2: _*), f(nss3: _*)))
         

@@ -562,8 +562,10 @@ class SequenceopsTest extends UnitSpec {
 		val lstAll = List(List(List(3), List(33)), List(List(55), List(5)))
         val ansAny = lstAny.exists(xs => predAny(xs: _*))
         val ansAll = lstAll.forall(xs => predAll(xs: _*))
-        List[(((Seq[List[Int]] => Boolean), List[List[Int]]*) => Boolean,
-            ((Seq[List[Int]] => Boolean), List[List[Int]]*) => Boolean)](
+        //List[(((Seq[List[Int]] => Boolean), List[List[Int]]*) => Boolean,
+        //    ((Seq[List[Int]] => Boolean), List[List[Int]]*) => Boolean)](
+        List[(((List[Int] *=> Boolean), Seq[List[List[Int]]]) => Boolean,
+            ((List[Int] *=> Boolean), Seq[List[List[Int]]]) => Boolean)](
 			(SeqopsVar.exists_iv, SeqopsVar.forall_iv),
 			(SeqopsVar.exists_rv, SeqopsVar.forall_rv),
 			(SeqopsVar.exists_fv, SeqopsVar.forall_fv),
@@ -584,12 +586,20 @@ class SequenceopsTest extends UnitSpec {
             (els, acc) => proc2(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]] :: acc)
         val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldRight(List[List[Int]]())(
             (els, acc) => proc3(els.productIterator.toList.asInstanceOf[List[Int]]: _*).asInstanceOf[List[Int]] :: acc)
-		List[((Seq[Int] => Seq[Int]), List[Int]*) => List[Seq[Int]]](
+		/*List[((Seq[Int] => Seq[Int]), Seq[List[Int]]) => List[Seq[Int]]](
 			SeqopsVar.map_iv, SeqopsVar.map_rv, SeqopsVar.map_fv,
                 SeqopsVar.map_uv).foreach { f =>
             assertResult(ans2) { f(proc2, lst2: _*) }
             assertResult(ans3) { f(proc3, lst3: _*) }
-		}
+		}*/
+		assertResult(ans2) { SeqopsVar.map_iv(proc2, lst2: _*) }
+        assertResult(ans3) { SeqopsVar.map_iv(proc3, lst3: _*) }
+		assertResult(ans2) { SeqopsVar.map_rv(proc2, lst2: _*) }
+        assertResult(ans3) { SeqopsVar.map_rv(proc3, lst3: _*) }
+		assertResult(ans2) { SeqopsVar.map_fv(proc2, lst2: _*) }
+        assertResult(ans3) { SeqopsVar.map_fv(proc3, lst3: _*) }
+		assertResult(ans2) { SeqopsVar.map_uv(proc2, lst2: _*) }
+        assertResult(ans3) { SeqopsVar.map_uv(proc3, lst3: _*) }
     }
     
     it should "variadic foreach elem" in {
@@ -603,12 +613,20 @@ class SequenceopsTest extends UnitSpec {
             (_, els) => proc2(els.productIterator.toList.asInstanceOf[List[Int]]: _*))
         val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldLeft(())(
             (_, els) => proc3(els.productIterator.toList.asInstanceOf[List[Int]]: _*))
-		List[((Seq[Int] => Unit), List[Int]*) => Unit](SeqopsVar.foreach_iv,
+		/*List[((Seq[Int] => Unit), Seq[List[Int]]) => Unit](SeqopsVar.foreach_iv,
             SeqopsVar.foreach_rv, SeqopsVar.foreach_fv, SeqopsVar.foreach_uv
                 ).foreach { f =>
             assertResult(ans2) { f(proc2, lst2: _*) }
             assertResult(ans3) { f(proc3, lst3: _*) }
-		}
+		}*/
+		assertResult(ans2) { SeqopsVar.foreach_iv(proc2, lst2: _*) }
+        assertResult(ans3) { SeqopsVar.foreach_iv(proc3, lst3: _*) }
+		assertResult(ans2) { SeqopsVar.foreach_rv(proc2, lst2: _*) }
+        assertResult(ans3) { SeqopsVar.foreach_rv(proc3, lst3: _*) }
+		assertResult(ans2) { SeqopsVar.foreach_fv(proc2, lst2: _*) }
+        assertResult(ans3) { SeqopsVar.foreach_fv(proc3, lst3: _*) }
+		assertResult(ans2) { SeqopsVar.foreach_uv(proc2, lst2: _*) }
+        assertResult(ans3) { SeqopsVar.foreach_uv(proc3, lst3: _*) }
     }
     
     it should "variadic fold left over sequences" in {
@@ -620,11 +638,15 @@ class SequenceopsTest extends UnitSpec {
             (acc, els) => corp2(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
         val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldLeft(0)(
             (acc, els) => corp3(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
-		List[(((Int, Seq[Int]) => Int), Int, List[Int]*) => Int](
+		/*List[(((Int, Seq[Int]) => Int), Int, Seq[List[Int]]) => Int](
                 SeqopsVar.foldLeft_iv, SeqopsVar.foldLeft_rv).foreach { f =>
             assertResult(ans2) { f(corp2, 0, lst2: _*) }
             assertResult(ans3) { f(corp3, 0, lst3: _*) }
-		}
+		}*/
+		assertResult(ans2) { SeqopsVar.foldLeft_iv(corp2, 0, lst2: _*) }
+        assertResult(ans3) { SeqopsVar.foldLeft_iv(corp3, 0, lst3: _*) }
+		assertResult(ans2) { SeqopsVar.foldLeft_rv(corp2, 0, lst2: _*) }
+        assertResult(ans3) { SeqopsVar.foldLeft_rv(corp3, 0, lst3: _*) }
     }
     
     it should "variadic fold right over sequences" in {
@@ -636,18 +658,22 @@ class SequenceopsTest extends UnitSpec {
             (els, acc) => proc2(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
         val ans3 = zipVar[Int, (Int, Int, Int)](lst3: _*).foldRight(0)(
             (els, acc) => proc3(acc, els.productIterator.toList.asInstanceOf[List[Int]]: _*))
-		List[(((Int, Seq[Int]) => Int), Int, List[Int]*) => Int](
+		/*List[(((Int, Seq[Int]) => Int), Int, Seq[List[Int]]) => Int](
                 SeqopsVar.foldRight_rv, SeqopsVar.foldRight_iv).foreach { f =>
             assertResult(ans2) { f(proc2, 0, lst2: _*) }
             assertResult(ans3) { f(proc3, 0, lst3: _*) }
-		}
+		}*/
+		assertResult(ans2) { SeqopsVar.foldRight_rv(proc2, 0, lst2: _*) }
+        assertResult(ans3) { SeqopsVar.foldRight_rv(proc3, 0, lst3: _*) }
+		assertResult(ans2) { SeqopsVar.foldRight_iv(proc2, 0, lst2: _*) }
+        assertResult(ans3) { SeqopsVar.foldRight_iv(proc3, 0, lst3: _*) }
     }
     
     it should "variadic append sequences" in {
 		val lst1 = List(List(1), List(2, 3), List(4))
 		val lst2 = List(List(1), List(2, 3), List(4), List(5, 6))
         val (ans1, ans2) = (List.concat(lst1: _*), List.concat(lst2: _*))
-		List[(List[Int]*) => List[Int]](SeqopsVar.append_iv,
+		List[List[Int] *=> List[Int]](SeqopsVar.append_iv,
             SeqopsVar.append_rv, SeqopsVar.append_fv, SeqopsVar.append_uv
                 ).foreach { f =>
             assertResult(ans1) { f(lst1: _*) }
@@ -663,7 +689,7 @@ class SequenceopsTest extends UnitSpec {
             (els, acc) => els.productIterator.toList.asInstanceOf[List[Int]] :: acc)
         val ans4 = zipVar[Int, (Int, Int, Int, Int)](lst4: _*).foldRight(List[List[Int]]())(
             (els, acc) => els.productIterator.toList.asInstanceOf[List[Int]] :: acc)
-		List[(List[Int]*) => List[List[Int]]](SeqopsVar.zip_iv,
+		List[List[Int] *=> List[List[Int]]](SeqopsVar.zip_iv,
             SeqopsVar.zip_rv, SeqopsVar.zip_fv, SeqopsVar.zip_uv).foreach {
                 f =>
             assertResult(ans3) { f(lst3: _*) }

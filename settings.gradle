@@ -7,9 +7,14 @@
  * in the user guide at https://docs.gradle.org/current/userguide/multi_project_builds.html
  */
 
+import org.apache.tools.ant.DirectoryScanner
+
 startParameter.offline = true
 //rootProject.buildFileName = 'build.gradle'
-rootProject.name = 'intro_scala'
+rootProject.name = "${rootname}"
+
+DirectoryScanner.removeDefaultExclude('**/.hgignore')
+DirectoryScanner.removeDefaultExclude('**/.gitignore')
 
 /* To declare projects as part of a multi-project build use the 'include' method
 include 'shared'

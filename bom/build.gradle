@@ -1,24 +1,60 @@
 buildscript {
-	repositories {
-		mavenLocal()
-		if (!gradle.startParameter.offline) {
-			mavenCentral()
-			//jcenter()
-		}
-	}
+  repositories {
+    mavenLocal()
+    if (!gradle.startParameter.offline) {
+      mavenCentral()
+    }
+  }
 }
 
 plugins {
-	id 'maven'   	// add support to deploy (Maven repos) artifacts
-	id 'java'
+  id 'maven-publish'   // add support to deploy (Maven repos) artifacts
+  id 'java'
 }
 
 group = 'org.sandbox'
 version = '0'
 
-install.doFirst {
-	copy { into buildDir ; from "${projectDir}/pom.xml"
-		rename { 'bom.pom' }
-	}
+ext {
+  proc_output = { cmdLn, dirFile = null ->
+    def errbuf = new StringBuffer()
+    def proc = cmdLn.execute(null, dirFile)
+    //proc.consumeProcessErrorStream(errbuf) ; println errbuf.toString()
+    return proc.text
+  }
 }
+
+publishing {
+  publications {
+    maven(MavenPublication) {
+      /*groupId = project.group
+      artifactId = project.name
+      version = project.version*/
+      
+      //from components.java
+
+      pom.withXml { provider ->
+        def builder = provider.asString()
+        builder.length = 0 // delete previous content
+        builder << project.file("${buildDir}/bom.pom").getText("utf-8")
+      }
+    }
+  }
+}
+
+generatePomFileForMavenPublication.doFirst {
+  copy { into buildDir ; from "${projectDir}/pom.xml" ; rename { 'bom.pom' } }
+}
+
+publishToMavenLocal.doLast {
+  def dirPath = java.nio.file.Paths.get("${System.getProperty('user.home')}",
+    ".m2/repository/${project.group.replace('.', '/')}/${project.name}/${project.version}")
+  //println proc_output("ls -ahl", dirPath.toFile())
+  dirPath.toFile().eachFile() { if (it =~ /\.pom$/) { println it } }
+}
+//task install { dependsOn publishToMavenLocal }
+task('install', dependsOn: [publishToMavenLocal]) { group = 'Publishing'
+  description '(alias: publishToMavenLocal) ' + publishToMavenLocal.description
+}
+
 artifacts.archives(file("${buildDir}/bom.pom"))

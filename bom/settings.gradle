@@ -1,3 +1,8 @@
+import org.apache.tools.ant.DirectoryScanner
+
 startParameter.offline = true
 //rootProject.buildFileName = 'build.gradle'
-rootProject.name = 'intro_scala-bom'
+rootProject.name = "intro_scala-bom"
+
+DirectoryScanner.removeDefaultExclude('**/.hgignore')
+DirectoryScanner.removeDefaultExclude('**/.gitignore')

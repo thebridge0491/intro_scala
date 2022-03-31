@@ -3,9 +3,9 @@ gradle.startParameter.offline = gradle.startParameter.offline ?: true
 group = project['group'] ?: 'org.sandbox'
 version = project['version'] ?: '0.1.0'
 
-ext['scala.compat'] = System.properties['scala.compat'] ?: '2.9'
+ext['scala.compat'] = System.properties['scala.compat'] ?: '2.13'
 ext.gradleLib = System.env.OSTYPE.grep(~/^(?i)linux.*/) ? 
-    '/usr/share/gradle' : '/usr/local/share/gradle/lib'
+  '/usr/share/gradle' : '/usr/local/share/gradle/lib'
 
 //ext.rsrcDir = "${projectDir}/src/main/resources"
 /*def versionProps = new Properties()
@@ -17,202 +17,198 @@ versionProps.each { k, v -> ext[k] = v }*/
 
 ant.lifecycleLogLevel = 'INFO'
 ['java.lib': System.env.OSTYPE.grep(~/^(?i)linux.*/) ? 
-		'/usr/share/java' : '/usr/local/share/java/classes',
-	'scala.lib': System.env.OSTYPE.grep(~/^(?i)linux.*/) ? 
-		'/usr/share/scala' : '/usr/local/share/scala/lib',
-	'scala.compat': project['scala.compat'],
+    '/usr/share/java' : '/usr/local/share/java/classes',
+  'scala.lib': System.env.OSTYPE.grep(~/^(?i)linux.*/) ? 
+    '/usr/share/scala' : '/usr/local/share/scala/lib',
+  'scala.compat': project['scala.compat'],
 
-	//'ivy.dep.file': "${projectDir}/ivy.xml",
-	'pom.dep.file': "${projectDir}/pom.xml",
+  //'ivy.dep.file': "${projectDir}/ivy.xml",
+  'pom.dep.file': "${projectDir}/pom.xml",
 
-	'ivy.configurations': System.properties['ivy.configurations'] 
-		?: 'test',
-	'ivy.lib.dir': System.properties['ivy.lib.dir'] ?: 
-		"${projectDir}/target/lib",
-	'ivy.distrib.dir': System.properties['ivy.distrib.dir'] ?: 
-		"${projectDir}/target/distrib",
-	'ivy.build.artifacts.dir': System.properties['ivy.build.artifacts.dir'] ?: 
-		"${projectDir}/target/artifacts",
-	'ivy.cache.ttl.default': 
-		System.properties['ivy.cache.ttl.default'] ?: 'eternal',
-	'ivy.resolve.cache.only': 
-		System.properties['ivy.resolve.cache.only'] ?: 'false',
-	'ivy.resolve.mode': System.properties['ivy.resolve.mode'] ?: 'default',
-	'ivy.resolve.log': System.properties['ivy.resolve.log'] ?: 'download-only',
-	'ivy.retrieve.types': System.properties['ivy.retrieve.types'] ?: 'jar,bundle',
-	'ivy.publish.overwrite': 
-		System.properties['ivy.publish.overwrite'] ?: 'false',
-	'ivy.out.file': System.properties['ivy.out.file'] ?: 
-		"${projectDir}/target/out-ivy.xml",
-	'pom.out.file': System.properties['pom.out.file'] ?: 
-		"${projectDir}/target/out-pom.xml",
+  'ivy.configurations': System.properties['ivy.configurations'] ?: 'test',
+  'ivy.lib.dir': System.properties['ivy.lib.dir'] ?: 
+    "${projectDir}/target/lib",
+  'ivy.distrib.dir': System.properties['ivy.distrib.dir'] ?: 
+    "${projectDir}/target/distrib",
+  'ivy.build.artifacts.dir': System.properties['ivy.build.artifacts.dir'] ?: 
+    "${projectDir}/target/artifacts",
+  'ivy.cache.ttl.default': System.properties['ivy.cache.ttl.default'] ?:
+    'eternal',
+  'ivy.resolve.cache.only': System.properties['ivy.resolve.cache.only'] ?:
+    'false',
+  'ivy.resolve.mode': System.properties['ivy.resolve.mode'] ?: 'default',
+  'ivy.resolve.log': System.properties['ivy.resolve.log'] ?: 'download-only',
+  'ivy.retrieve.types': System.properties['ivy.retrieve.types'] ?: 'jar,bundle',
+  'ivy.publish.overwrite': System.properties['ivy.publish.overwrite'] ?: 'false',
+  'ivy.out.file': System.properties['ivy.out.file'] ?: 
+    "${projectDir}/target/out-ivy.xml",
+  'pom.out.file': System.properties['pom.out.file'] ?: 
+    "${projectDir}/target/out-pom.xml",
 
-	'echo.pat': System.properties['echo.pat'] ?: '^.*',
-	'cal.offsetyr': System.properties['cal.offsetyr'] ?: '0',
+  'echo.pat': System.properties['echo.pat'] ?: '^.*',
+  'cal.offsetyr': System.properties['cal.offsetyr'] ?: '0',
 
-	'from.resolver': System.properties['from.resolver'] ?: 'default',
-	'to.resolver': System.properties['to.resolver'] ?: 'local',
+  'from.resolver': System.properties['from.resolver'] ?: 'default',
+  'to.resolver': System.properties['to.resolver'] ?: 'local',
 
-	'ivy.settings.defaultResolver': 
-		System.properties['ivy.settings.defaultResolver'] ?: 'default',
-	'ivy.settings.file': System.properties['ivy.settings.file'] ?:
-		"${System.env.HOME}/.ivy2/ivysettings.xml"
+  'ivy.settings.defaultResolver': 
+    System.properties['ivy.settings.defaultResolver'] ?: 'default',
+  'ivy.settings.file': System.properties['ivy.settings.file'] ?:
+    "${System.env.HOME}/.ivy2/ivysettings.xml"
 ].each { k, v -> ant.properties[k] = v }
 
 ant.taskdef(uri: 'ivy', //uri: 'antlib:org.apache.ivy.ant',
-	resource: 'org/apache/ivy/ant/antlib.xml',
-	//classpath: fileTree("${System.env.HOME}/.ant/lib").include('ivy*.jar'
-	//	).asPath
-	classpath: fileTree("${gradleLib}/plugins").include('ivy*.jar').asPath
+  resource: 'org/apache/ivy/ant/antlib.xml',
+  classpath: fileTree("${System.env.HOME}/.ant/lib").include('ivy*.jar'
+    ).asPath
+  //classpath: fileTree("${gradleLib}/plugins").include('ivy*.jar').asPath
 )
 //ant.importBuild("${projectDir}/depnmgr-ivy.xml") { antTargetName ->
-//	'ant-' + antTargetName }
+//  'ant-' + antTargetName }
 
 ant.tstamp() {
-	format(property: 'TSTAMP', pattern: 'HHmmss')
-	format(property: 'DSTAMP', pattern: 'yyyyMMdd', unit: 'year',
-		offset: ant.properties['cal.offsetyr'])
+  format(property: 'TSTAMP', pattern: 'HHmmss')
+  format(property: 'DSTAMP', pattern: 'yyyyMMdd', unit: 'year',
+    offset: ant.properties['cal.offsetyr'])
 }
 
 ant.'ivy:settings'(file: ant.properties['ivy.settings.file'])
 //ant.'ivy:settings'()
 
 task 'ant-resolve' { 
-    description "Resolve depns (Ivy) [-Divy.dep.file='??']"
-    doLast {
-        ant.'ivy:resolve'(conf: ant.properties['ivy.configurations'],
-            useCacheOnly: ant.properties['ivy.resolve.cache.only'],
-            //file: ant.properties['ivy.dep.file'],
-            type: 'jar', log: ant.properties['ivy.resolve.log'],
-            resolveMode: ant.properties['ivy.resolve.mode']
-            )
-    }
+  description "Resolve depns (Ivy) [-Divy.dep.file='??']"
+  doLast {
+    ant.'ivy:resolve'(conf: ant.properties['ivy.configurations'],
+      useCacheOnly: ant.properties['ivy.resolve.cache.only'],
+      //file: ant.properties['ivy.dep.file'],
+      type: 'jar', log: ant.properties['ivy.resolve.log'],
+      resolveMode: ant.properties['ivy.resolve.mode']
+    )
+  }
 }
 
 task ('ant-cachepath', dependsOn: 'ant-resolve') { 
-    description "Cachepath depns (Ivy)"
-    doLast {
-        /*ant.'ivy:cachepath'(conf: 'default', pathid: 'default.pathid',
-            keep: 'true', log: ant.properties['ivy.resolve.log'])*/
-        ant.'ivy:cachepath'(conf: 'compile', pathid: 'default_compile.pathid',
-            keep: 'true', log: ant.properties['ivy.resolve.log'])
-        ant.'ivy:cachepath'(conf: 'runtime', pathid: 'default_runtime.pathid',
-            keep: 'true', log: ant.properties['ivy.resolve.log'])
-        ant.'ivy:cachepath'(conf: 'test', pathid: 'default_test.pathid',
-            keep: 'true', log: ant.properties['ivy.resolve.log'])
-        
-        ant.echo(file: "${buildDir}/classpath_compile.txt",
-            message: ant.references.'default_compile.pathid')
-        ant.echo(file: "${buildDir}/classpath_runtime.txt",
-            message: ant.references.'default_runtime.pathid')
-        ant.echo(file: "${buildDir}/classpath_test.txt",
-            message: ant.references.'default_test.pathid')
-    }
+  description "Cachepath depns (Ivy)"
+  doLast {
+    /*ant.'ivy:cachepath'(conf: 'default', pathid: 'default.pathid',
+      keep: 'true', log: ant.properties['ivy.resolve.log'])*/
+    ant.'ivy:cachepath'(conf: 'compile', pathid: 'default_compile.pathid',
+      keep: 'true', log: ant.properties['ivy.resolve.log'])
+    ant.'ivy:cachepath'(conf: 'runtime', pathid: 'default_runtime.pathid',
+      keep: 'true', log: ant.properties['ivy.resolve.log'])
+    ant.'ivy:cachepath'(conf: 'test', pathid: 'default_test.pathid',
+      keep: 'true', log: ant.properties['ivy.resolve.log'])
+      
+    ant.echo(file: "${buildDir}/classpath_compile.txt",
+      message: ant.references.'default_compile.pathid')
+    ant.echo(file: "${buildDir}/classpath_runtime.txt",
+      message: ant.references.'default_runtime.pathid')
+    ant.echo(file: "${buildDir}/classpath_test.txt",
+      message: ant.references.'default_test.pathid')
+  }
 }
 
 task ('ant-properties', dependsOn: 'ant-resolve') { 
-    description 'Properties with depn mgr (Ivy)'
-    doLast {
-        //ant.properties.findAll { it.key.startsWith('ivy') }.each {println it}
-        ant.echoproperties() {
-			//propertyset() { propertyref(prefix: ant.properties['echo.pat']) }
-			propertyset() { propertyref(regex: ant.properties['echo.pat']) }
-        }
+  description 'Properties with depn mgr (Ivy)'
+  doLast {
+    //ant.properties.findAll { it.key.startsWith('ivy') }.each {println it}
+    ant.echoproperties() {
+      //propertyset() { propertyref(prefix: ant.properties['echo.pat']) }
+      propertyset() { propertyref(regex: ant.properties['echo.pat']) }
     }
+  }
 }
 
 task ('ant-report_ivy', dependsOn: 'ant-resolve') { 
-    description 'Report depns resolving (Ivy)'
-    doLast {
-        ant.'ivy:report'(graph: 'false', todir: "${buildDir}/rpt_ivy")
-    }
+  description 'Report depns resolving (Ivy)'
+  doLast {
+    ant.'ivy:report'(graph: 'false', todir: "${buildDir}/rpt_ivy")
+  }
 }
 
 task ('ant-buildlist', dependsOn: 'ant-resolve') { 
-    description 'Build order list (Ivy)'
-    doLast {
-        ant.'ivy:buildlist'(reference: 'build-order') {
-            fileset(dir: '.', includes: '**/build.gradle') }
-        ant.pathconvert(property: 'build-files', pathsep: ',',
-                refid: 'build-order') {
-            map(from: "${projectDir}/", to: '') }
-        ant.echo(ant.properties['build-files'])
-    }
+  description 'Build order list (Ivy)'
+  doLast {
+    ant.'ivy:buildlist'(reference: 'build-order') {
+      fileset(dir: '.', includes: '**/build.gradle') }
+    ant.pathconvert(property: 'build-files', pathsep: ',',
+        refid: 'build-order') {
+      map(from: "${projectDir}/", to: '') }
+    ant.echo(ant.properties['build-files'])
+  }
 }
 
 task ('ant-retrieve', dependsOn: 'ant-cachepath') { 
-    description "Retrieve depns (Ivy)"
-    doLast {
-        ant.'ivy:retrieve'(conf: ant.properties['ivy.configurations'],
-            type: ant.properties['ivy.retrieve.types'],
-            symlink: 'true', sync: 'false')
-    }
+  description "Retrieve depns (Ivy)"
+  doLast {
+    ant.'ivy:retrieve'(conf: ant.properties['ivy.configurations'],
+      type: ant.properties['ivy.retrieve.types'],
+      symlink: 'true', sync: 'false')
+  }
 }
 
 task ('ant-deliver', dependsOn: 'ant-resolve') { 
-    description "Deliver module Ivy file"
-	//def dateFmtr = new java.text.SimpleDateFormat('yyyyMMddHHmmss')
-	//def cal = Calendar.getInstance()
-	//cal.add(Calendar.YEAR, ant.properties['cal.offsetyr'])
-    doLast {
-        ant.'ivy:deliver'(
-			//pubdate: dateFmtr.format(cal.getTime()),
-			pubdate: "${ant.properties['DSTAMP']}${ant.properties['TSTAMP']}",
-			replacedynamicrev: 'true'
-            )
-    }
+  description "Deliver module Ivy file"
+  //def dateFmtr = new java.text.SimpleDateFormat('yyyyMMddHHmmss')
+  //def cal = Calendar.getInstance()
+  //cal.add(Calendar.YEAR, ant.properties['cal.offsetyr'])
+  doLast {
+    ant.'ivy:deliver'(
+      //pubdate: dateFmtr.format(cal.getTime()),
+      pubdate: "${ant.properties['DSTAMP']}${ant.properties['TSTAMP']}",
+      replacedynamicrev: 'true'
+    )
+  }
 }
 
 task ('ant-publish', dependsOn: 'ant-resolve') { 
-    description 'Publish module artifacts (Ivy)'
-    doLast {
-        ant.'ivy:publish'(resolver: ant.properties['to.resolver'], pubdate: 
-				"${ant.properties['DSTAMP']}${ant.properties['TSTAMP']}",
-				overwrite: ant.properties['ivy.publish.overwrite']) {
-            artifacts(pattern: 
-				ant.properties['ivy.publish.src.artifacts.pattern'])
-            artifacts(pattern: 
-				"${projectDir}/target/[artifact](-[revision])(-[classifier]).[ext]")
-		}
+  description 'Publish module artifacts (Ivy)'
+  doLast {
+    ant.'ivy:publish'(resolver: ant.properties['to.resolver'],
+        pubdate: "${ant.properties['DSTAMP']}${ant.properties['TSTAMP']}",
+        overwrite: ant.properties['ivy.publish.overwrite']) {
+      artifacts(pattern: ant.properties['ivy.publish.src.artifacts.pattern'])
+      artifacts(pattern: "${projectDir}/target/[artifact](-[revision])(-[classifier]).[ext]")
     }
+  }
 }
 
 task ('ant-install-to', dependsOn: 'ant-resolve') { 
-    description "Install depn to destination repo (Ivy) [-Dfrom.resolver=default -Dto.resolver=local -Dorganisation=?? -Dmodule=?? -Drevision=??]"
-    doLast {
-        ant.'ivy:install'(conf: ant.properties['ivy.configurations'], 
-			overwrite: true, from: ant.properties['from.resolver'],
-			to: ant.properties['to.resolver'],
-			revision: System.properties['revision'],
-			organisation: System.properties['organisation'],
-			module: System.properties['module'])
-    }
+  description "Install depn to destination repo (Ivy) [-Dfrom.resolver=default -Dto.resolver=local -Dorganisation=?? -Dmodule=?? -Drevision=??]"
+  doLast {
+    ant.'ivy:install'(conf: ant.properties['ivy.configurations'], 
+      overwrite: true, from: ant.properties['from.resolver'],
+      to: ant.properties['to.resolver'],
+      revision: System.properties['revision'],
+      organisation: System.properties['organisation'],
+      module: System.properties['module'])
+  }
 }
 
 task ('ant-makepom', dependsOn: 'ant-resolve') { 
-    description 'Make pom from ivy file [-Dpom.out.file=target/out-pom.xml]'
-    doLast {
-        ant.'ivy:makepom'(ivyfile: ant.properties['ivy.dep.file'],
-				pomfile: ant.properties['pom.out.file'],
-				conf: 'default,compile,runtime,test') {
-            mapping(conf: 'default', scope: 'compile')
-            mapping(conf: 'compile', scope: 'compile')
-            mapping(conf: 'runtime', scope: 'runtime')
-            mapping(conf: 'test', scope: 'test')
-		}
+  description 'Make pom from ivy file [-Dpom.out.file=target/out-pom.xml]'
+  doLast {
+    ant.'ivy:makepom'(ivyfile: ant.properties['ivy.dep.file'],
+        pomfile: ant.properties['pom.out.file'],
+        conf: 'default,compile,runtime,test') {
+      mapping(conf: 'default', scope: 'compile')
+      mapping(conf: 'compile', scope: 'compile')
+      mapping(conf: 'runtime', scope: 'runtime')
+      mapping(conf: 'test', scope: 'test')
     }
+  }
 }
 
 task 'ant-convertpom' { 
-    description 'Convert pom to ivy file [-Dpom.dep.file=?? -Divy.out.file=target/out-ivy.xml]'
-    doLast {
-        ant.'ivy:convertpom'(pomFile: ant.properties['pom.dep.file'],
-			ivyFile: ant.properties['ivy.out.file'])
-    }
+  description 'Convert pom to ivy file [-Dpom.dep.file=?? -Divy.out.file=target/out-ivy.xml]'
+  doLast {
+    ant.'ivy:convertpom'(pomFile: ant.properties['pom.dep.file'],
+      ivyFile: ant.properties['ivy.out.file'])
+  }
 }
 
 tasks.each { task ->
-	if (task.name.startsWith('ant-')) {
-		task.group = 'Dependency manager'
-	}
+  if (task.name.startsWith('ant-')) {
+    task.group = 'Dependency manager'
+  }
 }

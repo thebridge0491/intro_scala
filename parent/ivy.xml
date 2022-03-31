@@ -1,30 +1,28 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!-- version range ex: [0.1.0,)  0.1.+  latest.release -->
-<!-- ivy cmdln cmds: (1) resolve ; (2) cachepath ; (3) retrieve ;
-  (4) deliverto ; (5) publish ; (6) w/out ivy.xml - retrieve single depn
-(1) java -jar ivy.jar [-settings ivysettings.xml] [-ivy ivy.xml] 
-(2) java -jar ivy.jar [-ivy ivy.xml] -confs compile
-  -cachepath classpath_compile.txt
-(3) java -jar ivy.jar [-ivy ivy.xml]
-  -retrieve 'lib/[artifact]-[revision](-[classifier]).[ext]'
-(4) java -jar ivy.jar [-ivy ivy.xml] -revision X -deliverto 'ivy-[revision].xml'
-(5) java -jar ivy.jar [-ivy ivy.xml] [-overwrite] -revision X.Y.Z
-  -deliverto 'ivy-[revision].xml' -publishpattern 'ivy-[revision].xml'
-  [-publishpattern '[artifact]-[revision](-[classifier]).[ext]'] -publish local
-(6) java -jar ivy.jar -retrieve 'lib/[artifact]-[revision](-[classifier]).[ext]'
-  -dependency <organisation> <module> <revision> [-notransitive]
+<!-- ivy cmdln cmds: (1) resolve ; (2) cachepath ; (3) make pom ; (4) retrieve ;
+  (5) deliverto ; (6) publish ; (7) (w/out ivy.xml) retrieve single depn
+(1) java -jar ivy.jar [-settings ivysettings.xml] [-properties versions.properties]
+  [-ivy ivy.xml]
+(2) java -jar ivy.jar -confs compile -cachepath classpath_compile.txt
+(3) java -jar ivy.jar -confs default,compile,runtime,test -makepom out-pom.xml
+(4) java -jar ivy.jar -retrieve 'lib/[artifact]-[revision](-[classifier]).[ext]'
+(5) java -jar ivy.jar -revision X.Y.Z -deliverto 'ivy-[revision].xml'
+(6) java -jar ivy.jar [-overwrite] -revision X.Y.Z -deliverto 'ivy-[revision].xml'
+  [-publishpattern '[artifact]-[revision](-[classifier]).[ext]']
+  -publishpattern 'ivy-[revision].xml' -publish local
+(7) java -jar ivy.jar -retrieve 'lib/[artifact]-[revision](-[classifier]).[ext]'
+  [-notransitive] -dependency <organisation> <module> <revision>
 -->
 <!-- &var; to use as entity variable, example: &scala.lib; -->
-<!-- % versions SYSTEM './src/main/resources/versions.xml' -->
-<!-- % versions SYSTEM 'jar:file:./{parent}-{revision}.jar!/versions.xml' -->
-<!DOCTYPE ivy-module [
+<!--<! DOCTYPE ivy-module [
   <!ENTITY scala.lib '/usr/local/share/scala/lib'>
-  <!ENTITY % versions SYSTEM './src/main/resources/versions.xml'>
+  <!ENTITY % versions SYSTEM 'file:./src/main/resources/versions.xml'>
 
   %versions;
-]>
+]>-->
 
-<ivy-module version = '2.0'
+<ivy-module version = '2.0' xmlns:m = 'http://ant.apache.org/ivy/maven'
     xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'
     xsi:noNamespaceSchemaLocation = 'http://ant.apache.org/ivy/schemas/ivy.xsd'>
   <info organisation = 'org.sandbox' module = 'intro_scala-parent' revision = '0'>
@@ -34,13 +32,13 @@
       Multi-package project Intro examples for Scala.
     </description>
   </info>
-  <configurations defaultconfmapping = '*->compile,master,default'>
+  <configurations defaultconfmapping = 'default'>
     <conf name = 'default' description = 'runtime depns and master' extends = 'runtime,master'/>
     <conf name = 'master' description = 'module artifact itself only, no transitive depns'/>
     <conf name = 'compile' description = 'default compile depns'/>
     <conf name = 'runtime' description = 'runtime depns' extends = 'compile'/>
     <conf name = 'test' description = 'test depns' extends = 'runtime'/>
-    
+
     <conf name = 'sources' description = 'module source artifact only'/>
     <conf name = 'javadoc' description = 'module javadoc artifact only'/>
     <conf name = 'optional' description = 'optional depns'/>
@@ -48,38 +46,86 @@
   <publications/>
   <dependencies defaultconfmapping = '*->compile,master,default'
       defaultconf = 'compile'>
-    <dependency org = 'org.scala-lang' name = 'scala-library'
-      rev = "&version.scala;" revConstraint = "[&version.scala;,)">
+    <dependency org = 'org.scala-lang' name = 'scala-compiler'
+      rev = "${version.scala}" revConstraint = "[${version.scala},)">
       <!--<artifact m:classifier = 'sources' type = 'source' ext = 'jar'
-        url = "file://${scala.lib}/scala-library-sources.jar"
-        name = 'scala-library'/>-->
-        <artifact type = 'jar' name = 'scala-library'/>
+        url = "file://${scala.lib}/scala-compiler-sources.jar"
+        name = 'scala-compiler'/>-->
+        <artifact type = 'jar' name = 'scala-compiler'/>
     </dependency>
-    <dependency conf = 'test' org = 'org.scalatest' name = "scalatest_${scala.compat}"
-      rev = "&version.scalatest;" revConstraint = "[&version.scalatest;,)"/>
-    <dependency conf = 'test' org = 'org.scalacheck' name = "scalacheck_${scala.compat}"
-      rev = "&version.scalacheck;" revConstraint = "[&version.scalacheck;,)"/>
-    
-    <dependency conf = 'test' org = 'junit' name = 'junit' rev = "&version.junit;"
-      revConstraint = "[&version.junit;,)"/>
-    <dependency conf = 'test' org = 'org.testng' name = 'testng' rev = "&version.testng;"
-      revConstraint = "[&version.testng;,)"/>
-    
+    <dependency org = 'org.scalatest' name = "scalatest_${scala.compat}"
+      rev = "${version.scalatest}" revConstraint = "[${version.scalatest},)"/>
+    <dependency org = 'org.scalacheck' name = "scalacheck_${scala.compat}"
+      rev = "${version.scalacheck}" revConstraint = "[${version.scalacheck},)"/>
+    <dependency org = 'com.beautiful-scala' name = "scalastyle_${scala.compat}"
+      rev = "${version.scalastyle}" revConstraint = "[${version.scalastyle},)"/>
+    <dependency conf = 'optional' org = 'net.alchim31.maven' name = 'scala-maven-plugin'
+      rev = "${versionplugin.scala}" revConstraint = "[${versionplugin.scala},)"/>
+    <dependency org = 'org.scala-sbt' name = "zinc_2.12" rev = "${version.zinc}"
+      revConstraint = "[${version.zinc},)"/>
+
+    <dependency org = 'org.codehaus.groovy' name = 'groovy-all'
+      rev = "${version.groovy}" revConstraint = "[${version.groovy},)"/>
+    <dependency org = 'org.spockframework' name = 'spock-core'
+      rev = "${version.spock}" revConstraint = "[${version.spock},)"/>
+    <dependency org = 'org.codenarc' name = 'CodeNarc'
+      rev = "${version.codenarc}" revConstraint = "[${version.codenarc},)"/>
+
+    <dependency org = 'org.clojure' name = 'clojure'
+      rev = "${version.clojure}" revConstraint = "[${version.clojure},)"/>
+    <dependency org = 'org.clojure' name = 'test.check'
+      rev = "${version.testcheck}" revConstraint = "[${version.testcheck},)"/>
+    <dependency org = 'org.clojure' name = 'tools.reader'
+      rev = "${version.toolsreader}" revConstraint = "[${version.toolsreader},)"/>
+    <dependency org = 'org.clojure' name = 'tools.logging'
+      rev = "${version.toolslogging}" revConstraint = "[${version.toolslogging},)"/>
+    <dependency org = 'org.clojure' name = 'tools.cli'
+      rev = "${version.toolscli}" revConstraint = "[${version.toolscli},)"/>
+    <dependency org = 'org.clojure' name = 'data.json'
+      rev = "${version.datajson}" revConstraint = "[${version.datajson},)"/>
+
+    <dependency org="org.junit" name="junit-bom" rev = "${version.junit}"
+        revConstraint = "[${version.junit},)">
+      <artifact name="junit-bom" type="pom" ext="pom"/>
+    </dependency>
+    <dependency org = 'org.junit.platform' name = 'junit-platform-console'
+      rev = "${version.junitplatform}"
+      revConstraint = "[${version.junitplatform},)"/>
+    <dependency org = 'org.junit.platform' name = 'junit-platform-suite'
+      rev = "${version.junitplatform}"
+      revConstraint = "[${version.junitplatform},)"/>
+    <dependency org = 'org.junit.jupiter' name = 'junit-jupiter'
+      rev = "${version.junit}" revConstraint = "[${version.junit},)"/>
+    <dependency org = 'org.junit.platform' name = 'junit-platform-runner'
+      rev = "${version.junitplatform}"
+      revConstraint = "[${version.junitplatform},)"/>
+    <dependency org = 'org.junit.vintage' name = 'junit-vintage-engine'
+      rev = "${version.junit}" revConstraint = "[${version.junit},)"/>
+    <!--<dependency org = 'junit' name = 'junit' rev = "${version.junit4}"
+      revConstraint = "[${version.junit4},)"/>-->
+    <dependency org = 'org.testng' name = 'testng' rev = "${version.testng}"
+      revConstraint = "[${version.testng},)"/>
+    <dependency org = 'org.jacoco' name = 'org.jacoco.ant' rev = "${version.jacoco}"
+      revConstraint = "[${version.jacoco},)"/>
+    <dependency org = 'com.puppycrawl.tools' name = 'checkstyle'
+      rev = "${version.checkstyle}" revConstraint = "[${version.checkstyle},)"/>
+
+    <dependency org = 'org.slf4j' name = 'slf4j-api'
+      rev = "${version.slf4j}" revConstraint = "[${version.slf4j},)"/>
     <dependency org = 'org.slf4j' name = 'log4j-over-slf4j'
-      rev = "&version.slf4j;" revConstraint = "[&version.slf4j;,)"/>
+      rev = "${version.slf4j}" revConstraint = "[${version.slf4j},)"/>
     <dependency org = 'ch.qos.logback' name = 'logback-classic'
-      rev = "&version.logback;" revConstraint = "[&version.logback;,)"/>
-    
-    <dependency org = 'org.ini4j' name = 'ini4j' rev = "&version.ini4j;"
-      revConstraint = "[&version.ini4j;,)"/>
-    <dependency org = 'net.java.dev.jna' name = 'jna' rev = "&version.jna;"
-      revConstraint = "[&version.jna;,)"/>
-    
+      rev = "${version.logback}" revConstraint = "[${version.logback},)"/>
+
+    <dependency org = 'org.ini4j' name = 'ini4j' rev = "${version.ini4j}"
+      revConstraint = "[${version.ini4j},)"/>
+    <dependency org = 'net.java.dev.jna' name = 'jna' rev = "${version.jna}"
+      revConstraint = "[${version.jna},)"/>
     <dependency org = 'javax.json' name = 'javax.json-api'
-      rev = "&version.jsonp;" revConstraint = "[&version.jsonp;,)"/>
+      rev = "${version.jsonp}" revConstraint = "[${version.jsonp},)"/>
     <dependency org = 'org.glassfish' name = 'javax.json'
-      rev = "&version.jsonp;" revConstraint = "[&version.jsonp;,)"/>
+      rev = "${version.jsonp}" revConstraint = "[${version.jsonp},)"/>
     <dependency org = 'org.yaml' name = 'snakeyaml'
-      rev = "&version.snakeyaml;" revConstraint = "[&version.snakeyaml;,)"/>
+      rev = "${version.snakeyaml}" revConstraint = "[${version.snakeyaml},)"/>
   </dependencies>
 </ivy-module>

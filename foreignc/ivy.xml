@@ -1,18 +1,18 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!-- version range ex: [0.1.0,)  0.1.+  latest.release -->
-<!-- ivy cmdln cmds: (1) resolve ; (2) cachepath ; (3) retrieve ;
-  (4) deliverto ; (5) publish ; (6) w/out ivy.xml - retrieve single depn
-(1) java -jar ivy.jar [-settings ivysettings.xml] [-ivy ivy.xml] 
-(2) java -jar ivy.jar [-ivy ivy.xml] -confs compile
-  -cachepath classpath_compile.txt
-(3) java -jar ivy.jar [-ivy ivy.xml]
-  -retrieve 'lib/[artifact]-[revision](-[classifier]).[ext]'
-(4) java -jar ivy.jar [-ivy ivy.xml] -revision X -deliverto 'ivy-[revision].xml'
-(5) java -jar ivy.jar [-ivy ivy.xml] [-overwrite] -revision X.Y.Z
-  -deliverto 'ivy-[revision].xml' -publishpattern 'ivy-[revision].xml'
-  [-publishpattern '[artifact]-[revision](-[classifier]).[ext]'] -publish local
-(6) java -jar ivy.jar -retrieve 'lib/[artifact]-[revision](-[classifier]).[ext]'
-  -dependency <organisation> <module> <revision> [-notransitive]
+<!-- ivy cmdln cmds: (1) resolve ; (2) cachepath ; (3) make pom ; (4) retrieve ;
+  (5) deliverto ; (6) publish ; (7) (w/out ivy.xml) retrieve single depn
+(1) java -jar ivy.jar [-settings ivysettings.xml] [-properties versions.properties]
+  [-ivy ivy.xml]
+(2) java -jar ivy.jar -confs compile -cachepath classpath_compile.txt
+(3) java -jar ivy.jar -confs default,compile,runtime,test -makepom out-pom.xml
+(4) java -jar ivy.jar -retrieve 'lib/[artifact]-[revision](-[classifier]).[ext]'
+(5) java -jar ivy.jar -revision X.Y.Z -deliverto 'ivy-[revision].xml'
+(6) java -jar ivy.jar [-overwrite] -revision X.Y.Z -deliverto 'ivy-[revision].xml'
+  [-publishpattern '[artifact]-[revision](-[classifier]).[ext]']
+  -publishpattern 'ivy-[revision].xml' -publish local
+(7) java -jar ivy.jar -retrieve 'lib/[artifact]-[revision](-[classifier]).[ext]'
+  [-notransitive] -dependency <organisation> <module> <revision>
 -->
 <!-- &var; to use as entity variable, example: &scala.lib; -->
 <!-- % versions SYSTEM './src/main/resources/versions.xml' -->
@@ -23,26 +23,8 @@
 
   %versions;
 ]>-->
-<!--<!DOCTYPE ivy-module [
-  <!ENTITY version.scala '2.9.2'>
-  <!ENTITY version.scalatest '1.8'>
-  <!ENTITY version.scalacheck '1.8'>
-  
-  <!ENTITY version.junit '4.10'>
-  <!ENTITY version.testng '6.7'>
-  <!ENTITY version.spock '0.6-groovy-1.8'>
-  
-  <!ENTITY version.slf4j '1.6.5'>
-  <!ENTITY version.logback '1.0.6'>
-  
-  <!ENTITY version.ini4j '0.5.2'>
-  <!ENTITY version.jna '3.4.0'>
-  
-  <!ENTITY version.jsonp '1.0'>
-  <!ENTITY version.snakeyaml '1.10'>
-]>-->
 
-<ivy-module version = '2.0'
+<ivy-module version = '2.0' xmlns:m = 'http://ant.apache.org/ivy/maven'
     xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'
     xsi:noNamespaceSchemaLocation = 'http://ant.apache.org/ivy/schemas/ivy.xsd'
     xmlns:m = 'http://ant.apache.org/ivy/maven'>
@@ -62,7 +44,7 @@
     <conf name = 'compile' description = 'default compile depns'/>
     <conf name = 'runtime' description = 'runtime depns' extends = 'compile'/>
     <conf name = 'test' description = 'test depns' extends = 'runtime'/>
-    
+
     <conf name = 'sources' description = 'module source artifact only'/>
     <conf name = 'javadoc' description = 'module javadoc artifact only'/>
     <conf name = 'optional' description = 'optional depns'/>
@@ -79,12 +61,35 @@
     <dependency org = 'org.sandbox' name = 'intro_scala-util' rev = '0.1.0'
         revConstraint = '[0.1.0,)'/>
     
+    <!--<exclude org = 'org.scala-lang' module = 'scala-library'/>-->
+    <!--<exclude org = 'org.scala-lang' module = 'scala-compiler'/>-->
     <!--<exclude org = 'org.scalatest'/>-->
     <!--<exclude org = 'org.scalacheck'/>-->
-    <exclude org = 'junit' module = 'junit'/>
+    <!--<exclude org = 'com.beautiful-scala' module = "scalastyle_${scala.compat}"/>-->
+    
+    <exclude org = 'org.codehaus.groovy' module = 'groovy-all'/>
+    <exclude org = 'org.spockframework' module = 'spock-core'/>
+    <exclude org = 'org.codenarc' module = 'CodeNarc'/>
+    
+    <exclude org = 'org.clojure' module = 'clojure'/>
+    <exclude org = 'org.clojure' module = 'test.check'/>
+    <exclude org = 'org.clojure' module = 'tools.reader'/>
+    <exclude org = 'org.clojure' module = 'tools.logging'/>
+    <exclude org = 'org.clojure' module = 'tools.cli'/>
+    <exclude org = 'org.clojure' module = 'data.json'/>
+      
+    <exclude org = 'org.junit' module = 'junit-bom'/>  
+    <exclude org = 'org.junit.platform' module = 'junit-platform-console'/>
+    <exclude org = 'org.junit.platform' module = 'junit-platform-suite'/>
+    <exclude org = 'org.junit.jupiter' module = 'junit-jupiter'/>
+    <exclude org = 'org.junit.platform' module = 'junit-platform-runner'/>
+    <exclude org = 'org.junit.vintage' module = 'junit-vintage-engine'/>
     <exclude org = 'org.testng' module = 'testng'/>
+    <!--<exclude org = 'com.puppycrawl.tools' module = 'checkstyle'/>-->
+    
     <exclude org = 'org.slf4j' module = 'log4j-over-slf4j'/>
     <exclude org = 'ch.qos.logback' module = 'logback-classic'/>
+    
     <exclude org = 'org.ini4j' module = 'ini4j'/>
     <!--<exclude org = 'net.java.dev.jna' module = 'jna'/>-->
     <exclude org = 'javax.json' module = 'javax.json-api'/>

@@ -7,27 +7,23 @@
  */
 
 buildscript {
-	repositories {
-		mavenLocal()
-		if (!gradle.startParameter.offline) {
-			mavenCentral()
-			//jcenter()
-		}
-	}
+  repositories {
+    mavenLocal()
+    if (!gradle.startParameter.offline) {
+      mavenCentral()
+    }
+  }
 }
 
 plugins {
-  id 'maven'			// add support to deploy (Maven repos) artifacts
-  //id 'groovy'			// extend Java plugin with Groovy support
-  id 'scala'			// extend Java plugin with Scala support
+  id 'maven-publish'  // add support to deploy (Maven repos) artifacts
+  //id 'groovy'       // extend Java plugin with Groovy support
+  id 'scala'          // extend Java plugin with Scala support
   id 'application'	// extend Java plugin with support to build an application and archive (tar, zip) distribution
 }
 
 description = 'Main app sub-package for Scala Intro examples project.'
 //gradle.startParameter.offline = true
-
-//org.apache.tools.ant.DirectoryScanner.removeDefaultExclude('**/.gitignore')
-//org.apache.tools.ant.DirectoryScanner.removeDefaultExclude('**/.hgignore')
 
 group = 'org.sandbox'
 version = '0.1.0'
@@ -48,7 +44,7 @@ ext {
 }
 
 application {
-	applicationDefaultJvmArgs += defaultJvmArgs
+  applicationDefaultJvmArgs += defaultJvmArgs
 }
 
 // Define the main class for the application
@@ -62,86 +58,94 @@ ant.properties['scala.lib'] = System.env.OSTYPE.grep(~/^(?i)linux.*/) ?
   '/usr/share/scala' : '/usr/local/share/scala/lib'
 
 configurations {
-	testOutput.extendsFrom (testCompile)
-  checkstyle // with plugin: id 'checkstyle'
-  codenarc // with plugin: id 'codenarc'
+  testOutput.extendsFrom (testCompile)
   scalastyle // with plugin: id 'scalastyle'
+  codenarc // with plugin: id 'codenarc'
+  checkstyle // with plugin: id 'checkstyle'
   jacoco // with plugin: id 'jacoco'
 }
 
 sourceSets {
-	main {
-		scala { srcDirs = ['src/main/java', 'src/main/scala'] }
-		java { srcDirs = [] /*['src/main/java']*/ }
-	}
-	test {
-		scala { srcDirs = ['src/test/java', 'src/test/scala']
-			//exclude '**/ClassicTest.*'
-		}
-		java { srcDirs = [] /*['src/test/java']*/
-			//exclude '**/ClassicTest.*'
-		}
-	}
+  main {
+    scala { srcDirs = ['src/main/java', 'src/main/scala'] }
+    //groovy { srcDirs = ['src/main/java', 'src/main/groovy'] }
+    java { srcDirs = [] /*['src/main/java']*/ }
+  }
+  test {
+    scala { srcDirs = ['src/test/java', 'src/test/scala']
+      //exclude '**/ClassicTest.*'
+    }
+    //groovy { srcDirs = ['src/test/java', 'src/test/groovy']
+    //  //exclude '**/ClassicTest.*'
+    //}
+    java { srcDirs = [] /*['src/test/java']*/
+      //exclude '**/ClassicTest.*'
+    }
+  }
 }
 
 repositories {		// You can declare any Maven/Ivy/file repository here.
   flatDir { dirs "${rootDir}/lib" /*,ant.properties['java.lib'],
     ant.properties['scala.lib']*/  }
-	mavenLocal()    // maven {url "${System.env.HOME}/.m2/repository"}
-	if (!gradle.startParameter.offline) {
-		mavenCentral()  // maven {url 'https://repo.maven.apache.org/maven2'}
-		//jcenter()       // maven {url 'https://jcenter.bintray.com'}
-	}
-	ivy {
+  mavenLocal()    // maven {url "${System.env.HOME}/.m2/repository"}
+  if (!gradle.startParameter.offline) {
+    mavenCentral()  // maven {url 'https://repo.maven.apache.org/maven2'}
+  }
+  ivy {
     url "${System.env.HOME}/.ivy2/cache"
-    layout 'pattern', {
-		  //artifact IVY_ARTIFACT_PATTERN
-		  artifact '[organisation]/[module]/[type]s/[artifact](-[revision])(-[classifier]).[ext]'
-		  ivy '[organisation]/[module]/ivy-[revision].xml'
+    patternLayout {
+      //artifact IVY_ARTIFACT_PATTERN
+      artifact '[organisation]/[module]/[type]s/[artifact](-[revision])(-[classifier]).[ext]'
+      ivy '[organisation]/[module]/ivy-[revision].xml'
     }
     //url "${System.env.HOME}/.ivy2/local"
     //layout 'ivy'
-	}
+  }
 }
 
 dependencies {
-	// import BOM
-	implementation platform('org.sandbox:intro_scala-bom:0')
-
-	implementation "org.scala-lang:scala-library"
-  //implementation fileTree(dir: ant.properties['scala.lib'], includes: ['scala-library.jar'])
-	testImplementation "org.scalacheck:scalacheck_${project['scala.compat']}"
-	testImplementation "org.scalatest:scalatest_${project['scala.compat']}"
-
-	//testImplementation 'junit:junit'
-  //testImplementation fileTree(dir: ant.properties['java.lib'], includes: ['hamcrest-core.jar', 'junit.jar'])
-  //testImplementation 'org.testng:testng'
-  //testImplementation 'org.spockframework:spock-core'
-
-	implementation 'org.slf4j:slf4j-api'
-
-	implementation 'org.ini4j:ini4j'
-  //implementation 'net.java.dev.jna:jna'
-
-  implementation 'org.glassfish:javax.json'
-  implementation 'javax.json:javax.json-api'
-  implementation 'org.yaml:snakeyaml'
-  //runtimeOnly 'org.slf4j:log4j-over-slf4j'
-  runtimeOnly 'ch.qos.logback:logback-classic'
-  //testRuntimeOnly "org.scala-lang.modules:scala-xml_${project['scala.compat']}:[1.2,)"
-
-  jacoco 'org.jacoco:org.jacoco.ant:[0.8.5,)'
-  //jacoco fileTree(dir: "${System.env.HOME}/.ant/lib", includes: ['org.jacoco.ant*.jar', 'asm-*.jar'])
-  checkstyle 'com.puppycrawl.tools:checkstyle:8.33'
-  //checkstyle fileTree(dir: ant.properties['java.lib'], includes: ['checkstyle*.jar'])
-  //codenarc 'org.codenarc:CodeNarc:[1.6,)'
-  //codenarc fileTree(dir: ant.properties['java.lib'], includes: ['CodeNarc*.jar'])
-  scalastyle "com.beautiful-scala:scalastyle_${project['scala.compat']}:1.4.0"
-  //scalastyle fileTree(dir: "${System.env.HOME}/javalib", includes: ['scalastyle*.jar', 'scalariform*.jar', 'config*.jar', 'scala-*.jar'])
-  //zinc "org.scala-sbt:zinc_${project['scala.compat']}:[1.3.5,)"
+  // import BOM
+  //implementation platform('org.junit:junit-bom:5.8.0')
+  implementation platform("org.sandbox:${rootname}-bom:0")
 
   implementation 'org.sandbox:intro_scala-util:[0.1.0,)'
   implementation 'org.sandbox:intro_scala-practice:[0.1.0,)'
+
+  implementation "org.scala-lang:scala-library"
+  //implementation fileTree(dir: ant.properties['scala.lib'], includes: ['scala-library.jar'])
+  //testRuntimeOnly "org.scala-lang.modules:scala-xml_${project['scala.compat']}:[1.2,)"
+  testImplementation "org.scalatest:scalatest_${project['scala.compat']}"
+  testImplementation "org.scalacheck:scalacheck_${project['scala.compat']}"
+  scalastyle "com.beautiful-scala:scalastyle_${project['scala.compat']}:[1.4.0,)"
+  //scalastyle fileTree(dir: "${System.env.HOME}/javalib", includes: ['scalastyle*.jar', 'scalariform*.jar', 'config*.jar', 'scala-*.jar'])
+  //zinc "org.scala-sbt:zinc_${project['scala.compat']}:[1.3.5,)"
+
+  //implementation "org.codehaus.groovy:groovy-all"
+  //testImplementation 'org.spockframework:spock-core'
+  //codenarc 'org.codenarc:CodeNarc:[1.6,)'
+  //codenarc fileTree(dir: ant.properties['java.lib'], includes: ['CodeNarc*.jar'])
+
+  //testImplementation 'org.junit.platform:junit-platform-console'
+  //testImplementation 'org.junit.platform:junit-platform-suite'
+  //testImplementation 'org.junit.jupiter:junit-jupiter'
+  //testImplementation 'org.junit.platform:junit-platform-runner'
+  //testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
+  //testImplementation 'org.testng:testng'
+  jacoco 'org.jacoco:org.jacoco.ant:[0.8.5,)'
+  //jacoco fileTree(dir: "${System.env.HOME}/.ant/lib", includes: ['org.jacoco.ant*.jar', 'asm-*.jar'])
+  checkstyle 'com.puppycrawl.tools:checkstyle:[8.33,)'
+  //checkstyle fileTree(dir: ant.properties['java.lib'], includes: ['checkstyle*.jar'])
+
+  implementation 'org.slf4j:slf4j-api'
+  //runtimeOnly 'org.slf4j:log4j-over-slf4j'
+  runtimeOnly 'ch.qos.logback:logback-classic'
+
+  implementation 'org.ini4j:ini4j'
+  //implementation 'net.java.dev.jna:jna'
+  
+  implementation 'org.glassfish:javax.json'
+  implementation 'javax.json:javax.json-api'
+  implementation 'org.yaml:snakeyaml'
 }
 
 tasks.withType(ScalaCompile) {
@@ -155,15 +159,15 @@ tasks.withType(ScalaCompile) {
   scalaCompileOptions.additionalParameters += ['-deprecation', '-unchecked',
     '-feature']
   //scalaCompileOptions.force = false
-	//scalaCompileOptions.forkOptions.jvmArgs = ['-XX:MaxPermSize=1024m']
-	//scalaClasspath = fileTree(dir: ant.properties['scala.lib'])
-	//zincClasspath = fileTree(dir: ant.properties['scala.lib'])
+  //scalaCompileOptions.forkOptions.jvmArgs = ['-XX:MaxPermSize=1024m']
+  //scalaClasspath = fileTree(dir: ant.properties['scala.lib'])
+  //zincClasspath = fileTree(dir: ant.properties['scala.lib'])
   //configurations.zinc.transitive = true
 }
 
 /*tasks.withType(GroovyCompile) {
   if ('1' == DEBUG) {
-      options.compilerArgs += ['-g']    // << '-g' OR += ['-g']
+    options.compilerArgs += ['-g']    // << '-g' OR += ['-g']
   }
   options.compilerArgs += ['-Xlint:all', '-deprecation']
 }*/
@@ -176,19 +180,21 @@ tasks.withType(JavaCompile) {
 }
 
 tasks.withType(JavaExec) {
-	enableAssertions = true
+  enableAssertions = true
 }
 
 test { ignoreFailures true
-	description description + " [-PtestOpts='${testOpts}']"
-	environment 'LD_LIBRARY_PATH', ld_path
+  description description + " [-PtestOpts='${testOpts}']"
+  environment 'LD_LIBRARY_PATH', ld_path
   systemProperties(System.getProperties())
   allJvmArgs = defaultJvmArgs
   testLogging.showStandardStreams = true
   //includes = (toptslist.collect { it.replace('.', '/') + '.class' })
   setTestNameIncludePatterns(toptslist)
   exclude '**/Ts_*.class'
-	outputs.upToDateWhen { false }
+  outputs.upToDateWhen { false }
+  
+  //useJUnitPlatform()
 }
 
 //useTestNG()
@@ -198,12 +204,12 @@ assemble {
 }
 
 clean {
-	FileTree tree = fileTree('.').include('*.log')
-	delete tree
+  FileTree tree = fileTree('.').include('*.log')
+  delete tree
 }
 
 tasks.withType(Jar) {
-	duplicatesStrategy 'exclude'
+  duplicatesStrategy 'exclude'
   doFirst {
     manifest {
       attributes(
@@ -220,46 +226,46 @@ tasks.withType(Jar) {
 }
 
 tasks.withType(Tar) {
-	description description + " [-Ptarext='${tarext}']"
-	switch (tarext) {
-		case 'tar': compression = Compression.NONE ; extension = 'tar'
-			break
-		case 'tar.bz2': compression = Compression.BZIP2 ; extension = 'tar.bz2'
-			break
-		default: compression = Compression.GZIP ; extension = 'tar.gz'
-			break
-	}
+  description description + " [-Ptarext='${tarext}']"
+  switch (tarext) {
+    case 'tar': compression = Compression.NONE ; archiveExtension = 'tar'
+      break
+    case 'tar.bz2': compression = Compression.BZIP2 ; archiveExtension = 'tar.bz2'
+      break
+    default: compression = Compression.GZIP ; archiveExtension = 'tar.gz'
+      break
+  }
 }
 
 assembleDist {
-	description description + " [-Ptarext='${tarext}']"
+  description description + " [-Ptarext='${tarext}']"
 }
 
 jar {
-	//if ((new File('exclude.lst')).exists()) {
-	//	from('.') { exclude (new File('exclude.lst') as String[])
-	//		exclude '**/build/*', '**/gradle/*' }
-	//	exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
-	//} else {
-	//	//from sourceSets.main.allSource
-	//	from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
-	//	exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
-	//}
+  //if ((new File('exclude.lst')).exists()) {
+  //  from('.') { exclude (new File('exclude.lst') as String[])
+  //    exclude '**/build/*', '**/gradle/*' }
+  //  exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
+  //} else {
+  //  //from sourceSets.main.allSource
+  //  from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
+  //  exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
+  //}
 
-	doFirst {
-		manifest {
-			def mfClasspath = configurations.runtimeClasspath.collect {
-				'lib/' + it.getName()}.join(' ')
-			attributes 'Class-Path': mfClasspath
-		}
-	}
+  doFirst {
+    manifest {
+      def mfClasspath = configurations.runtimeClasspath.collect {
+	'lib/' + it.getName()}.join(' ')
+      attributes 'Class-Path': mfClasspath
+    }
+  }
 }
 
 //scaladoc {
   /*scalaClasspath = files(
     "${ant.properties['scala.lib']}/scala-library.jar",
-		"${ant.properties['scala.lib']}/scala-compiler.jar",
-		"${ant.properties['scala.lib']}/scala-reflect.jar")*/
+    "${ant.properties['scala.lib']}/scala-compiler.jar",
+    "${ant.properties['scala.lib']}/scala-reflect.jar")*/
   //scalaClasspath = fileTree(ant.properties['scala.lib']).include('*.jar')
 //}
 
@@ -268,37 +274,48 @@ distTar.classifier = 'project'
 distZip.classifier = 'project'
 
 distributions {
-	ant.defaultexcludes remove: '**/.hgignore'
-	ant.defaultexcludes remove: '**/.gitignore'
-	main { baseName = project.name
-		if ((new File('exclude.lst')).exists()) {
-		  contents {
-			  //from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
-			  from('.') { exclude (new File('exclude.lst') as String[])
-				  exclude '**/build/*', '**/gradle/*' }
-			  exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
-		  }
-		} else {
-		  contents {
-			  from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
-			  exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
-		  }
-		}
-	}
+  main { distributionBaseName = project.name
+    if ((new File('exclude.lst')).exists()) {
+      contents {
+        //from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
+        from('.') { exclude (new File('exclude.lst') as String[])
+          exclude '**/build/*', '**/gradle/*' }
+        exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
+      }
+    } else {
+      contents {
+        from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
+        exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
+      }
+    }
+  }
 }
 
+publishing {
+  publications {
+    maven(MavenPublication) {
+      /*groupId = project.group
+      artifactId = project.name
+      version = project.version*/
+      
+      from components.java
+    }
+  }
+}
+
+
 run {
-	description description + " [-PappArgs='${appArgs}']"
-	environment 'LD_LIBRARY_PATH', ld_path
+  description description + " [-PappArgs='${appArgs}']"
+  environment 'LD_LIBRARY_PATH', ld_path
   //jvmArgs applicationDefaultJvmArgs
   systemProperties(System.getProperties())
   args argslist
-	standardInput = System.in
+  standardInput = System.in
 }
 
 task debug(dependsOn: [assemble]) {
   description "Debug project\'s main [-PappArgs='${appArgs}']"
-	doLast { ignoreExitValue true
+  doLast { ignoreExitValue true
     /*environment 'LD_LIBRARY_PATH', ld_path
     executable = 'ddd'
     args = ['--jdb'] + applicationDefaultJvmArgs.collect { "-J${it}" } +
@@ -313,14 +330,14 @@ task debug(dependsOn: [assemble]) {
 
 task('run-jar', dependsOn: [jar]) {
   description "Run project jar\'s main [-PappArgs='${appArgs}']"
-	doLast {
+  doLast {
     /*javaexec { ignoreExitValue true
       environment 'LD_LIBRARY_PATH', ld_path
       jvmArgs = applicationDefaultJvmArgs
       main = '-jar'
-      args = [jar.archivePath] + argslist
+      args = [jar.archiveFile.get()] + argslist
     }*/
-    println exec_output("java ${applicationDefaultJvmArgs.join(' ')} -jar ${jar.archivePath} ${argslist.join(' ')}")
+    println exec_output("java ${applicationDefaultJvmArgs.join(' ')} -jar ${jar.archiveFile.get()} ${argslist.join(' ')}")
   }
 }
 
@@ -330,19 +347,27 @@ task('debug-jar', dependsOn: [jar]) {
     /*environment 'LD_LIBRARY_PATH', ld_path
     executable = 'ddd'
     args = ['--jdb'] + applicationDefaultJvmArgs.collect { "-J${it}" } +
-      ['-classpath', jar.archivePath, mainClassName] + argslist
+      ['-classpath', jar.archiveFile.get(), mainClassName] + argslist
     standardInput = System.in
     */
     println exec_output("ddd --jdb " +
       ${applicationDefaultJvmArgs.collect { "-J${it}" }.join(' ')} +
-      " -classpath ${jar.archivePath} ${mainClassName} ${argslist.join(' ')}")
+      " -classpath ${jar.archiveFile.get()} ${mainClassName} ${argslist.join(' ')}")
   }
 }
 
 if ((new File("${projectDir}/build-targets.gradle")).exists()) {
-	//apply from: "${projectDir}/depnmgr-ivy.gradle"
-	apply from: "${projectDir}/build-targets.gradle"
+  //apply from: "${projectDir}/depnmgr-ivy.gradle"
+  apply from: "${projectDir}/build-targets.gradle"
 
-	jar.dependsOn([copyDepns])
-	artifacts.archives(tasks.jarTests) //, tasks.jarSources, tasks.jarJavadoc)
+  jar.dependsOn([copyDepns])
+  artifacts.archives(tasks.jarTests) //, tasks.jarSources, tasks.jarJavadoc)
 }
+
+//task auxffi(type: Exec) { workingDir projectDir ; ignoreExitValue true
+//	description "Compile FFI auxiliary products [-Pprefix='${prefix}']"
+//	environment PREFIX:prefix, CC:'cc'
+//	def make_cmd = System.env.OSTYPE.grep(~/^(?i)linux.*/) ? 'make' : 'gmake'
+//	commandLine "${make_cmd} -B -f Makefile-auxffi.mk auxffi".split()
+//}
+//assemble.dependsOn auxffi

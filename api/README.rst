@@ -43,15 +43,15 @@ cd <path> ; ant [-Djava.library.path=$PREFIX/lib] compile [test]
 
 ant publish
 
-build example with maven:
-cd <path> ; mvn [-Djava.library.path=$PREFIX/lib] compile [test]
+build example with maven wrapper:
+cd <path> ; ./mvnw [-Djava.library.path=$PREFIX/lib] compile [test]
 
-mvn install
+./mvnw install
 
-build example with gradle:
-cd <path> ; gradle [-Djava.library.path=$PREFIX/lib] assemble [check]
+build example with gradle wrapper:
+cd <path> ; ./gradlew [-Djava.library.path=$PREFIX/lib] assemble [check]
 
-gradle install
+./gradlew install
 
 Usage
 -----

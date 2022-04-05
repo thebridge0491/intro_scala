@@ -146,6 +146,7 @@ dependencies {
   implementation 'org.glassfish:javax.json'
   implementation 'javax.json:javax.json-api'
   implementation 'org.yaml:snakeyaml'
+  implementation 'com.moandjiezana.toml:toml4j:[0.7.2,)'
 }
 
 tasks.withType(ScalaCompile) {

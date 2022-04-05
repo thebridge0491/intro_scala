@@ -58,7 +58,7 @@ class CollectionsTest extends UnitSpec {
 		m_queue1.enqueue(-0.5f)
 		assertResult(len_oldM + 1, "offer") { m_queue1.size }
 		assertResult(true, "poll") { Util.in_epsilon(epsilon, floats(0),
-            m_queue1.dequeue) }
+            m_queue1.dequeue()) }
 		assertResult("[0.1, 78.5, 52.3, -0.5]", "toString")
 			{ m_queue1.mkString("[", ", ", "]") }
 	}
@@ -139,9 +139,9 @@ class CollectionsTest extends UnitSpec {
             floats2(floats2.length - 1),
             pri_q2.headOption.getOrElse(0.0f): Float) }
 		assertResult(true, "poll") { Util.in_epsilon(epsilon, floats2(0),
-            pri_q1.dequeue) }
+            pri_q1.dequeue()) }
 		assertResult(true, "poll (rev)") { Util.in_epsilon(epsilon,
-            floats2(floats2.length - 1), pri_q2.dequeue) }
+            floats2(floats2.length - 1), pri_q2.dequeue()) }
 		val (len_old1, len_old2) = (pri_q1.size, pri_q2.size)
 		pri_q1.enqueue(-0.5f)
 		pri_q2.enqueue(-0.5f)

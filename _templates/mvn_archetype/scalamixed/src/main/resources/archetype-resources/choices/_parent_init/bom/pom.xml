@@ -1,0 +1,166 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<project xmlns = 'http://maven.apache.org/POM/4.0.0'
+    xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'
+    xsi:schemaLocation = 'http://maven.apache.org/POM/4.0.0
+      http://maven.apache.org/xsd/maven-4.0.0.xsd'>
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>${groupId}</groupId>
+  <artifactId>${parent}-bom</artifactId>
+  <version>0</version>
+  <packaging>pom</packaging>
+
+  <name>${parent.substring(0,1).toUpperCase()}${parent.substring(1)}::BOM</name>
+  <description>BOM pom: ${parentdescription}</description>
+
+  <properties>
+    <scala.compat>2.13</scala.compat>
+    <version.scala>2.13.2</version.scala>
+    <versionplugin.scala>4.5.6</versionplugin.scala>
+    <version.scalatest>3.2.10</version.scalatest>
+    <version.scalacheck>1.15.4</version.scalacheck>
+    <version.scalastyle>1.5.1</version.scalastyle>
+    <version.zinc>1.3.5</version.zinc>
+
+    <version.groovy>3.0.8</version.groovy>
+    <version.spock>2.0-groovy-3.0</version.spock>
+    <version.codenarc>2.2.0</version.codenarc>
+
+    <version.clojure>1.10.3</version.clojure>
+    <version.testcheck>1.1.1</version.testcheck>
+    <version.toolsreader>1.3.6</version.toolsreader>
+    <version.toolslogging>1.2.4</version.toolslogging>
+    <version.toolscli>1.0.206</version.toolscli>
+    <version.datajson>2.4.0</version.datajson>
+
+    <version.junit>5.8.0</version.junit>
+    <version.junitplatform>1.8.0</version.junitplatform>
+    <!--<version.junit4>4.13.2</version.junit4>-->
+    <version.testng>7.5</version.testng>
+    <version.jacoco>0.8.7</version.jacoco>
+    <version.checkstyle>9.2.1</version.checkstyle>
+
+    <version.slf4j>1.7.33</version.slf4j>
+    <version.logback>1.2.10</version.logback>
+
+    <version.ini4j>0.5.4</version.ini4j>
+    <version.jna>5.10.0</version.jna>
+    <version.jsonp>1.1.4</version.jsonp>
+    <version.snakeyaml>1.30</version.snakeyaml>
+    <version.toml4j>0.7.2</version.toml4j>
+  </properties>
+
+  <dependencyManagement>
+  <dependencies>
+    <dependency> <scope>import</scope> <type>pom</type>
+      <groupId>org.junit</groupId> <artifactId>junit-bom</artifactId>
+      <version>${symbol_dollar}{version.junit}</version> </dependency>
+
+    <dependency> <groupId>org.scala-lang</groupId>
+      <artifactId>scala-library</artifactId>
+      <version>${symbol_dollar}{version.scala}</version> </dependency>
+    <dependency> <!--<classifier>sources</classifier> <type>jar</type>-->
+      <groupId>org.scala-lang</groupId> <artifactId>scala-compiler</artifactId>
+      <version>${symbol_dollar}{version.scala}</version> </dependency>
+    <dependency> <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${symbol_dollar}{scala.compat}</artifactId>
+      <version>${symbol_dollar}{version.scalatest}</version> </dependency>
+    <dependency> <groupId>org.scalacheck</groupId>
+      <artifactId>scalacheck_${symbol_dollar}{scala.compat}</artifactId>
+      <version>${symbol_dollar}{version.scalacheck}</version> </dependency>
+    <dependency> <groupId>com.beautiful-scala</groupId>
+      <artifactId>scalastyle_${symbol_dollar}{scala.compat}</artifactId>
+      <version>${symbol_dollar}{version.scalastyle}</version> </dependency>
+	<dependency> <optional>true</optional> <groupId>net.alchim31.maven</groupId>
+	  <artifactId>scala-maven-plugin</artifactId>
+	  <version>${symbol_dollar}{versionplugin.scala}</version> </dependency>
+    <dependency> <groupId>org.scala-sbt</groupId>
+      <artifactId>zinc_2.12</artifactId>
+      <version>${symbol_dollar}{version.zinc}</version> </dependency>
+
+    <dependency> <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-all</artifactId> <type>pom</type>
+      <version>${symbol_dollar}{version.groovy}</version> </dependency>
+
+    <dependency> <groupId>org.clojure</groupId>
+      <artifactId>clojure</artifactId>
+      <version>${symbol_dollar}{version.clojure}</version> </dependency>
+    <dependency> <groupId>org.clojure</groupId>
+      <artifactId>test.check</artifactId>
+      <version>${symbol_dollar}{version.testcheck}</version> </dependency>
+    <dependency> <groupId>org.clojure</groupId>
+      <artifactId>tools.reader</artifactId>
+      <version>${symbol_dollar}{version.toolsreader}</version> </dependency>
+    <dependency> <groupId>org.clojure</groupId>
+      <artifactId>tools.logging</artifactId>
+      <version>${symbol_dollar}{version.toolslogging}</version> </dependency>
+    <dependency> <groupId>org.clojure</groupId>
+      <artifactId>tools.cli</artifactId>
+      <version>${symbol_dollar}{version.toolscli}</version> </dependency>
+    <dependency> <groupId>org.clojure</groupId>
+      <artifactId>data.json</artifactId>
+      <version>${symbol_dollar}{version.datajson}</version> </dependency>
+
+    <!--<dependency> <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-console</artifactId> </dependency>
+    <dependency> <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-suite</artifactId> </dependency>
+    <dependency> <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId> </dependency>
+    <dependency> <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-runner</artifactId> </dependency>
+    <dependency> <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId> </dependency>-->
+    <!--<dependency> <groupId>junit</groupId> <artifactId>junit</artifactId>
+      <version>${symbol_dollar}{version.junit4}</version> </dependency>-->
+    <dependency> <groupId>org.testng</groupId>
+      <artifactId>testng</artifactId>
+      <version>${symbol_dollar}{version.testng}</version> </dependency>
+    <dependency> <groupId>org.spockframework</groupId>
+      <artifactId>spock-core</artifactId>
+      <version>${symbol_dollar}{version.spock}</version> </dependency>
+    <dependency> <groupId>org.jacoco</groupId>
+      <artifactId>org.jacoco.ant</artifactId>
+      <version>${symbol_dollar}{version.jacoco}</version> </dependency>
+    <dependency> <groupId>com.puppycrawl.tools</groupId>
+      <artifactId>checkstyle</artifactId>
+      <version>${symbol_dollar}{version.checkstyle}</version> </dependency>
+    <dependency> <groupId>org.codenarc</groupId>
+      <artifactId>CodeNarc</artifactId>
+      <version>${symbol_dollar}{version.codenarc}</version> </dependency>
+
+    <dependency> <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${symbol_dollar}{version.slf4j}</version> </dependency>
+    <dependency> <groupId>org.slf4j</groupId>
+      <artifactId>log4j-over-slf4j</artifactId>
+      <version>${symbol_dollar}{version.slf4j}</version> </dependency>
+    <dependency> <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <version>${symbol_dollar}{version.logback}</version> </dependency>
+
+    <dependency> <groupId>org.ini4j</groupId>
+      <artifactId>ini4j</artifactId>
+      <version>${symbol_dollar}{version.ini4j}</version> </dependency>
+    <dependency> <groupId>net.java.dev.jna</groupId>
+      <artifactId>jna</artifactId>
+      <version>${symbol_dollar}{version.jna}</version> </dependency>
+
+    <dependency> <groupId>javax.json</groupId>
+      <artifactId>javax.json-api</artifactId>
+      <version>${symbol_dollar}{version.jsonp}</version> </dependency>
+    <dependency> <groupId>org.glassfish</groupId>
+      <artifactId>javax.json</artifactId>
+      <version>${symbol_dollar}{version.jsonp}</version> </dependency>
+    <dependency> <groupId>org.yaml</groupId>
+      <artifactId>snakeyaml</artifactId>
+      <version>${symbol_dollar}{version.snakeyaml}</version> </dependency>
+    <dependency> <groupId>com.moandjiezana.toml</groupId>
+      <artifactId>toml4j</artifactId>
+      <version>${symbol_dollar}{version.toml4j}</version> </dependency>
+  </dependencies>
+  </dependencyManagement>
+</project>

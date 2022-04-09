@@ -3,28 +3,28 @@
 #set( $symbol_escape = '\' )
 package ${package} {
 
-import org.junit.Test
-import org.junit.Assert._
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions._
 
 class NewTest {
     //val tolerance = 2.0f * Float.MinPositiveValue
     val epsilon = 1.0e-7f
-    
-    @org.junit.Before
+
+    @org.junit.jupiter.api.BeforeEach
     def setUp(): Unit = {
     	System.err.println("setup Test ...")
     }
-    @org.junit.After
+    @org.junit.jupiter.api.AfterEach
     def tearDown(): Unit = {
     	System.err.println("... teardown Test")
     }
-	
+
     def in_epsilon(a: Double, b: Double, tolerance: Double = 0.001): Boolean = {
         val delta = Math.abs(tolerance)
         //(a - delta) <= b && (a + delta) >= b
 		!((a + delta) < b) && !((b + delta) < a)
     }
-	
+
     @Test
     def test_classExists() = {
         try {
@@ -33,14 +33,14 @@ class NewTest {
             assertTrue(true)
         } catch {
             case exc: ClassNotFoundException => {
-                //fail("Class(es) not existent: " + 
+                //fail("Class(es) not existent: " +
                 //    classOf[Library].getName)
-                fail("%s %s".format("Class(es) not existent:", 
+                fail("%s %s".format("Class(es) not existent:",
                     Array(classOf[Library].getName).mkString))
             }
         }
     }
-    
+
 	@Test
     def test_method() = { assertEquals(4, 2 * 2)
     }
@@ -52,26 +52,30 @@ class NewTest {
     @Test
     def test_strMethod() = { assertEquals("Hello", "Hello")
     }
-    @Test(timeout = 1000000)
+    @org.junit.jupiter.api.Timeout(value = 1000000,
+      unit = java.util.concurrent.TimeUnit.MILLISECONDS)
+    @Test
     def test_timeoutMethod() = { for (i <- List.range(0, 1.0e6.toInt, 1)) {}
     }
-    @org.junit.Ignore @Test
+    @org.junit.jupiter.api.Disabled @Test
     def test_ignoredMethod() = { assertEquals(5, 2 * 2)
     }
     @Test //(expected = AssertionError.class)
     def test_failMethod() = { fail()
     }
-    @Test(expected = classOf[IllegalArgumentException])
-    def test_exceptionMethod() { throw new IllegalArgumentException
+    @Test //(expected = classOf[IllegalArgumentException])
+    def test_exceptionMethod(): Unit = {
+      assertThrows(classOf[IllegalArgumentException],
+        () => throw new IllegalArgumentException)
     }
 }
 
 object NewTest {
-    @org.junit.BeforeClass
+    @org.junit.jupiter.api.BeforeAll
     def setUpClass(): Unit = {
     	System.err.println("${symbol_pound}${symbol_pound}${symbol_pound}setup TestCase${symbol_pound}${symbol_pound}${symbol_pound}")
     }
-    @org.junit.AfterClass
+    @org.junit.jupiter.api.AfterAll
     def tearDownClass(): Unit = {
     	System.err.println("${symbol_pound}${symbol_pound}${symbol_pound}teardown TestCase${symbol_pound}${symbol_pound}${symbol_pound}")
     }

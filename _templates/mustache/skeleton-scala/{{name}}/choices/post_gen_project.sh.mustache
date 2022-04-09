@@ -1,0 +1,53 @@
+#!/bin/sh
+
+mkdir -p build ; cp -R choices build/
+rm -r choices
+mv _mvn .mvn
+
+proj_dir=`pwd`
+readmeext={{readmeext}}{{^readmeext}}.rst{{/readmeext}}
+license={{license}}{{^license}}Apache-2.0{{/license}}
+buildtool={{buildtool}}{{^buildtool}}maven{{/buildtool}}
+testfrwk={{testfrwk}}{{^testfrwk}}junit{{/testfrwk}}
+executable={{executable}}{{^executable}}no{{/executable}}
+ffilib={{ffilib}}{{^ffilib}}none{{/ffilib}}
+
+nesteddirs={{nesteddirs}}{{^nesteddirs}}intro_jvm/util{{/nesteddirs}}
+
+cp build/choices/readme/README${readmeext} README${readmeext}
+if [ -d build/choices/_parent_readme ] ; then
+    cp build/choices/_parent_readme/README${readmeext} \
+	    build/choices/_parent_init/README${readmeext} ;
+fi
+
+if [ ! 'Not open source' = "${license}" ] ; then
+    cp build/choices/license/LICENSE_${license} LICENSE ;
+fi
+
+if [ -d build/choices/build_tool ] && [ ! 'gradle' = "${buildtool}" ] ; then
+	cp -R build/choices/build_tool/${buildtool}/* . ;
+elif [ -d build/choices/build_tool ] ; then # default: gradle
+	cp -R build/choices/build_tool/gradle/* . ;
+fi
+
+if [ -d build/choices/testfrwk ] && [ ! "scalatest" = "${testfrwk}" ] ; then
+	cp -R build/choices/testfrwk/${testfrwk}/* src/test/scala/${nesteddirs}/ ;
+elif [ -d build/choices/testfrwk ] ; then # default: scalatest
+	cp -R build/choices/testfrwk/scalatest/* src/test/scala/${nesteddirs}/ ;
+fi
+
+if [ -d src/main/java/${nesteddirs} ] && [ ! "yes" = "${executable}" ] ; then
+    rm -vf src/main/*/${nesteddirs}/Main.* ;
+fi
+
+if [ -d build/choices/ffi_lib ] && [ '' = "$(echo "${ffilib}" | grep -E 'none')" ] ; then
+	cp -R build/choices/ffi_lib/${ffilib}/* src/main/scala/${nesteddirs}/ ;
+fi
+
+if [ -d '../_templates' ] ; then
+	skeletondir={{skeletondir}}{{^skeletondir}}$HOME/Templates/mustache/skeleton-jvm{{/skeletondir}} ;
+	skel_pardir=`dirname ${skeletondir}` ;
+	rm -fr ../_templates/mustache/`basename ${skeletondir}` ;
+	mkdir -p ../_templates/mustache ;
+	cp -R ${skel_pardir}/render_mustache.* ${skeletondir} ../_templates/mustache/ ;
+fi

@@ -12,7 +12,7 @@ class Person(var name: String = "ToDo", var age: Int = 10) {
 	private val pracLogger = LoggerFactory.getLogger("prac")
 	pracLogger.info("Person()")
     
-    def this() {
+    def this() = {
     	this("ToDo", 10)
     	pracLogger.info("Person()")
     }

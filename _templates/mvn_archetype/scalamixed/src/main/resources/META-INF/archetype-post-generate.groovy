@@ -46,21 +46,22 @@ def dirX = Paths.get("${request.outputDirectory}", "${artifactId}").toFile()
 	, "mv -v _hgignore .hgignore", "mv -v _gitignore .gitignore"
 	, "mv -v build/choices/_parent_init/_hgignore.lst build/choices/_parent_init/.hgignore"
 	, "mv -v build/choices/_parent_init/_gitignore.lst build/choices/_parent_init/.gitignore"
-	].each { 
+	].each {
 	cmd -> run_cmd(cmd, dirX) }
+run_cmd("mv _mvn .mvn", dirX)
 
 run_cmd("cp -v build/choices/readme/README${readmeExt} README${readmeExt}",
 	dirX)
 run_cmd("cp -v build/choices/_parent_readme/README${readmeExt} build/choices/_parent_init/README${readmeExt}",
 	dirX)
 
-if (license in ['Apache-2.0', 'MIT', 'BSD-3-Clause', 'GPL-3.0+', 'ISC', 
+if (license in ['Apache-2.0', 'MIT', 'BSD-3-Clause', 'GPL-3.0+', 'ISC',
 		'Unlicense']) {
 	run_cmd("cp -v build/choices/license/LICENSE_${license}.txt LICENSE.txt",
 		dirX)
 }
 
-if (buildTool in ['gradle', 'maven', 'ant', 'rake', 'make', 'sbt']) {
+if (Files.exists(Paths.get("${dirX}/build/choices/build_tool")) && (buildTool in ['gradle', 'maven', 'ant', 'sbt', 'rake', 'make'])) {
 	def files = glob_files("${dirX}/build/choices/build_tool/${buildTool}")
 	run_cmd("cp -vR ${files.join(' ')} .", dirX)
 } else { // default: gradle
@@ -68,7 +69,7 @@ if (buildTool in ['gradle', 'maven', 'ant', 'rake', 'make', 'sbt']) {
 	run_cmd("cp -vR ${files.join(' ')} .", dirX)
 }
 
-if (testFrwk in ['scalatest', 'junit', 'testng']) {
+if (Files.exists(Paths.get("${dirX}/build/choices/testfrwk")) && (testFrwk in ['scalatest', 'junit', 'testng'])) {
 	def files = glob_files("${dirX}/build/choices/testfrwk/${testFrwk}")
 	run_cmd("cp -vR ${files.join(' ')} src/test/scala/${packageInPathFormat}/",
 		dirX)
@@ -78,18 +79,18 @@ if (testFrwk in ['scalatest', 'junit', 'testng']) {
 		dirX)
 }
 
-if ('yes' != executable) {
+if (Files.exists(Paths.get("${dirX}/src/main/scala/${packageInPathFormat}")) && ('yes' != executable)) {
     run_cmd("rm -vf src/main/scala/${packageInPathFormat}/Main.scala src/main/java/${packageInPathFormat}/Main.java",
 		dirX)
 }
 
-if (ffiLib in ['jna', 'swig']) {
+if (Files.exists(Paths.get("${dirX}/build/choices/ffi_lib")) &&(ffiLib in ['jna', 'swig'])) {
 	def files = glob_files("${dirX}/build/choices/ffi_lib/${ffiLib}")
 	run_cmd("cp -vR ${files.join(' ')} src/main/scala/${packageInPathFormat}/",
 		dirX)
 }
 /*
-if (Files.exists(Paths.get("_templates"))) {
+if (Files.exists(Paths.get("_templates")) && Files.isDirectory(Paths.get("_templates"))) {
 	run_cmd("mkdir -vp ../_templates/${request.getArchetypeArtifactId()}",
 	 	dirX)
 	def archetypeOrgPath = "${request.getArchetypeGroupId()}".replaceAll("\\.", "/")

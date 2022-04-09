@@ -1,0 +1,440 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<!-- depn scopes: compile, provided, runtime, test, system, import -->
+<!-- maven cmdln cmds: (1) resolve ; (2) build-classpath ; (3) copy-depns ; (4) install ;
+  (5) (w/out pom.xml) get single depn ; (6) (w/out pom.xml) copy single depn ;
+  (7) (w/out pom.xml) install external depn
+(1) mvn [-f pom.xml] [-s settings.xml] dependency:resolve[-plugins]
+(2) mvn [-Dmdep.prefix=lib] [-Dmdep.outputFile=<file.txt>]
+  [-DincludeScope=compile] dependency:build-classpath
+(3) mvn [-DoutputDirectory=lib] dependency:copy-dependencies
+(4) mvn [-DupdateReleaseInfo=true] install:install
+(5) mvn [-Dtransitive=false] -Dartifact=<groupId>:<artifactId>:<version>[:<packaging>]
+  dependency:get
+(6) mvn [-Dtransitive=false] [-DoutputDirectory=<dir>]
+  -Dartifact=<groupId>:<artifactId>:<version>[:<packaging>]
+  org.apache.maven.plugins:maven-dependency-plugin:2.6:copy
+(7) mvn [-DgroupId=<groupId> -DartifactId=<artifactId> -Dversion=<version>
+  -Dpackaging=jar] -Dfile=file.jar install:install-file
+-->
+<project xmlns = 'http://maven.apache.org/POM/4.0.0'
+    xmlns:xsi = 'http://www.w3.org/2001/XMLSchema-instance'
+    xsi:schemaLocation = 'http://maven.apache.org/POM/4.0.0
+      http://maven.apache.org/xsd/maven-4.0.0.xsd'>
+  <modelVersion>4.0.0</modelVersion>
+  
+  <groupId>{{groupid}}{{^groupid}}org.sandbox{{/groupid}}</groupId>
+  <artifactId>{{parent}}{{^parent}}intro_jvm{{/parent}}-parent</artifactId>
+  <version>0</version>
+  <packaging>pom</packaging>
+  
+  <name>{{parentcap}}{{^parentcap}}Intro_jvm{{/parentcap}}</name>
+  <description>Parent pom: {{parentdescription}}{{^parentdescription}}Multi-package project Intro examples for JVM language.{{/parentdescription}}</description>
+  <url>https://{{repohost}}{{^repohost}}bitbucket.org{{/repohost}}/{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}/{{parent}}{{^parent}}intro_jvm{{/parent}}</url>
+  
+  <properties>
+    <maven.prereq>3.3.9</maven.prereq>
+
+    <versionplugin.help>3.2.0</versionplugin.help>
+    <versionplugin.versions>2.9.0</versionplugin.versions>
+    <versionplugin.antrun>3.0.0</versionplugin.antrun>
+    <versionplugin.clean>3.1.0</versionplugin.clean>
+    <versionplugin.dependency>3.2.0</versionplugin.dependency>
+    <versionplugin.resources>3.2.0</versionplugin.resources>
+    <versionplugin.compiler>3.9.0</versionplugin.compiler>
+    <versionplugin.surefire>2.22.2</versionplugin.surefire>
+    <versionplugin.failsafe>2.22.2</versionplugin.failsafe>
+    <versionplugin.exec>3.0.0</versionplugin.exec>
+    <versionplugin.jar>3.2.2</versionplugin.jar>
+    <versionplugin.source>3.2.1</versionplugin.source>
+    <versionplugin.assembly>3.3.0</versionplugin.assembly>
+    <versionplugin.javadoc>3.3.1</versionplugin.javadoc>
+    <versionplugin.checkstyle>3.1.2</versionplugin.checkstyle>
+    <versionplugin.codenarc>0.22-1</versionplugin.codenarc>
+    <versionplugin.install>2.5.2</versionplugin.install>
+    <versionplugin.deploy>2.8.2</versionplugin.deploy>
+
+    <versionplugin.scala>4.5.6</versionplugin.scala>
+    <versionplugin.groovy>3.7.0</versionplugin.groovy>
+    <versionplugin.groovybatch>3.0.8-01</versionplugin.groovybatch>
+    <versionplugin.clojure>1.8.4</versionplugin.clojure>
+    <versionplugin.buildhelper>3.3.0</versionplugin.buildhelper>
+    <versionplugin.scalastyle>1.1.1</versionplugin.scalastyle>
+    <versionplugin.scalatest>2.0.2</versionplugin.scalatest>
+    
+    <version.jacoco>0.8.7</version.jacoco>
+    
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.sourceEncoding>UTF-8</project.reporting.sourceEncoding>
+    <checkstyle.config.location>${project.basedir}/config/sun_checks.xml</checkstyle.config.location>
+    <scalastyle.config.location>${project.basedir}/config/scalastyle_config.xml</scalastyle.config.location>
+    <argLine></argLine>
+    
+    <echo.file>${project.build.directory}/matching.properties</echo.file>
+    <echo.pat>^.*</echo.pat>
+    <project.package>${project.groupId}.{{parent}}{{^parent}}intro_jvm{{/parent}}.parent</project.package>
+  </properties>
+  
+  <prerequisites>
+    <maven>${maven.prereq}</maven>
+  </prerequisites>
+  
+  <build>
+    <pluginManagement>
+    <plugins>
+	  <!-- default pluginGroups: org.apache.maven.plugins; org.codehaus.mojo -->
+	  <plugin> <artifactId>maven-help-plugin</artifactId>
+		<version>${versionplugin.help}</version> </plugin>
+        
+      <plugin> <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${versionplugin.versions}</version> </plugin>
+	  
+	  <plugin> <artifactId>maven-antrun-plugin</artifactId>
+		<version>${versionplugin.antrun}</version>
+	    <executions>
+	      <execution>
+	        <id>echoproperties</id>
+	        <phase>validate</phase>
+	        <goals> <goal>run</goal> </goals>
+	        <configuration>
+	          <target description = 'Echo properties matching pattern [-Decho.file="${echo.file}" -Decho.pat="${echo.pat}"]' name = 'properties'>
+	            <echo>Echo properties matching pattern [-Decho.file="${echo.file}" -Decho.pat="${echo.pat}"]</echo>
+	            <echoproperties destfile = "${echo.file}">
+	              <!--<propertyset> <propertyref prefix = "${echo.pat}"/> </propertyset>-->
+                  <propertyset> <propertyref regex = "${echo.pat}"/> </propertyset>
+	            </echoproperties>
+	          </target>
+	        </configuration>
+	      </execution>
+          <execution>
+            <id>define-classpath</id>
+            <phase>process-resources</phase>
+            <goals> <goal>run</goal> </goals>
+            <configuration>
+              <exportAntProperties>true</exportAntProperties>
+              <target>
+                <pathconvert property = 'test.jars' pathsep = ' '
+                    refid = 'maven.test.classpath'>
+                  <chainedmapper>
+                    <flattenmapper/>
+                    <globmapper from = '*' to = 'lib/*'/>
+                  </chainedmapper>
+                </pathconvert>
+              </target>
+            </configuration>
+          </execution>
+	    </executions>
+	  </plugin>
+	  
+	  <plugin> <artifactId>maven-clean-plugin</artifactId>
+		<version>${versionplugin.clean}</version> </plugin>
+	  
+	  <plugin> <artifactId>maven-dependency-plugin</artifactId>
+		<version>${versionplugin.dependency}</version>
+        <executions>
+          <execution>
+            <id>copy-dependencies</id>
+            <goals> <goal>copy-dependencies</goal> </goals>
+            <configuration>
+              <outputDirectory>${project.build.directory}/lib</outputDirectory>
+            </configuration>
+          </execution>
+          <execution>
+            <phase>package</phase>
+            <goals> <goal>build-classpath</goal> </goals>
+            <configuration>
+              <prefix>lib</prefix>
+              <!--<outputFilterFile>true</outputFilterFile>-->
+              <outputFile>${project.build.directory}/classpath_test.txt</outputFile>
+              <!--<outputProperty>test.jars</outputProperty>-->
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+	  
+	  <plugin> <artifactId>maven-resources-plugin</artifactId>
+		<version>${versionplugin.resources}</version> </plugin>
+	  
+	  <plugin> <artifactId>maven-compiler-plugin</artifactId>
+		<version>${versionplugin.compiler}</version>
+	    <!--<dependencies>
+	      <dependency>
+			<groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-eclipse-compiler</artifactId>
+            <version>${versionplugin.groovy}</version>
+          </dependency>
+	      <dependency>
+			<groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-eclipse-batch</artifactId>
+            <version>${versionplugin.groovybatch}</version>
+          </dependency>
+	    </dependencies>-->
+	    <configuration>
+	      <!--<compilerId>groovy-eclipse-compiler</compilerId>-->
+          <testExcludes>
+            <testExclude>**/ClassicTest.*</testExclude>
+            <testExclude>**/ClassicProp.*</testExclude>
+          </testExcludes>
+	    </configuration>
+	  </plugin>
+	  
+	  <plugin> <artifactId>maven-surefire-plugin</artifactId>
+		<version>${versionplugin.surefire}</version>
+	    <configuration> <testFailureIgnore>true</testFailureIgnore>
+	      <skipTests>true</skipTests> </configuration>
+	  </plugin>
+	  
+	  <plugin> <artifactId>maven-failsafe-plugin</artifactId>
+		<version>${versionplugin.failsafe}</version>
+	    <configuration> <testFailureIgnore>true</testFailureIgnore>
+	      <skipTests>true</skipTests> </configuration>
+	  </plugin>
+        
+      <plugin> <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>${versionplugin.exec}</version> </plugin>
+	  
+	  <plugin> <artifactId>maven-jar-plugin</artifactId>
+		<version>${versionplugin.jar}</version>
+        <configuration>
+          <archive combine.self = 'override'>
+            <index>false</index>
+            <manifestEntries><Built-By></Built-By></manifestEntries>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+              <classpathPrefix>lib/</classpathPrefix>
+              <mainClass></mainClass>
+              <!--<mainClass>${project.package}.Main</mainClass>-->
+              <packageName>${project.package}</packageName>
+            </manifest>
+          </archive>
+        </configuration>
+        <executions>
+          <execution>
+            <id>test-manifest-mf</id>
+            <configuration>
+              <archive combine.self = 'override'>
+                <manifestEntries>
+                  <Built-By></Built-By>
+                  <Class-Path>${project.artifactId}-${project.version}.jar ${test.jars}</Class-Path>
+                </manifestEntries>
+                <manifest>
+                  <addClasspath>false</addClasspath>
+                  <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                  <classpathPrefix>lib/</classpathPrefix>
+                  <!--<classpathLayoutType>custom</classpathLayoutType>
+                  <customClasspathLayout>${artifact.artifactId}${artifact.dashClassifier?}.${artifact.extension}</customClasspathLayout>-->
+                  <mainClass>${project.package}.Ts_Main</mainClass>
+                  <packageName>${project.package}</packageName>
+                </manifest>
+              </archive>
+            </configuration>
+            <phase>package</phase>
+            <goals> <goal>test-jar</goal> </goals>
+          </execution>
+        </executions>
+      </plugin>
+	  
+	  <plugin> <artifactId>maven-source-plugin</artifactId>
+		<version>${versionplugin.source}</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <goals> <goal>jar-no-fork</goal>
+              <goal>test-jar-no-fork</goal> </goals>
+          </execution>
+        </executions>
+      </plugin>
+	  
+	  <plugin> <artifactId>maven-assembly-plugin</artifactId>
+		<version>${versionplugin.assembly}</version>
+        <configuration>
+          <descriptorRefs>
+            <descriptorRef>project</descriptorRef>
+          </descriptorRefs>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assemble</id>
+            <phase>package</phase>
+            <goals> <goal>single</goal> </goals>
+          </execution>
+        </executions>
+      </plugin>
+	  
+	  <plugin> <artifactId>maven-javadoc-plugin</artifactId>
+		<version>${versionplugin.javadoc}</version>
+        <executions>
+          <execution>
+            <id>attach-apidocs</id>
+            <phase>package</phase>
+            <goals> <goal>jar</goal> </goals>
+          </execution>
+        </executions>
+      </plugin>
+	  
+	  <plugin> <artifactId>maven-checkstyle-plugin</artifactId>
+		<version>${versionplugin.checkstyle}</version>
+	    <configuration>
+	      <consoleOutput>true</consoleOutput>
+	      <failOnViolation>false</failOnViolation>
+	    </configuration>
+	    <executions>
+	      <execution>
+	        <id>checkstyle</id>
+	        <goals> <goal>check</goal> </goals>
+	      </execution>
+	    </executions>
+	  </plugin>
+      
+      <!--<plugin> <groupId>org.codehaus.groovy</groupId>
+        <artifactId>groovy-eclipse-compiler</artifactId>
+        <version>${versionplugin.groovy}</version> </plugin>-->
+      
+      <plugin> <groupId>org.codehaus.mojo</groupId>
+		<artifactId>codenarc-maven-plugin</artifactId>
+		<version>${versionplugin.codenarc}</version>
+        <!--<executions>
+          <execution>
+            <goals> <goal>verify</goal> </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <maxPriority1Violations>2</maxPriority1Violations>
+          <maxPriority2Violations>3</maxPriority2Violations>
+          <maxPriority3Violations>1</maxPriority3Violations>
+        </configuration>-->
+	  </plugin>
+      
+      <plugin> <artifactId>maven-install-plugin</artifactId>
+		<version>${versionplugin.install}</version> </plugin>
+	  
+	  <plugin> <artifactId>maven-deploy-plugin</artifactId>
+		<version>${versionplugin.deploy}</version> </plugin>
+      
+      <!-- 3rd party plugins -->
+      <!-- see http://davidb.github.com/scala-maven-plugin -->
+	  <plugin> <groupId>net.alchim31.maven</groupId>
+		<artifactId>scala-maven-plugin</artifactId>
+		<version>${versionplugin.scala}</version>
+        <executions>
+          <execution>
+            <id>scala-compile-first</id>
+            <phase>process-resources</phase>
+            <goals> <goal>add-source</goal>
+              <goal>compile</goal> </goals>
+          </execution>
+          <execution>
+            <id>scala-test-compile</id>
+            <phase>process-test-resources</phase>
+            <goals> <goal>testCompile</goal> </goals>
+          </execution>
+          <execution>
+            <id>attach-scaladocs</id>
+            <goals> <goal>doc-jar</goal> </goals>
+          </execution>
+        </executions>
+	  </plugin>
+
+      <plugin>
+        <groupId>com.theoryinpractise</groupId>
+        <artifactId>clojure-maven-plugin</artifactId>
+        <version>${versionplugin.clojure}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <sourceDirectories>
+            <sourceDirectory>src/main/clj</sourceDirectory>
+          </sourceDirectories>
+          <testSourceDirectories>
+            <testSourceDirectory>src/test/clj</testSourceDirectory>
+          </testSourceDirectories>
+          <!--<temporaryOutputDirectory>true</temporaryOutputDirectory>-->
+          <!--<mainClass>${project.package}.Main</mainClass>-->
+        </configuration>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>${versionplugin.buildhelper}</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals> <goal>add-source</goal> </goals>
+            <configuration>
+              <sources> <source>src/main/java</source> </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+	  
+	  <plugin> <groupId>org.scalatest</groupId>
+		<artifactId>scalatest-maven-plugin</artifactId>
+		<version>${versionplugin.scalatest}</version>
+ 	    <configuration>
+	      <testFailureIgnore>true</testFailureIgnore>
+	       <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+	      <junitxml>.</junitxml>
+	      <filereports>WDF TestSuite.txt</filereports>
+	    </configuration>
+	    <executions>
+	      <execution>
+	        <id>test</id>
+	        <goals> <goal>test</goal> </goals>
+	      </execution>
+	    </executions>
+	  </plugin>
+	  
+	  <plugin> <groupId>org.neo4j</groupId>
+		<artifactId>scalastyle-maven-plugin</artifactId>
+		<version>${versionplugin.scalastyle}</version>
+ 	    <configuration>
+	      <sourceDirectory>src/main/scala</sourceDirectory>
+	    </configuration>
+	    <executions>
+	      <execution>
+	        <id>scalastyle</id>
+	        <goals> <goal>check</goal> </goals>
+	      </execution>
+	    </executions>
+	  </plugin>
+	  
+	  <plugin> <groupId>org.jacoco</groupId>
+		<artifactId>jacoco-maven-plugin</artifactId>
+		<version>${version.jacoco}</version>
+        <executions>
+          <execution>
+            <id>default-prepare-agent</id>
+            <goals> <goal>prepare-agent</goal> </goals>
+          </execution>
+          <execution>
+            <id>default-report</id>
+            <phase>verify</phase>
+            <goals> <goal>report</goal> </goals>
+          </execution>
+        </executions>
+	  </plugin>
+    </plugins>
+    </pluginManagement>
+  </build>
+  <reporting>
+    <plugins>
+      <plugin> <groupId>org.jacoco</groupId>
+		<artifactId>jacoco-maven-plugin</artifactId>
+		<version>${version.jacoco}</version>
+        <reportSets>
+          <reportSet>
+            <reports>
+			  <!-- select non-aggregate reports -->
+              <report>report</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
+</project>

@@ -3,8 +3,8 @@
 prefix=/usr/local
 debug=0
 
-#if ! [ build = `basename $PWD` ] ; then
-#	echo ; echo "ERROR: cd build ; [sh] ./configure.sh [OPTIONS]" ;
+#if [ build = `basename $PWD` ] ; then
+#	echo ; echo "ERROR: [sh] ./configure.sh [OPTIONS]" ;
 #	echo ; exit 1 ;
 #fi
 
@@ -30,6 +30,6 @@ PREFIX = ENV['prefix'] ? ENV['prefix'] : '$prefix'
 DEBUG = ENV['DEBUG'] ? ENV['DEBUG'] : '$debug'
 
 EOF
-cat ./rakefile.new >> rakefile
+cat ./Rakefile.new >> Rakefile
 
 echo "Finished configuring, for help: make help"

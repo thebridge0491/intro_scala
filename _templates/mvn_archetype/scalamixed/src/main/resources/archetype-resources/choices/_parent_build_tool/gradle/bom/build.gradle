@@ -2,43 +2,62 @@
 #set( $symbol_dollar = '$' )
 #set( $symbol_escape = '\' )
 buildscript {
-	repositories {
-		mavenLocal()
-		if (!gradle.startParameter.offline) {
-			mavenCentral()
-			//jcenter()
-			//maven { url 'https://repo.spring.io/plugins-release' }
-		}
-	}
-	
-	dependencies {
-		classpath 'io.spring.gradle:dependency-management-plugin:+'
-	}
+  repositories {
+    mavenLocal()
+    if (!gradle.startParameter.offline) {
+      mavenCentral()
+    }
+  }
 }
 
 plugins {
-	id 'maven'   	// add support to deploy (Maven repos) artifacts
-	id 'java'
+  id 'maven-publish'   // add support to deploy (Maven repos) artifacts
+  id 'java'
 }
-
-apply plugin: 'io.spring.dependency-management'
 
 group = '${groupId}'
 version = '0'
 
-/*dependencyManagement {
-	dependencies { // version range ex: [0.1.0,)  0.1.+  latest.release
-		dependency 'junit:junit:[4.10,)'
-	}
+ext {
+  proc_output = { cmdLn, dirFile = null ->
+    def errbuf = new StringBuffer()
+    def proc = cmdLn.execute(null, dirFile)
+    //proc.consumeProcessErrorStream(errbuf) ; println errbuf.toString()
+    return proc.text
+  }
 }
-def installer = install.repositories.mavenInstaller
-[installer]*.pom*.whenConfigured { pom ->
-	pom.packaging = 'pom'
-}*/
 
-install.doFirst {
-	copy { into buildDir ; from "${symbol_dollar}{projectDir}/pom.xml"
-		rename { 'bom.pom' }
-	}
+publishing {
+  publications {
+    maven(MavenPublication) {
+      /*groupId = project.group
+      artifactId = project.name
+      version = project.version*/
+
+      //from components.java
+
+      pom.withXml { provider ->
+        def builder = provider.asString()
+        builder.length = 0 // delete previous content
+        builder << project.file("${symbol_dollar}{buildDir}/bom.pom").getText("utf-8")
+      }
+    }
+  }
 }
+
+generatePomFileForMavenPublication.doFirst {
+  copy { into buildDir ; from "${symbol_dollar}{projectDir}/pom.xml" ; rename { 'bom.pom' } }
+}
+
+publishToMavenLocal.doLast {
+  def dirPath = java.nio.file.Paths.get("${symbol_dollar}{System.getProperty('user.home')}",
+    ".m2/repository/${symbol_dollar}{project.group.replace('.', '/')}/${symbol_dollar}{project.name}/${symbol_dollar}{project.version}")
+  //println proc_output("ls -ahl", dirPath.toFile())
+  dirPath.toFile().eachFile() { if (it =~ /\.pom$/) { println it } }
+}
+//task install { dependsOn publishToMavenLocal }
+task('install', dependsOn: [publishToMavenLocal]) { group = 'Publishing'
+  description '(alias: publishToMavenLocal) ' + publishToMavenLocal.description
+}
+
 artifacts.archives(file("${symbol_dollar}{buildDir}/bom.pom"))

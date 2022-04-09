@@ -1,0 +1,63 @@
+RAKE = ENV['RAKE'] ? ENV['RAKE'] : 'rake'
+# Single package rakefile script.
+
+class SharedVars
+  attr_accessor :groupid, :parent, :pkg, :version, :proj, :main_class,
+    :dist_jar, :dist_test_jar
+  
+  def initialize
+    @groupid, @parent, @pkg = 'org.example', 'new_parent', 'new_pkg'
+    @version, @proj, @main_class = '0.0.0', "#{parent}-#{pkg}", ''
+    @dist_jar = "#{proj}-#{version}.jar"
+    @dist_test_jar = "#{proj}-#{version}-tests.jar"
+  end
+end
+
+VARS = SharedVars.new
+VARS.groupid = '{{groupid}}{{^groupid}}org.sandbox{{/groupid}}'
+VARS.parent, VARS.pkg = '{{parent}}{{^parent}}intro_jvm{{/parent}}', '{{project}}{{^project}}util{{/project}}'
+VARS.version = '{{version}}{{^version}}0.1.0{{/version}}'
+ENV['version'] = VARS.version
+VARS.proj = "#{VARS.parent}-#{VARS.pkg}"
+namespace_path = "#{VARS.groupid}.#{VARS.parent}.#{VARS.pkg}".gsub(/\./, '/')
+
+VARS.dist_jar = "target/#{VARS.proj}-#{VARS.version}.jar"
+VARS.dist_test_jar = "target/#{VARS.proj}-#{VARS.version}-tests.jar"
+
+desc "Default target: #{RAKE} help"
+task :default => [:help]
+
+src_java = FileList["src/main/java/**/*.java"]
+src_scala = FileList["src/main/scala/**/*.scala"]
+#src_groovy = FileList["src/main/groovy/**/*.groovy"]
+
+{{#executable}}
+VARS.main_class = "#{VARS.groupid}.#{VARS.parent}.#{VARS.pkg}.Main"
+{{/executable}}
+
+file "#{VARS.dist_jar}" => src_java + src_scala
+
+tests_java = FileList["src/test/java/**/*.java"].exclude("**/ClassicTest.*", "**/ClassicProp.*")
+#tests_java = FileList[Dir.glob(File.join("src/test/java", "**", "*.java"))]
+tests_scala = FileList["src/test/scala/**/*.scala"].exclude("**/ClassicTest.*", "**/ClassicProp.*")
+#tests_groovy = FileList["src/test/groovy/**/*.groovy"].exclude("**/ClassicTest.*")
+
+file "#{VARS.dist_test_jar}" => tests_java + tests_scala
+
+file "target/.depend" do |t|
+  "target/lib target/include #{CLASSES_DIR} #{CLASSES_TEST_DIR}".split().each { |i|
+    mkdir_p(i) || true }
+  sh "echo '' > #{t.name} || true"
+end
+
+desc 'Build target'
+task :compile => ["target/.depend", "#{VARS.dist_jar}"]
+
+desc 'Build test target'
+task :testCompile => ["#{VARS.dist_test_jar}"]
+
+
+require "./rakefile-rules-java.rb"
+require "./rakefile-depnmgr.rb"
+require "./rakefile-targets.rb"
+#require "./rakefile-auxffi.rb"

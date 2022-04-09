@@ -28,7 +28,7 @@
     <classpath path = "${ant.library.dir}/jacocoant.jar"/> </taskdef>-->
     <ivy:cachepath resolveMode = 'dynamic' inline = 'true' type = 'jar'
       organisation = 'org.jacoco' module = 'org.jacoco.ant'
-      revision = '[0.5.9.201207300726,)' pathid = 'jacoco_ant.pathid'/>
+      revision = '[0.8.7,)' pathid = 'jacoco_ant.pathid'/>
     <taskdef uri = 'antlib:org.jacoco.ant' resource = 'org/jacoco/ant/antlib.xml'>
       <classpath path = "${toString:jacoco_ant.pathid}"/>
     </taskdef>

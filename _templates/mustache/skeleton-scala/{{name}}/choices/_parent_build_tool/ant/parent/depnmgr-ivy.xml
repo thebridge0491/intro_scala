@@ -4,14 +4,14 @@
   <!--<path id = 'ivy.tasks.classpath'>
 	<fileset dir = "${user.home}/.ant/lib" includes = 'ivy*.jar'/>
   </path>
-  <taskdef uri = 'antlib:org.apache.ivy.ant' 
+  <taskdef uri = 'antlib:org.apache.ivy.ant'
     resource = 'org/apache/ivy/ant/antlib.xml'
     classpathref = 'ivy.tasks.classpath'/>-->
-  
+
   <description>
     Dependency manager tasks (Ivy) including publish/deliver Ant script.
   </description>
-  
+
   <!--<dirname property = 'ant.project.dir' file = "${ant.file}"/>-->
   <condition property = 'java.lib' value = '/usr/share/java'
       else = '/usr/local/share/java/classes'>
@@ -21,8 +21,8 @@
       else = '/usr/local/share/scala/lib'>
     <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${os.name}"/>
   </condition>
-  <!--<property name = 'scala.compat' value = '2.9'/>-->
-  
+  <property name = 'scala.compat' value = '2.13'/>
+
   <!--<property name = 'ivy.dep.file' value = "${basedir}/ivy.xml"/>-->
   <property name = 'pom.dep.file' value = "${basedir}/pom.xml"/>
   <!--<property url = "jar:file:./target/<parent>-<revision>.jar!/versions.properties"/>-->
@@ -40,7 +40,7 @@
   <property name = 'ivy.publish.overwrite' value = 'false'/>
   <property name = 'ivy.out.file' value = "${basedir}/target/out-ivy.xml"/>
   <property name = 'pom.out.file' value = "${basedir}/target/out-pom.xml"/>
-  
+
   <property name = 'echo.pat' value = '^ivy\.'/>
   <property name = 'cal.offsetyr' value = '0'/>
   <tstamp>
@@ -50,20 +50,20 @@
   </tstamp>
   <property name = 'from.resolver' value = 'default'/>
   <property name = 'to.resolver' value = 'local'/>
-  
+
   <property name = 'ivy.settings.defaultResolver' value = 'default'/>
   <property name = 'ivy.settings.file'
     value = "${user.home}/.ivy2/ivysettings.xml"/>
   <!--<ivy:settings file = "${ivy.settings.file}"/>-->
   <ivy:settings/>
-  
-  <target description = 'Resolve depns (Ivy): ant [-Divy.dep.file=??] resolve' 
+
+  <target description = 'Resolve depns (Ivy): ant [-Divy.dep.file=??] resolve'
       name = 'resolve'>
     <ivy:resolve conf = "${ivy.configurations}"
         useCacheOnly = "${ivy.resolve.cache.only}"
         log = "${ivy.resolve.log}" resolveMode = "${ivy.resolve.mode}"/>
   </target>
-  
+
   <target description = 'Cachepath depns (Ivy): ant cachepath'
       name = 'cachepath' depends = 'resolve'>
     <!--<ivy:cachepath conf = 'default' pathid = 'default.pathid' keep = 'true'
@@ -78,7 +78,7 @@
     <echo file = "${basedir}/target/classpath_runtime.txt">${toString:runtime.pathid}</echo>
     <echo file = "${basedir}/target/classpath_test.txt">${toString:test.pathid}</echo>
   </target>
-  
+
   <target description = 'Echo properties matching pattern [-Decho.pat="^ivy\."]'
       name = 'properties' depends = 'resolve'>
     <echoproperties>
@@ -86,11 +86,11 @@
       <propertyset> <propertyref regex = "${echo.pat}"/> </propertyset>
     </echoproperties>
   </target>
-  
+
   <target description = 'Report depns resolving (Ivy)' name = 'report_ivy'
       depends = 'resolve'>
     <ivy:report graph = 'false' todir = "${basedir}/target/rpt_ivy"/> </target>
-  
+
   <target description = 'Build order list (Ivy)' name = 'buildlist'
       depends = 'resolve'>
     <dirname property = 'ant.project.dir' file = "${ant.file}"/>
@@ -101,22 +101,22 @@
       <map from = "${user.dir}/" to = ''/> </pathconvert>
     <echo>${build-files}</echo>
   </target>
-  
+
   <target description = 'Retrieve depns (Ivy): ant retrieve' name = 'retrieve'
       depends = 'cachepath'>
     <ivy:retrieve conf = "${ivy.configurations}" type = "${ivy.retrieve.types}"
       symlink = 'true' sync = 'false'/>
   </target>
-  
+
   <target description = 'Deliver module Ivy file' name = 'deliver'
       depends = 'resolve'>
-    <ivy:deliver pubdate = "${DSTAMP}${TSTAMP}" replacedynamicrev = 'true'/> 
+    <ivy:deliver pubdate = "${DSTAMP}${TSTAMP}" replacedynamicrev = 'true'/>
     <replaceregexp flags = 'gis' match = '!DOCTYPE.*\[.*\]'
         replace = '!-- !DOCTYPE was deleted --'>
       <fileset dir = 'target' includes = 'ivy*.xml.bak,ivy*.xml'/>
     </replaceregexp>
   </target>
-  
+
   <target description = 'Publish module artifacts (Ivy)' name = 'publish'
       depends = 'deliver'>
     <ivy:publish resolver = "${to.resolver}" pubdate = "${DSTAMP}${TSTAMP}"
@@ -125,14 +125,14 @@
       <artifacts pattern = "${basedir}/target/[artifact](-[revision])(-[classifier]).[ext]"/>
     </ivy:publish>
   </target>
-  
-  <target description = 'Install depn to destination repo (Ivy): ant [-Dfrom.resolver=default -Dto.resolver=local -Dorganisation=?? -Dmodule=?? -Drevision=??] install-to' 
+
+  <target description = 'Install depn to destination repo (Ivy): ant [-Dfrom.resolver=default -Dto.resolver=local -Dorganisation=?? -Dmodule=?? -Drevision=??] install-to'
       name = 'install-to' depends = 'resolve'>
     <ivy:install conf = "${ivy.configurations}" overwrite = 'true'
       from = "${from.resolver}" to = "${to.resolver}" revision = "${revision}"
       organisation = "${organisation}" module = "${module}"/>
   </target>
-  
+
   <target description = 'Make pom from ivy file: ant [-Dpom.out.file=target/out-pom.xml] makepom'
       name = 'makepom' depends = 'resolve'>
     <ivy:makepom ivyfile = "${ivy.dep.file}" pomfile = "${pom.out.file}"
@@ -143,7 +143,7 @@
       <mapping conf = 'test' scope = 'test'/>
     </ivy:makepom>
   </target>
-  
+
   <target description = 'Convert pom to ivy file: ant [-Dpom.dep.file=?? -Divy.out.file=target/out-ivy.xml] convertpom'
       name = 'convertpom'>
     <ivy:convertpom pomFile = "${pom.dep.file}" ivyFile = "${ivy.out.file}"/>

@@ -1,0 +1,114 @@
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<project default = 'resolve'
+    xmlns:resolver = 'antlib:org.apache.maven.resolver.ant'>
+  <!--<path id = 'maven-resolver-ant.tasks.classpath'>
+	<fileset dir = "${user.home}/.ant/lib" includes = 'maven-resolver-ant-tasks*uber.jar'/>
+  </path>
+  <taskdef uri = 'antlib:org.apache.maven.resolver.ant'
+    resource = 'org/apache/maven/resolver/ant/antlib.xml'
+    classpathref = 'maven-resolver-ant.tasks.classpath'/>-->
+
+  <description>
+    Dependency manager tasks (Maven) including install Ant script.
+  </description>
+
+  <!--<dirname property = 'ant.project.dir' file = "${ant.file}"/>-->
+  <condition property = 'java.lib' value = '/usr/share/java'
+      else = '/usr/local/share/java/classes'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${os.name}"/>
+  </condition>
+  <condition property = 'scala.lib' value = '/usr/share/scala/lib'
+      else = '/usr/local/share/scala/lib'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${os.name}"/>
+  </condition>
+  <property name = 'scala.compat' value = '2.13'/>
+  <!--<condition property = 'maven.home' value = '/usr/share/maven3'
+      else = '/usr/local/share/java/maven3'>
+    <equals casesensitive = 'false' arg1 = 'Linux' arg2 = "${os.name}"/>
+  </condition>-->
+  <pathconvert property = 'jar.exists' setonempty = 'false'>
+    <fileset dir = "${basedir}" includes = 'target/*.jar'/>
+  </pathconvert>
+
+  <property name = 'pom.dep.file' value = "${basedir}/pom.xml"/>
+  <!--<property url = "jar:file:./target/<parent>-<revision>.jar!/versions.properties"/>-->
+  <!--<property file = "${basedir}/src/main/resources/versions.properties"/>-->
+  <property name = 'maven.settings.file'
+    value = "${user.home}/.m2/settings.xml"/>
+  <property name = 'maven.scopes' value = 'compile,runtime,test'/>
+  <property name = 'pom.out.file' value = "${basedir}/target/out-pom.xml"/>
+
+  <property name = 'echo.pat' value = '^maven\.'/>
+  <property name = 'outputDirectory' value = "${basedir}/target/lib"/>
+  <!--<xmlproperty prefix = 'maven.pom' file = "${pom.dep.file}"/>-->
+  
+  <resolver:settings file = "${maven.settings.file}"/>
+  <resolver:pom id = 'mypom' file = "${pom.dep.file}"/>
+
+  <target description = 'Resolve depns (Maven): ant [-Dpom.dep.file=??] resolve'
+      name = 'resolve'>
+    <resolver:resolve>
+      <resolver:dependencies id = 'depsFromPom' pomRef = 'mypom'/>
+      <resolver:properties prefix = 'dep.' scopes = "${maven.scopes}"/>
+    </resolver:resolve>
+  </target>
+
+  <target description = 'Classpath depns (Maven): ant [-Dpom.dep.file=??] classpath'
+      name = 'classpath' depends = 'resolve'>
+    <resolver:resolve>
+      <resolver:dependencies id = 'depsFromPom' pomRef = 'mypom'/>
+      <path refid = 'compile.pathid' classpath = 'compile'/>
+      <path refid = 'runtime.pathid' classpath = 'runtime'/>
+      <path refid = 'test.pathid' classpath = 'test'/>
+      <resolver:properties prefix = 'dep.' scopes = "${maven.scopes}"/>
+    </resolver:resolve>
+    <echo file = "${basedir}/target/classpath_compile.txt">${toString:compile.pathid}</echo>
+    <echo file = "${basedir}/target/classpath_runtime.txt">${toString:runtime.pathid}</echo>
+    <echo file = "${basedir}/target/classpath_test.txt">${toString:test.pathid}</echo>
+  </target>
+
+  <target description = 'Echo properties matching pattern [-Decho.pat="^maven\."]'
+      name = 'properties'>
+    <echoproperties>
+      <!--<propertyset> <propertyref prefix = "${echo.pat}"/> </propertyset>-->
+      <propertyset> <propertyref regex = "${echo.pat}"/> </propertyset>
+    </echoproperties>
+    <echo>mypom.properties: ${mypom.properties}</echo>
+    <echo>mypom.build.finalName: ${mypom.build.finalName}</echo>
+  </target>
+
+  <target description = 'Copy depns (Maven): ant [-DoutputDirectory=??] copy-dependencies'
+      name = 'copy-dependencies' depends = 'classpath'>
+    <resolver:resolve>
+      <resolver:dependencies id = 'depsFromPom' pomRef = 'mypom'/>
+      <resolver:files refid = 'depns.files' dir = "${outputDirectory}"
+        layout = "{artifactId}-{version}.{extension}"/>
+      <resolver:properties prefix = 'dep.' scopes = "${maven.scopes}"/>
+    </resolver:resolve>
+  </target>
+
+  <!--<target description = 'Write pom file from in-memory pom: ant [-Dpom.dep.file=?? -Dpom.out.file=target/out-pom.xml] writepom'
+      name = 'writepom' depends = 'copy-dependencies'>
+    <resolver:writepom pomRef = 'mypom' file = "${pom.out.file}"/>
+  </target>-->
+
+  <target name = '-install-jar' if = 'jar.exists'>
+    <resolver:install>
+      <resolver:artifact file = "${basedir}/target/${mypom.artifactId}-${mypom.version}.jar" type = 'jar'/>
+      <resolver:artifact file = "${basedir}/target/${mypom.artifactId}-${mypom.version}-sources.jar" classifier = 'sources' type = 'jar' id = 'source'/>
+    </resolver:install>
+  </target>
+
+  <target name = '-install-pom-only' unless = 'jar.exists'>
+    <resolver:install>
+      <resolver:artifact file = "${basedir}/target/${mypom.artifactId}-${mypom.version}.jar" type = 'pom' id = 'pom'/>
+    </resolver:install>
+  </target>
+
+  <!--<target description = 'Install module artifacts (Maven)' name = 'install'
+      depends = 'writepom,-install-pom-only,-install-jar'>
+  </target>-->
+  <target description = 'Install module artifacts (Maven)' name = 'install'
+      depends = '-install-pom-only,-install-jar'>
+  </target>
+</project>

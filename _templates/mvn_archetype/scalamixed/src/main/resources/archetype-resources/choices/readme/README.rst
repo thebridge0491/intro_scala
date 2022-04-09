@@ -11,45 +11,51 @@ ${description}
 Installation
 ------------
 source code tarball download:
-    
+
         ${symbol_pound} [aria2c --check-certificate=false | wget --no-check-certificate | curl -kOL]
-        
+
         FETCHCMD='aria2c --check-certificate=false'
-        
+
         ${symbol_dollar}FETCHCMD https://${repohost}/${repoacct}/${parent}/[get | archive]/master.zip
 
 version control repository clone:
-        
+
         git clone https://${repohost}/${repoacct}/${parent}.git
 
 #{if}("sbt" == ${buildTool})
-cd <path> ; sbt [-Djava.library.path=$PREFIX/lib] compile [test:run]
+build example with sbt self-install:
+cd <path> ; ./sbtw [-Djava.library.path=${symbol_dollar}PREFIX/lib] compile [test:run]
 
-sbt publishLocal
+./sbtw publishLocal
 #{elseif}("rake" == ${buildTool})
-cd <path> ; [sh] ./configure.sh [--prefix=$PREFIX] [--help]
+build example with rake:
+cd <path> ; [sh] ./configure.sh [--prefix=${symbol_dollar}PREFIX] [--help]
 
 rake main [check]
 
 rake publish
 #{elseif}("make" == ${buildTool})
-cd <path> ; [sh] ./configure.sh [--prefix=$PREFIX] [--help]
+build example with make:
+cd <path> ; [sh] ./configure.sh [--prefix=${symbol_dollar}PREFIX] [--help]
 
 make all [check]
 
 make publish
 #{elseif}("ant" == ${buildTool})
-cd <path> ; ant [-Djava.library.path=$PREFIX/lib] compile [test]
+build example with ant:
+cd <path> ; ant [-Djava.library.path=${symbol_dollar}PREFIX/lib] compile [test]
 
 ant publish
 #{elseif}("maven" == ${buildTool})
-cd <path> ; mvn [-Djava.library.path=$PREFIX/lib] compile [test]
+build example with maven wrapper:
+cd <path> ; ./mvnw [-Djava.library.path=${symbol_dollar}PREFIX/lib] compile [test]
 
-mvn install
+./mvnw install
 #{else}
-cd <path> ; gradle [-Djava.library.path=$PREFIX/lib] assemble [check]
+build example with gradle wrapper:
+cd <path> ; ./gradlew [-Djava.library.path=${symbol_dollar}PREFIX/lib] assemble [check]
 
-gradle install
+./gradlew install
 #{end}
 
 Usage
@@ -58,15 +64,15 @@ Usage
         [env RSRC_PATH=<path>/resources] java -jar ${parent}-${name}-<version>.jar [-h]
 #{else}
         // PKG_CONFIG='pkg-config --with-path=${symbol_dollar}PREFIX/lib/pkgconfig'
-        
+
         // ${symbol_dollar}PKG_CONFIG --cflags --libs <ffi-lib>
-        
+
         // java [-Djava.library.path=${symbol_dollar}PREFIX/lib] ...
-        
+
         import ${package}.Library
-        
+
         ...
-        
+
         val (arr1, arr2) = (Array[Int](0, 1, 2), Array[Int](10, 20, 30))
         val nested_arr = Library.cartesian_prod(arr1, arr2)
 #{end}

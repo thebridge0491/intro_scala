@@ -4,22 +4,21 @@
 import Settings._
 import BuildTasks._
 
-//scalaVersion     in ThisBuild := "2.9.2"
-version          in ThisBuild := "${version}"
-organization     in ThisBuild := "${groupId}"
-organizationName in ThisBuild := "Coding Sandbox"
+ThisBuild / scalaVersion := "2.13.2"
+ThisBuild / organization := "${groupId}"
+ThisBuild / organizationName := "Coding Sandbox"
+ThisBuild / version := "${version}"
 
-lazy val root = (project in file("."))
-	.settings(defaultSettings:_*)
-    .settings(name := "${parent}"
-        , run in Test := { (run in util in Test).evaluated }
-        , run in Compile := { () }
-        )
-	.aggregate(parent, util, intro)
+lazy val root = project.in(file("."))
+  .settings(defaultSettings:_*)
+  .settings(name := "${parent}"
+    , Test / run := { (Test / run / util).evaluated }
+    , Compile / run := { () }
+    ).aggregate(parent, util, intro)
 
-lazy val parent = (project in file("parent"))
+lazy val parent = project.in(file("parent"))
 
-lazy val util = (project in file("common"))
+lazy val util = project.in(file("common"))
 
-lazy val intro = (project in file("app"))
-	//.dependsOn(util)
+lazy val intro = project.in(file("app"))
+  //.dependsOn(util)

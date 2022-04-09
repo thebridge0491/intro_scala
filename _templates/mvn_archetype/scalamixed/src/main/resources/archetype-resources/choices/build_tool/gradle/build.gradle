@@ -10,38 +10,27 @@
  */
 
 buildscript {
-	repositories {
-		mavenLocal()
-		if (!gradle.startParameter.offline) {
-			mavenCentral()
-			//jcenter()
-			//maven { url 'https://repo.spring.io/plugins-release' }
-		}
-	}
-	
-	dependencies {
-		classpath 'io.spring.gradle:dependency-management-plugin:+'
-	}
+  repositories {
+    mavenLocal()
+    if (!gradle.startParameter.offline) {
+      mavenCentral()
+    }
+  }
 }
 
 plugins {
-    id 'maven'			// add support to deploy (Maven repos) artifacts
-    //id 'groovy'			// extend Java plugin with Groovy support
-    id 'scala'			// extend Java plugin with Scala support
+  id 'maven-publish'  // add support to deploy (Maven repos) artifacts
+  //id 'groovy'       // extend Java plugin with Groovy support
+  id 'scala'          // extend Java plugin with Scala support
 #{if}("yes" == ${executable})
-    id 'application'	// extend Java plugin with support to build an application and archive (tar, zip) distribution
+  id 'application'	// extend Java plugin with support to build an application and archive (tar, zip) distribution
 #{else}
-    id 'distribution'	// add support to archive (tar, zip) distribution
+  id 'distribution'	// add support to archive (tar, zip) distribution
 #{end}
 }
 
-apply plugin: 'io.spring.dependency-management'
-
 description = '${description}'
 //gradle.startParameter.offline = true
-
-//org.apache.tools.ant.DirectoryScanner.removeDefaultExclude('**/.gitignore')
-//org.apache.tools.ant.DirectoryScanner.removeDefaultExclude('**/.hgignore')
 
 group = '${groupId}'
 version = '${version}'
@@ -49,21 +38,21 @@ version = '${version}'
 //sourceCompatibility = javacSource
 //targetCompatibility = javacTarget
 
-ext['scala.compat'] = System.properties['scala.compat'] ?: '2.9'
+ext['scala.compat'] = System.properties['scala.compat'] ?: '2.13'
 ext {
-    ld_path = [System.env.LD_LIBRARY_PATH ?: '.', 
-		System.getProperty('java.library.path', '.')].join(':')
-    defaultJvmArgs = ['-esa', '-ea', '-Xmx1024m', '-Xms16m', '-Xss16m']
-    pkgname = "${symbol_dollar}{project.group}.${symbol_dollar}{project.name.replaceAll('-', '.')}"
-                                                // -PtestOpts=-h,s
-    //toptslist = Eval.me(testOpts).flatten()	// -PtestOpts="['-h', '-s']"
-    toptslist = '' == testOpts ? [] : testOpts.split(',').flatten()
-    argslist = appArgs.split(',').flatten()
+  ld_path = [System.env.LD_LIBRARY_PATH ?: '.',
+    System.getProperty('java.library.path', '.')].join(':')
+  defaultJvmArgs = ['-esa', '-ea', '-Xmx1024m', '-Xms16m', '-Xss16m']
+  pkgname = "${symbol_dollar}{project.group}.${symbol_dollar}{project.name.replaceAll('-', '.')}"
+                                              // -PtestOpts=-h,s
+  //toptslist = Eval.me(testOpts).flatten()    // -PtestOpts="['-h', '-s']"
+  toptslist = '' == testOpts ? [] : testOpts.split(',').flatten()
+  argslist = appArgs.split(',').flatten()
 }
 #{if}("yes" == ${executable})
 
 application {
-	applicationDefaultJvmArgs += defaultJvmArgs
+  applicationDefaultJvmArgs += defaultJvmArgs
 }
 
 // Define the main class for the application
@@ -72,308 +61,323 @@ jar.manifest { attributes 'Main-Class': mainClassName }
 #{end}
 
 ant.lifecycleLogLevel = 'INFO'
-ant.properties['java.lib'] = System.env.OSTYPE.grep(~/^(?i)linux.*/) ? 
-    '/usr/share/java' : '/usr/local/share/java/classes'
-ant.properties['scala.lib'] = System.env.OSTYPE.grep(~/^(?i)linux.*/) ? 
-    '/usr/share/scala' : '/usr/local/share/scala/lib'
+ant.properties['java.lib'] = System.env.OSTYPE.grep(~/^(?i)linux.*/) ?
+  '/usr/share/java' : '/usr/local/share/java/classes'
+ant.properties['scala.lib'] = System.env.OSTYPE.grep(~/^(?i)linux.*/) ?
+  '/usr/share/scala' : '/usr/local/share/scala/lib'
 
 configurations {
-	testOutput.extendsFrom (testCompile)
-    checkstyle // with plugin: id 'checkstyle'
-    scalastyle // with plugin: id 'scalastyle'
-    jacoco // with plugin: id 'jacoco'
+  testOutput.extendsFrom (testCompile)
+  scalastyle // with plugin: id 'scalastyle'
+  codenarc // with plugin: id 'codenarc'
+  checkstyle // with plugin: id 'checkstyle'
+  jacoco // with plugin: id 'jacoco'
 }
 
 sourceSets {
-	main {
-		scala { srcDirs = ['src/main/java', 'src/main/scala'] }
-		java { srcDirs = [] /*['src/main/java']*/ }
-	}
-	test {
-		scala { srcDirs = ['src/test/java', 'src/test/scala']
-			exclude '**/ClassicTest.*', '**/ClassicProp.*'
-		}
-		java { srcDirs = [] /*['src/test/java']*/
-			exclude '**/ClassicTest.*', '**/ClassicProp.*'
-		}
-	}
+  main {
+    scala { srcDirs = ['src/main/java', 'src/main/scala'] }
+    //groovy { srcDirs = ['src/main/java', 'src/main/groovy'] }
+    java { srcDirs = [] /*['src/main/java']*/ }
+  }
+  test {
+    scala { srcDirs = ['src/test/java', 'src/test/scala']
+      //exclude '**/ClassicTest.*', '**/ClassicProp.*'
+    }
+    //groovy { srcDirs = ['src/test/java', 'src/test/groovy']
+    //  //exclude '**/ClassicTest.*'
+    //}
+    java { srcDirs = [] /*['src/test/java']*/
+      //exclude '**/ClassicTest.*'
+    }
+  }
 }
 
 repositories {		// You can declare any Maven/Ivy/file repository here.
-    flatDir { dirs "${symbol_dollar}{rootDir}/lib" /*,ant.properties['java.lib'], 
-		ant.properties['scala.lib']*/  }
-	mavenLocal()    // maven {url "${symbol_dollar}{System.env.HOME}/.m2/repository"}
-	if (!gradle.startParameter.offline) {
-		mavenCentral()  // maven {url 'https://repo.maven.apache.org/maven2'}
-		//jcenter()       // maven {url 'https://jcenter.bintray.com'}
-	}
-	ivy {
-        url "${symbol_dollar}{System.env.HOME}/.ivy2/cache"
-        layout 'pattern', {
-			//artifact IVY_ARTIFACT_PATTERN
-			artifact '[organisation]/[module]/[type]s/[artifact](-[revision])(-[classifier]).[ext]'
-			ivy '[organisation]/[module]/ivy-[revision].xml'
-        }
-        //url "${symbol_dollar}{System.env.HOME}/.ivy2/local"
-        //layout 'ivy'
-	}
-}
-
-dependencyManagement {
-	imports {
-		mavenBom('${groupId}:${parent}-bom:0') {
-			//bomProperty 'version.junit', '[4.10,)'
-			bomProperty 'version.scala', '[2.9.2,)'
-			bomProperty 'version.scalatest', '[1.8,)'
-			bomProperty 'version.scalacheck', '[1.8,)'
-		}
-	}
-	dependencies { // version range ex: [0.1.0,)  0.1.+  latest.release
-        // example: versions inherited from depns in BOM
-        /*dependency "org.scala-lang:scala-library:[${symbol_dollar}{project['scala.compat']},)"
-        dependency 'junit:junit:[4.10,)'
-        dependency 'org.slf4j:slf4j-api:[1.6.5,)'
-		*/
-        
-        dependency 'org.jacoco:org.jacoco.ant:[0.5.9.201207300726,)'
-        dependency 'com.puppycrawl.tools:checkstyle:[5.5,)'
-        dependency "org.scalastyle:scalastyle_${symbol_dollar}{project['scala.compat']}:[0.1.0,)"
-		dependency 'com.typesafe.zinc:zinc:[0.1.0,)'
-	}
+  flatDir { dirs "${symbol_dollar}{rootDir}/lib" /*,ant.properties['java.lib'],
+    ant.properties['scala.lib']*/  }
+  mavenLocal()    // maven {url "${symbol_dollar}{System.env.HOME}/.m2/repository"}
+  if (!gradle.startParameter.offline) {
+    mavenCentral()  // maven {url 'https://repo.maven.apache.org/maven2'}
+  }
+  ivy {
+    url "${symbol_dollar}{System.env.HOME}/.ivy2/cache"
+    patternLayout {
+      //artifact IVY_ARTIFACT_PATTERN
+      artifact '[organisation]/[module]/[type]s/[artifact](-[revision])(-[classifier]).[ext]'
+      ivy '[organisation]/[module]/ivy-[revision].xml'
+    }
+    //url "${symbol_dollar}{System.env.HOME}/.ivy2/local"
+    //layout 'ivy'
+  }
 }
 
 dependencies {
-	compile "org.scala-lang:scala-library"
-    //compile fileTree(dir: ant.properties['scala.lib'], includes: ['scala-library.jar'])
-	testCompile "org.scalacheck:scalacheck_${symbol_dollar}{project['scala.compat']}"
-	testCompile "org.scalatest:scalatest_${symbol_dollar}{project['scala.compat']}"
-	
-	//testCompile 'junit:junit'
-    //testCompile fileTree(dir: ant.properties['java.lib'], includes: ['hamcrest-core.jar', 'junit.jar'])
-    //testCompile 'org.testng:testng'
-    //testCompile 'org.spockframework:spock-core'
-    
-	compile 'org.slf4j:slf4j-api'
-    
-	compile 'org.ini4j:ini4j'
-    //compile 'net.java.dev.jna:jna'
-    
+  // import BOM
+  //implementation platform('org.junit:junit-bom:5.8.0')
+  implementation platform("${project.group}:${rootname}-bom:0")
+
+  //testImplementation "${project.group}:${rootname}-util:[0.1.0,)""
+
+  implementation "org.scala-lang:scala-library"
+  //implementation fileTree(dir: ant.properties['scala.lib'], includes: ['scala-library.jar'])
+  //testRuntimeOnly "org.scala-lang.modules:scala-xml_${project['scala.compat']}:[1.2,)"
+  testImplementation "org.scalatest:scalatest_${project['scala.compat']}"
+  testImplementation "org.scalacheck:scalacheck_${project['scala.compat']}"
+  scalastyle "com.beautiful-scala:scalastyle_${project['scala.compat']}:[1.4.0,)"
+  //scalastyle fileTree(dir: "${System.env.HOME}/javalib", includes: ['scalastyle*.jar', 'scalariform*.jar', 'config*.jar', 'scala-*.jar'])
+  //zinc "org.scala-sbt:zinc_${project['scala.compat']}:[1.3.5,)"
+
+  //implementation "org.codehaus.groovy:groovy-all"
+  //testImplementation 'org.spockframework:spock-core'
+  //codenarc 'org.codenarc:CodeNarc:[1.6,)'
+  //codenarc fileTree(dir: ant.properties['java.lib'], includes: ['CodeNarc*.jar'])
+
+  //testImplementation 'org.junit.platform:junit-platform-console'
+  //testImplementation 'org.junit.platform:junit-platform-suite'
+  //testImplementation 'org.junit.jupiter:junit-jupiter'
+  //testImplementation 'org.junit.platform:junit-platform-runner'
+  //testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
+  //testImplementation 'org.testng:testng'
+  jacoco 'org.jacoco:org.jacoco.ant:[0.8.5,)'
+  //jacoco fileTree(dir: "${System.env.HOME}/.ant/lib", includes: ['org.jacoco.ant*.jar', 'asm-*.jar'])
+  checkstyle 'com.puppycrawl.tools:checkstyle:[8.33,)'
+  //checkstyle fileTree(dir: ant.properties['java.lib'], includes: ['checkstyle*.jar'])
+
+  implementation 'org.slf4j:slf4j-api'
 #{if}("yes" == ${executable})
-    compile 'org.glassfish:javax.json'
-    compile 'javax.json:javax.json-api'
-    compile 'org.yaml:snakeyaml'
-    //runtime 'org.slf4j:log4j-over-slf4j'
-    runtime 'ch.qos.logback:logback-classic'
+  //runtimeOnly 'org.slf4j:log4j-over-slf4j'
+  runtimeOnly 'ch.qos.logback:logback-classic'
 #{else}
-    //testRuntime 'org.slf4j:log4j-over-slf4j'
-    //testRuntime 'ch.qos.logback:logback-classic'
+  //testRuntimeOnly 'org.slf4j:log4j-over-slf4j'
+  //testRuntimeOnly 'ch.qos.logback:logback-classic'
 #{end}
-    
-    jacoco 'org.jacoco:org.jacoco.ant'
-    //jacoco fileTree(dir: "${symbol_dollar}{System.env.HOME}/.ant/lib", includes: ['org.jacoco.ant*.jar', 'asm-*.jar'])
-    checkstyle 'com.puppycrawl.tools:checkstyle'
-    //checkstyle fileTree(dir: ant.properties['java.lib'], includes: ['checkstyle*.jar'])
-    scalastyle "org.scalastyle:scalastyle_${symbol_dollar}{project['scala.compat']}"
-    //scalastyle fileTree(dir: "${symbol_dollar}{System.env.HOME}/javalib", includes: ['scalastyle*.jar', 'scalariform*.jar', 'config*.jar', 'scala-*.jar'])
-    zinc 'com.typesafe.zinc:zinc'
+  implementation 'org.ini4j:ini4j'
+  //implementation 'net.java.dev.jna:jna'
+
+#{if}("yes" == ${executable})
+  implementation 'org.glassfish:javax.json'
+  implementation 'javax.json:javax.json-api'
+  implementation 'org.yaml:snakeyaml'
+  implementation 'com.moandjiezana.toml:toml4j'
+#{end}
 }
 
 tasks.withType(ScalaCompile) {
-    if ('1' == DEBUG) {
-        options.compilerArgs += ['-g']    // << '-g' OR += ['-g']
-        scalaCompileOptions.additionalParameters = ['-g:vars']
-    } else {
-        scalaCompileOptions.additionalParameters = ['-optimise']
-    }
-    options.compilerArgs += ['-Xlint:all', '-deprecation']
-    scalaCompileOptions.additionalParameters += ['-deprecation', '-unchecked',
-        '-feature']
-    //scalaCompileOptions.force = false
-	//scalaCompileOptions.forkOptions.jvmArgs = ['-XX:MaxPermSize=1024m']
-	//scalaClasspath = fileTree(dir: ant.properties['scala.lib'])
-	//zincClasspath = fileTree(dir: ant.properties['scala.lib'])
-    //configurations.zinc.transitive = true
+  if ('1' == DEBUG) {
+    options.compilerArgs += ['-g']    // << '-g' OR += ['-g']
+    scalaCompileOptions.additionalParameters = ['-g:vars']
+  } else {
+    scalaCompileOptions.additionalParameters = ['-opt:l:method', '-opt:l:inline']
+  }
+  options.compilerArgs += ['-Xlint:all', '-deprecation']
+  scalaCompileOptions.additionalParameters += ['-deprecation', '-unchecked',
+    '-feature']
+  //scalaCompileOptions.force = false
+  //scalaCompileOptions.forkOptions.jvmArgs = ['-XX:MaxPermSize=1024m']
+  //scalaClasspath = fileTree(dir: ant.properties['scala.lib'])
+  //zincClasspath = fileTree(dir: ant.properties['scala.lib'])
+  //configurations.zinc.transitive = true
 }
 
+/*tasks.withType(GroovyCompile) {
+  if ('1' == DEBUG) {
+    options.compilerArgs += ['-g']    // << '-g' OR += ['-g']
+  }
+  options.compilerArgs += ['-Xlint:all', '-deprecation']
+}*/
+
 tasks.withType(JavaCompile) {
-    if ('1' == DEBUG) {
-        options.compilerArgs += ['-g']    // << '-g' OR += ['-g']
-    }
-    options.compilerArgs += ['-Xlint:all', '-deprecation']
+  if ('1' == DEBUG) {
+    options.compilerArgs += ['-g']    // << '-g' OR += ['-g']
+  }
+  options.compilerArgs += ['-Xlint:all', '-deprecation']
 }
 
 tasks.withType(JavaExec) {
-	enableAssertions = true
+  enableAssertions = true
 }
 
 test { ignoreFailures true
-	description description + " [-PtestOpts='${symbol_dollar}{testOpts}']"
-	environment 'LD_LIBRARY_PATH', ld_path
-    systemProperties(System.getProperties())
-    allJvmArgs = defaultJvmArgs
-    testLogging.showStandardStreams = true
-    //includes = (toptslist.collect { it.replace('.', '/') + '.class' })
-    setTestNameIncludePatterns(toptslist)
-    exclude '**/Ts_*.class'
-	outputs.upToDateWhen { false }
+  description description + " [-PtestOpts='${symbol_dollar}{testOpts}']"
+  environment 'LD_LIBRARY_PATH', ld_path
+  systemProperties(System.getProperties())
+  allJvmArgs = defaultJvmArgs
+  testLogging.showStandardStreams = true
+  //includes = (toptslist.collect { it.replace('.', '/') + '.class' })
+  setTestNameIncludePatterns(toptslist)
+  exclude '**/Ts_*.class'
+  outputs.upToDateWhen { false }
+
+  //useJUnitPlatform()
 }
 
 //useTestNG()
 
 assemble {
-    description description + " [-PDEBUG='${symbol_dollar}{DEBUG}']"
+  description description + " [-PDEBUG='${symbol_dollar}{DEBUG}']"
 }
 
 clean {
-	FileTree tree = fileTree('.').include('*.log')
-	delete tree
+  FileTree tree = fileTree('.').include('*.log')
+  delete tree
 }
 
 tasks.withType(Jar) {
-	duplicatesStrategy 'exclude'
-    doFirst {
-        manifest {
-            attributes(
-                'Build-Jdk': System.properties['java.version'],
-                'Created-By': 'Gradle ' + gradle.gradleVersion,
-                'Built-By': '',
-                'Package': project.pkgname,
-                'Implementation-Title': project.name,
-                'Implementation-Vendor-Id': project.group,
-                'Implementation-Version': project.version
-            )
-        }
+  duplicatesStrategy 'exclude'
+  doFirst {
+    manifest {
+      attributes(
+        'Build-Jdk': System.properties['java.version'],
+        'Created-By': 'Gradle ' + gradle.gradleVersion,
+        'Built-By': '',
+        'Package': project.pkgname,
+        'Implementation-Title': project.name,
+        'Implementation-Vendor-Id': project.group,
+        'Implementation-Version': project.version
+      )
     }
+  }
 }
 
 tasks.withType(Tar) {
-	description description + " [-Ptarext='${symbol_dollar}{tarext}']"
-	switch (tarext) {
-		case 'tar': compression = Compression.NONE ; extension = 'tar'
-			break
-		case 'tar.bz2': compression = Compression.BZIP2 ; extension = 'tar.bz2'
-			break
-		default: compression = Compression.GZIP ; extension = 'tar.gz'
-			break
-	}
+  description description + " [-Ptarext='${symbol_dollar}{tarext}']"
+  switch (tarext) {
+    case 'tar': compression = Compression.NONE ; archiveExtension = 'tar'
+      break
+    case 'tar.bz2': compression = Compression.BZIP2 ; archiveExtension = 'tar.bz2'
+      break
+    default: compression = Compression.GZIP ; archiveExtension = 'tar.gz'
+      break
+  }
 }
 
 assembleDist {
-	description description + " [-Ptarext='${symbol_dollar}{tarext}']"
+  description description + " [-Ptarext='${symbol_dollar}{tarext}']"
 }
 
 jar {
-	//if ((new File('exclude.lst')).exists()) {
-	//	from('.') { exclude (new File('exclude.lst') as String[])
-	//		exclude '**/build/*', '**/gradle/*' }
-	//	exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
-	//} else {
-	//	//from sourceSets.main.allSource
-	//	from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
-	//	exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
-	//}
-	
-	doFirst {
-		manifest {
-			def mfClasspath = configurations.runtime.collect {
-				'lib/' + it.getName()}.join(' ')
-			attributes 'Class-Path': mfClasspath
-		}
-	}
+  //if ((new File('exclude.lst')).exists()) {
+  //  from('.') { exclude (new File('exclude.lst') as String[])
+  //    exclude '**/build/*', '**/gradle/*' }
+  //  exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
+  //} else {
+  //  //from sourceSets.main.allSource
+  //  from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
+  //  exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
+  //}
+
+  doFirst {
+    manifest {
+      def mfClasspath = configurations.runtimeClasspath.collect {
+	'lib/' + it.getName()}.join(' ')
+      attributes 'Class-Path': mfClasspath
+    }
+  }
 }
 
-scaladoc {
-    /*scalaClasspath = files(
-		"${symbol_dollar}{ant.properties['scala.lib']}/scala-library.jar", 
-		"${symbol_dollar}{ant.properties['scala.lib']}/scala-compiler.jar", 
-		"${symbol_dollar}{ant.properties['scala.lib']}/scala-reflect.jar")*/
-    //scalaClasspath = fileTree(ant.properties['scala.lib']).include('*.jar')
-}
+//scaladoc {
+  /*scalaClasspath = files(
+    "${symbol_dollar}{ant.properties['scala.lib']}/scala-library.jar",
+    "${symbol_dollar}{ant.properties['scala.lib']}/scala-compiler.jar",
+    "${symbol_dollar}{ant.properties['scala.lib']}/scala-reflect.jar")*/
+  //scalaClasspath = fileTree(ant.properties['scala.lib']).include('*.jar')
+//}
 
 artifacts.archives(tasks.jar)
 distTar.classifier = 'project'
 distZip.classifier = 'project'
 
 distributions {
-	ant.defaultexcludes remove: '**/.hgignore'
-	ant.defaultexcludes remove: '**/.gitignore'
-	main { baseName = project.name
-		if ((new File('exclude.lst')).exists()) {
-		contents {
-			//from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
-			from('.') { exclude (new File('exclude.lst') as String[])
-				exclude '**/build/*', '**/gradle/*' }
-			exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
-		}
-		} else {
-		contents {
-			from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
-			exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
-		}
-		}
-	}
+  main { distributionBaseName = project.name
+    if ((new File('exclude.lst')).exists()) {
+      contents {
+        //from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
+        from('.') { exclude (new File('exclude.lst') as String[])
+          exclude '**/build/*', '**/gradle/*' }
+        exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
+      }
+    } else {
+      contents {
+        from('.') { include '**/*.gradle', '**/src/', '**/*.properties' }
+        exclude '**/*.jar', '**/.gradle/', '**/build/*', '**/gradle/*'
+      }
+    }
+  }
+}
+
+publishing {
+  publications {
+    maven(MavenPublication) {
+      /*groupId = project.group
+      artifactId = project.name
+      version = project.version*/
+
+      from components.java
+    }
+  }
 }
 
 #{if}("yes" == ${executable})
 run {
-	description description + " [-PappArgs='${symbol_dollar}{appArgs}']"
-	environment 'LD_LIBRARY_PATH', ld_path
-    //jvmArgs applicationDefaultJvmArgs
-    systemProperties(System.getProperties())
-    args argslist
-	standardInput = System.in
+  description description + " [-PappArgs='${symbol_dollar}{appArgs}']"
+  environment 'LD_LIBRARY_PATH', ld_path
+  //jvmArgs applicationDefaultJvmArgs
+  systemProperties(System.getProperties())
+  args argslist
+  standardInput = System.in
 }
 
 task debug(dependsOn: [assemble]) {
-    description "Debug project\'s main [-PappArgs='${symbol_dollar}{appArgs}']"
-	doLast { ignoreExitValue true
-        /*environment 'LD_LIBRARY_PATH', ld_path
-        executable = 'ddd'
-        args = ['--jdb'] + applicationDefaultJvmArgs.collect { "-J${symbol_dollar}{it}" } +
-            [mainClassName] + argslist
-        standardInput = System.in
-        */
-        println exec_output("ddd --jdb " + 
-            ${symbol_dollar}{applicationDefaultJvmArgs.collect { "-J${symbol_dollar}{it}" }.join(' ')} + 
-            " ${symbol_dollar}{mainClassName} ${symbol_dollar}{argslist.join(' ')}")
-    }    
+  description "Debug project\'s main [-PappArgs='${symbol_dollar}{appArgs}']"
+  doLast { ignoreExitValue true
+    /*environment 'LD_LIBRARY_PATH', ld_path
+    executable = 'ddd'
+    args = ['--jdb'] + applicationDefaultJvmArgs.collect { "-J${symbol_dollar}{it}" } +
+      [mainClassName] + argslist
+    standardInput = System.in
+    */
+    println exec_output("ddd --jdb " +
+      ${symbol_dollar}{applicationDefaultJvmArgs.collect { "-J${symbol_dollar}{it}" }.join(' ')} +
+      " ${symbol_dollar}{mainClassName} ${symbol_dollar}{argslist.join(' ')}")
+  }
 }
 
 task('run-jar', dependsOn: [jar]) {
-    description "Run project jar\'s main [-PappArgs='${symbol_dollar}{appArgs}']"
-	doLast {
-        /*javaexec { ignoreExitValue true
-            environment 'LD_LIBRARY_PATH', ld_path
-            jvmArgs = applicationDefaultJvmArgs
-            main = '-jar'
-            args = [jar.archivePath] + argslist
-        }*/
-        println exec_output("java ${symbol_dollar}{applicationDefaultJvmArgs.join(' ')} -jar ${symbol_dollar}{jar.archivePath} ${symbol_dollar}{argslist.join(' ')}")
-    }    
+  description "Run project jar\'s main [-PappArgs='${symbol_dollar}{appArgs}']"
+  doLast {
+    /*javaexec { ignoreExitValue true
+      environment 'LD_LIBRARY_PATH', ld_path
+      jvmArgs = applicationDefaultJvmArgs
+      main = '-jar'
+      args = [jar.archiveFile.get()] + argslist
+    }*/
+    println exec_output("java ${symbol_dollar}{applicationDefaultJvmArgs.join(' ')} -jar ${symbol_dollar}{jar.archiveFile.get()} ${symbol_dollar}{argslist.join(' ')}")
+  }
 }
 
 task('debug-jar', dependsOn: [jar]) {
-    description "Debug project jar\'s main [-PappArgs='${symbol_dollar}{appArgs}']"
+  description "Debug project jar\'s main [-PappArgs='${symbol_dollar}{appArgs}']"
 	doLast { ignoreExitValue true
-        /*environment 'LD_LIBRARY_PATH', ld_path
-        executable = 'ddd'
-        args = ['--jdb'] + applicationDefaultJvmArgs.collect { "-J${symbol_dollar}{it}" } +
-            ['-classpath', jar.archivePath, mainClassName] + argslist
-        standardInput = System.in
-        */
-        println exec_output("ddd --jdb " +
-            ${symbol_dollar}{applicationDefaultJvmArgs.collect { "-J${symbol_dollar}{it}" }.join(' ')} + 
-            " -classpath ${symbol_dollar}{jar.archivePath} ${symbol_dollar}{mainClassName} ${symbol_dollar}{argslist.join(' ')}")
-    }    
+    /*environment 'LD_LIBRARY_PATH', ld_path
+    executable = 'ddd'
+    args = ['--jdb'] + applicationDefaultJvmArgs.collect { "-J${symbol_dollar}{it}" } +
+      ['-classpath', jar.archiveFile.get(), mainClassName] + argslist
+    standardInput = System.in
+    */
+    println exec_output("ddd --jdb " +
+      ${symbol_dollar}{applicationDefaultJvmArgs.collect { "-J${symbol_dollar}{it}" }.join(' ')} +
+      " -classpath ${symbol_dollar}{jar.archiveFile.get()} ${symbol_dollar}{mainClassName} ${symbol_dollar}{argslist.join(' ')}")
+  }
 }
 #{end}
 
 if ((new File("${symbol_dollar}{projectDir}/build-targets.gradle")).exists()) {
-	//apply from: "${symbol_dollar}{projectDir}/depnmgr-ivy.gradle"
-	apply from: "${symbol_dollar}{projectDir}/build-targets.gradle"
-	
-	jar.dependsOn([copyDepns])
-	artifacts.archives(tasks.jarTests) //, tasks.jarSources, tasks.jarJavadoc)
+  //apply from: "${symbol_dollar}{projectDir}/depnmgr-ivy.gradle"
+  apply from: "${symbol_dollar}{projectDir}/build-targets.gradle"
+
+  jar.dependsOn([copyDepns])
+  artifacts.archives(tasks.jarTests) //, tasks.jarSources, tasks.jarJavadoc)
 }
 
 //task auxffi(type: Exec) { workingDir projectDir ; ignoreExitValue true

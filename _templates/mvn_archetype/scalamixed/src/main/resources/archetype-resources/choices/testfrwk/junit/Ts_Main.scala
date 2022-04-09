@@ -3,45 +3,36 @@
 #set( $symbol_escape = '\' )
 package ${package} {
 
-@org.junit.runner.RunWith(classOf[org.junit.runners.Suite])
-@org.junit.runners.Suite.SuiteClasses(Array(classOf[NewTest], classOf[NewProp]))
-//@org.junit.runners.Suite.SuiteClasses(Array(classOf[NewTest], classOf[NewProp],
-//    classOf[ClassicTest], classOf[ClassicProp]))
+@org.junit.platform.suite.api.Suite
+@org.junit.platform.suite.api.IncludeClassNamePatterns(Array("^.*Test${symbol_dollar}",
+  "^Test.*${symbol_dollar}", "^.*Prop${symbol_dollar}", "^Prop.*${symbol_dollar}"))
+@org.junit.platform.suite.api.SelectClasses(Array(classOf[NewTest], classOf[NewProp]))
+//@org.junit.platform.suite.api.SelectClasses(Array(classOf[NewTest], classOf[NewProp],
+//  classOf[ClassicTest], classOf[ClassicProp]))
 class Ts_Main {
-    @org.junit.Before
+    @org.junit.jupiter.api.BeforeEach
     def setUp(): Unit = {
     }
-    @org.junit.After
+    @org.junit.jupiter.api.AfterEach
     def tearDown(): Unit = {
     }
 }
 
 object Ts_Main {
-    @org.junit.BeforeClass
+    @org.junit.jupiter.api.BeforeAll
     def setUpClass(): Unit = {
     }
-    @org.junit.AfterClass
+    @org.junit.jupiter.api.AfterAll
     def tearDownClass(): Unit = {
     }
-    
+
     def main(args: Array[String]): Unit = {
         if (1 > args.length)
-            org.junit.runner.JUnitCore.main(classOf[Ts_Main].getName)
-        else {
-            args.foreach { s =>
-                try {
-                    val cls = Class.forName(s)
-                } catch {
-                    case exc: ClassNotFoundException => {
-                        Console.err.println(exc) //exc.printStackTrace()
-                        sys.exit(1)
-                    }
-                }
-            }
-            org.junit.runner.JUnitCore.main(args :_*)
-        }
+        	org.junit.platform.console.ConsoleLauncher.main("-c",
+              classOf[NewTest].getName, "-c", classOf[NewProp].getName)
+        else
+            org.junit.platform.console.ConsoleLauncher.main(args :_*)
     }
-
 }
 
 }

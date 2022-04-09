@@ -2,9 +2,10 @@
 
 depnmgr ?= ivy  # ivy or maven
 version ?= 0
-SCALA_COMPAT ?= 2.9
-IVY = java -Dscala.compat=$(SCALA_COMPAT) -Divy.cache.ttl.default=eternal -jar $(HOME)/.ant/lib/ivy.jar
-MVN = mvn -Dscala.compat=$(SCALA_COMPAT)
+SCALA_COMPAT ?= 2.13
+rsrc_path ?= src/main/resources
+IVY ?= java -Dscala.compat=$(SCALA_COMPAT) -Divy.cache.ttl.default=eternal -jar $(HOME)/.ant/lib/ivy.jar -properties $(rsrc_path)/versions.properties
+MVN ?= ./mvnw -Dscala.compat=$(SCALA_COMPAT)
 
 .PHONY: resolve retrieve publish
 resolve: ## resolve depns

@@ -20,25 +20,31 @@ version control repository clone:
 
 
 #{if}("sbt" == ${buildTool})
-cd <path> ; sbt [-Djava.library.path=$PREFIX/lib] compile [test:run]
-sbt publishLocal
+build example with sbt self-install:
+cd <path> ; ./sbtw [-Djava.library.path=${symbol_dollar}PREFIX/lib] compile [test:run]
+./sbtw publishLocal
 #{elseif}("rake" == ${buildTool})
-cd <path> ; [sh] ./configure.sh [--prefix=$PREFIX] [--help]
+build example with rake:
+cd <path> ; [sh] ./configure.sh [--prefix=${symbol_dollar}PREFIX] [--help]
 rake main [check]
 rake publish
 #{elseif}("make" == ${buildTool})
-cd <path> ; [sh] ./configure.sh [--prefix=$PREFIX] [--help]
+build example with make:
+cd <path> ; [sh] ./configure.sh [--prefix=${symbol_dollar}PREFIX] [--help]
 make all [check]
 make publish
 #{elseif}("ant" == ${buildTool})
-cd <path> ; ant [-Djava.library.path=$PREFIX/lib] compile [test]
+build example with ant:
+cd <path> ; ant [-Djava.library.path=${symbol_dollar}PREFIX/lib] compile [test]
 ant publish
 #{elseif}("maven" == ${buildTool})
-cd <path> ; mvn [-Djava.library.path=$PREFIX/lib] compile [test]
-mvn install
+build example with maven wrapper:
+cd <path> ; ./mvnw [-Djava.library.path=${symbol_dollar}PREFIX/lib] compile [test]
+./mvnw install
 #{else}
-cd <path> ; gradle [-Djava.library.path=$PREFIX/lib] assemble [check]
-gradle install
+build example with gradle wrapper:
+cd <path> ; ./gradlew [-Djava.library.path=${symbol_dollar}PREFIX/lib] assemble [check]
+./gradlew install
 #{end}
 
 ${symbol_pound}${symbol_pound} Usage

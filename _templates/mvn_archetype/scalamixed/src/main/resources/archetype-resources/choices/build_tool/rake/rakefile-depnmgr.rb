@@ -2,10 +2,10 @@
 
 DEPNMGR = ENV['depnmgr'] ? ENV['depnmgr'] : 'ivy'
 VERSION = ENV['version'] ? ENV['version'] : '0'
-SCALA_COMPAT = ENV['SCALA_COMPAT'] ? ENV['SCALA_COMPAT'] : '2.9'
-
-IVY = "java -Dscala.compat=#{SCALA_COMPAT} -Divy.cache.ttl.default=eternal -jar #{ENV['HOME']}/.ant/lib/ivy.jar"
-MVN = "mvn -Dscala.compat=#{SCALA_COMPAT}"
+SCALA_COMPAT = ENV['SCALA_COMPAT'] ? ENV['SCALA_COMPAT'] : '2.13'
+RSRC_PATH = ENV['rsrc_path'] ? ENV['rsrc_path'] : 'src/main/resources'
+IVY = "java -Dscala.compat=#{SCALA_COMPAT} -Divy.cache.ttl.default=eternal -jar #{ENV['HOME']}/.ant/lib/ivy.jar -properties #{RSRC_PATH}/versions.properties"
+MVN = "./mvnw -Dscala.compat=#{SCALA_COMPAT}"
 
 desc "Resolve depns [depnmgr=#{DEPNMGR}]"
 task :resolve do

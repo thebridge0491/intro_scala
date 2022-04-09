@@ -1,0 +1,46 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<ivysettings>
+  <include url = "${symbol_dollar}{ivy.default.settings.dir}/ivysettings.xml"/>
+
+  <property name = 'rsrc_path' value = "${symbol_dollar}{ivy.basedir}/src/main/resources"/>
+  <properties file = "${symbol_dollar}{rsrc_path}/versions.properties"/>
+  <property name = 'maven.local.default.root'
+    value = "${symbol_dollar}{user.home}/.m2/repository"/>
+  <property name = 'maven.local.default.ivy.pattern'
+    value = '[organization]/[module]/[revision]/[module](-[revision])(-[classifier]).pom'/>
+  <property name = 'maven.local.default.artifact.pattern'
+    value = '[organization]/[module]/[revision]/[artifact](-[revision])(-[classifier]).[ext]'/>
+  <settings defaultResolver = "${symbol_dollar}{ivy.settings.defaultResolver}"/>
+
+  <resolvers>
+    <!--<filesystem name = 'shared'>
+      <ivy pattern = "${symbol_dollar}{ivy.shared.default.root}/${symbol_dollar}{ivy.shared.default.ivy.pattern}"/>
+      <artifact pattern = "${symbol_dollar}{ivy.shared.default.root}/${symbol_dollar}{ivy.shared.default.artifact.pattern}"/>
+    </filesystem>-->
+
+    <!--<filesystem name = 'maven-local' m2compatible = 'true'>
+      <ivy pattern = "${symbol_dollar}{maven.local.default.root}/${symbol_dollar}{maven.local.default.ivy.pattern}"/>
+      <artifact pattern = "${symbol_dollar}{maven.local.default.root}/${symbol_dollar}{maven.local.default.artifact.pattern}"/>
+    </filesystem>-->
+    <ibiblio name = 'maven-local' m2compatible = 'true'
+      root = "file://${symbol_dollar}{maven.local.default.root}"
+      pattern = "${symbol_dollar}{maven.local.default.artifact.pattern}"/>
+
+    <!-- https://repo.maven.apache.org/maven2 -->
+    <!--<ibiblio name = 'public' m2compatible = 'true'
+      root = 'https://repo.maven.apache.org/maven2'/>-->
+
+    <url name = 'typesafe-ivy'>
+      <ivy pattern = "https://dl.bintray.com/typesafe/ivy-releases/${symbol_dollar}{ivy.local.default.ivy.pattern}"/>
+      <artifact pattern = "https://dl.bintray.com/typesafe/ivy-releases/${symbol_dollar}{ivy.local.default.artifact.pattern}"/>
+    </url>
+
+    <chain name = 'default' returnFirst = 'true'>
+      <resolver ref = 'local'/> <!--<resolver ref = 'shared'/>-->
+      <resolver ref = 'maven-local'/> </chain>
+    <chain name = 'main' returnFirst = 'true'>
+      <resolver ref = 'public'/> <resolver ref = 'typesafe-ivy'/> </chain>
+  </resolvers>
+</ivysettings>

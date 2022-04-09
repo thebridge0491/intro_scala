@@ -1,0 +1,66 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+RAKE = ENV['RAKE'] ? ENV['RAKE'] : 'rake'
+${symbol_pound} Single package rakefile script.
+
+class SharedVars
+  attr_accessor :groupid, :parent, :pkg, :version, :proj, :main_class,
+    :dist_jar, :dist_test_jar
+
+  def initialize
+    @groupid, @parent, @pkg = 'org.example', 'new_parent', 'new_pkg'
+    @version, @proj, @main_class = '0.0.0', "${symbol_pound}{parent}-${symbol_pound}{pkg}", ''
+    @dist_jar = "${symbol_pound}{proj}-${symbol_pound}{version}.jar"
+    @dist_test_jar = "${symbol_pound}{proj}-${symbol_pound}{version}-tests.jar"
+  end
+end
+
+VARS = SharedVars.new
+VARS.groupid = '${groupId}'
+VARS.parent, VARS.pkg = '${parent}', '${name}'
+VARS.version = '${version}'
+ENV['version'] = VARS.version
+VARS.proj = "${symbol_pound}{VARS.parent}-${symbol_pound}{VARS.pkg}"
+namespace_path = "${symbol_pound}{VARS.groupid}.${symbol_pound}{VARS.parent}.${symbol_pound}{VARS.pkg}".gsub(/\./, '/')
+
+VARS.dist_jar = "target/${symbol_pound}{VARS.proj}-${symbol_pound}{VARS.version}.jar"
+VARS.dist_test_jar = "target/${symbol_pound}{VARS.proj}-${symbol_pound}{VARS.version}-tests.jar"
+
+desc "Default target: ${symbol_pound}{RAKE} help"
+task :default => [:help]
+
+src_java = FileList["src/main/java/**/*.java"]
+src_scala = FileList["src/main/scala/**/*.scala"]
+${symbol_pound}src_groovy = FileList["src/main/groovy/**/*.groovy"]
+
+#{if}("yes" == ${executable})
+VARS.main_class = "${symbol_pound}{VARS.groupid}.${symbol_pound}{VARS.parent}.${symbol_pound}{VARS.pkg}.Main"
+#{end}
+
+file "${symbol_pound}{VARS.dist_jar}" => src_java + src_scala
+
+tests_java = FileList["src/test/java/**/*.java"].exclude("**/ClassicTest.*")
+${symbol_pound}tests_java = FileList[Dir.glob(File.join("src/test/java", "**", "*.java"))]
+tests_scala = FileList["src/test/scala/**/*.scala"].exclude("**/ClassicTest.*")
+${symbol_pound}tests_groovy = FileList["src/test/groovy/**/*.groovy"].exclude("**/ClassicTest.*")
+
+file "${symbol_pound}{VARS.dist_test_jar}" => tests_java + tests_scala
+
+file "target/.depend" do |t|
+  "target/lib target/include ${symbol_pound}{CLASSES_DIR} ${symbol_pound}{CLASSES_TEST_DIR}".split().each { |i|
+    mkdir_p(i) || true }
+  sh "echo '' > ${symbol_pound}{t.name} || true"
+end
+
+desc 'Build target'
+task :compile => ["target/.depend", "${symbol_pound}{VARS.dist_jar}"]
+
+desc 'Build test target'
+task :testCompile => ["${symbol_pound}{VARS.dist_test_jar}"]
+
+
+require "./rakefile-rules-java.rb"
+require "./rakefile-depnmgr.rb"
+require "./rakefile-targets.rb"
+${symbol_pound}require "./rakefile-auxffi.rb"

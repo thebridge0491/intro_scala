@@ -18,6 +18,7 @@ dist_test_jar = target/${symbol_dollar}(proj)-${symbol_dollar}(version)-tests.ja
 src_java = ${symbol_dollar}(shell ls src/main/java/${symbol_dollar}(namespace_path)/*.java)
 ${symbol_pound}src_java = ${symbol_dollar}(shell find src/main/java -name '*.java')
 src_scala = ${symbol_dollar}(shell ls src/main/scala/${symbol_dollar}(namespace_path)/*.scala)
+${symbol_pound}src_groovy = ${symbol_dollar}(shell ls src/main/groovy/${symbol_dollar}(namespace_path)/*.groovy)
 
 #{if}("yes" == ${executable})
 main_class = ${symbol_dollar}(groupid).${symbol_dollar}(parent).${symbol_dollar}(pkg).Main
@@ -25,6 +26,7 @@ main_class = ${symbol_dollar}(groupid).${symbol_dollar}(parent).${symbol_dollar}
 
 tests_java = ${symbol_dollar}(shell ls src/test/java/${symbol_dollar}(namespace_path)/*.java | grep -ve ClassicTest)
 tests_scala = ${symbol_dollar}(shell ls src/test/scala/${symbol_dollar}(namespace_path)/*.scala | grep -ve ClassicTest)
+${symbol_pound}tests_groovy = ${symbol_dollar}(shell ls src/test/groovy/${symbol_dollar}(namespace_path)/*.groovy | grep -ve ClassicTest)
 
 target/.depend: resolve
 	-@mkdir -p target/lib target/include ${symbol_dollar}(classes_dir) ${symbol_dollar}(classes_test_dir)

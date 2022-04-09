@@ -1,16 +1,19 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <!-- depn scopes: compile, provided, runtime, test, system, import -->
-<!-- maven cmdln cmds: (1) resolve ; (2) build-classpath ; (3) copy-depns ;
-  (4) install ; (5) w/out pom.xml - get single depn ;
-  (6) w/out pom.xml - install external depn
+<!-- maven cmdln cmds: (1) resolve ; (2) build-classpath ; (3) copy-depns ; (4) install ;
+  (5) (w/out pom.xml) get single depn ; (6) (w/out pom.xml) copy single depn ;
+  (7) (w/out pom.xml) install external depn
 (1) mvn [-f pom.xml] [-s settings.xml] dependency:resolve[-plugins]
-(2) mvn [-f pom.xml] [-Dmdep.prefix=lib] [-Dmdep.outputFile=<file.txt>] 
+(2) mvn [-Dmdep.prefix=lib] [-Dmdep.outputFile=<file.txt>]
   [-DincludeScope=compile] dependency:build-classpath
-(3) mvn [-f pom.xml] [-DoutputDirectory=lib] dependency:copy-dependencies
-(4) mvn [-f pom.xml] [-DupdateReleaseInfo=true] install:install
-(5) mvn -DrepoUrl=http://repo.maven.apache.org/maven2 [-Dtransitive=false] 
-  -Dartifact=<groupId>:<artifactId>:<version>[:<packaging>] dependency:get
-(6) mvn [-DgroupId=<groupId> -DartifactId=<artifactId> -Dversion=<version>
+(3) mvn [-DoutputDirectory=lib] dependency:copy-dependencies
+(4) mvn [-DupdateReleaseInfo=true] install:install
+(5) mvn [-Dtransitive=false] -Dartifact=<groupId>:<artifactId>:<version>[:<packaging>]
+  dependency:get
+(6) mvn [-Dtransitive=false] [-DoutputDirectory=<dir>]
+  -Dartifact=<groupId>:<artifactId>:<version>[:<packaging>]
+  org.apache.maven.plugins:maven-dependency-plugin:2.6:copy
+(7) mvn [-DgroupId=<groupId> -DartifactId=<artifactId> -Dversion=<version>
   -Dpackaging=jar] -Dfile=file.jar install:install-file
 -->
 <project xmlns = 'http://maven.apache.org/POM/4.0.0'
@@ -20,21 +23,21 @@
   <modelVersion>4.0.0</modelVersion>
   
   <parent> <groupId>{{groupid}}{{^groupid}}org.sandbox{{/groupid}}</groupId>
-    <artifactId>{{parent}}{{^parent}}intro_scala{{/parent}}-parent</artifactId> <version>0</version>
+    <artifactId>{{parent}}{{^parent}}intro_jvm{{/parent}}-parent</artifactId> <version>0</version>
     <relativePath></relativePath> </parent>
   <!--<groupId>{{groupid}}{{^groupid}}org.sandbox{{/groupid}}</groupId>-->
-  <artifactId>{{name}}{{^name}}intro_scala-util{{/name}}</artifactId>
+  <artifactId>{{name}}{{^name}}intro_jvm-util{{/name}}</artifactId>
   <version>{{version}}{{^version}}0.1.0{{/version}}</version>
   
-  <name>{{parentcap}}{{^parentcap}}Intro_scala{{/parentcap}}::{{projectcap}}{{^projectcap}}Util{{/projectcap}}</name>
-  <description>{{description}}{{^description}}Utilities sub-package for Scala Intro examples project.{{/description}}</description>
-  <url>https://{{repohost}}{{^repohost}}bitbucket.org{{/repohost}}/{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}/{{parent}}{{^parent}}intro_scala{{/parent}}</url>
+  <name>{{parentcap}}{{^parentcap}}Intro_jvm{{/parentcap}}::{{projectcap}}{{^projectcap}}Util{{/projectcap}}</name>
+  <description>{{description}}{{^description}}Utilities sub-package for JVM language Intro examples project.{{/description}}</description>
+  <url>https://{{repohost}}{{^repohost}}bitbucket.org{{/repohost}}/{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}/{{parent}}{{^parent}}intro_jvm{{/parent}}</url>
   
   <properties>
-    <!--<scala.compat>2.9</scala.compat>-->
-    <maven.prereq>3.0.4</maven.prereq>
+    <scala.compat>2.13</scala.compat>
+    <maven.prereq>3.3.9</maven.prereq>
     
-    <project.package>{{namespace}}{{^namespace}}org.sandbox.intro_scala.util{{/namespace}}</project.package>
+    <project.package>{{namespace}}{{^namespace}}org.sandbox.intro_jvm.util{{/namespace}}</project.package>
   </properties>
   
   <prerequisites>
@@ -44,8 +47,11 @@
   <dependencyManagement>
   <dependencies>
     <dependency> <scope>import</scope> <type>pom</type>
+      <groupId>org.junit</groupId> <artifactId>junit-bom</artifactId>
+      <version>5.8.0</version> </dependency>
+    <dependency> <scope>import</scope> <type>pom</type>
       <groupId>{{groupid}}{{^groupid}}org.sandbox{{/groupid}}</groupId>
-      <artifactId>{{parent}}{{^parent}}intro_scala{{/parent}}-bom</artifactId>
+      <artifactId>{{parent}}{{^parent}}intro_jvm{{/parent}}-bom</artifactId>
       <version>0</version> </dependency>
   </dependencies>
   </dependencyManagement>
@@ -58,8 +64,8 @@
   
   <scm>
     <url>${project.url}</url>
-    <connection>scm:git:http://{{repohost}}{{^repohost}}bitbucket.org{{/repohost}}/{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}/{{parent}}{{^parent}}intro_scala{{/parent}}.git</connection>
-    <developerConnection>scm:git:ssh://git@{{repohost}}{{^repohost}}bitbucket.org{{/repohost}}/{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}/{{parent}}{{^parent}}intro_scala{{/parent}}.git</developerConnection>
+    <connection>scm:git:http://{{repohost}}{{^repohost}}bitbucket.org{{/repohost}}/{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}/{{parent}}{{^parent}}intro_jvm{{/parent}}.git</connection>
+    <developerConnection>scm:git:ssh://git@{{repohost}}{{^repohost}}bitbucket.org{{/repohost}}/{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}/{{parent}}{{^parent}}intro_jvm{{/parent}}.git</developerConnection>
   </scm>
   
   <inceptionYear>{{year}}{{^year}}2014{{/year}}</inceptionYear>
@@ -69,11 +75,11 @@
       <distribution>repo</distribution> </license>
   </licenses>
   <organization> <name>Coding Sandbox</name>
-    <url>http://sandbox.org/{{parent}}{{^parent}}intro_scala{{/parent}}</url> </organization>
+    <url>http://sandbox.org/{{parent}}{{^parent}}intro_jvm{{/parent}}</url> </organization>
   <developers>
     <developer>
       <id>{{author}}{{^author}}{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}{{/author}}</id>
-      <name>{{author}}{{^author}}{{author}}{{^author}}{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}{{/author}}{{/author}}</name>
+      <name>{{author}}{{^author}}{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}{{/author}}</name>
       <email>{{email}}{{^email}}{{repoacct}}{{^repoacct}}imcomputer{{/repoacct}}-codelab@yahoo.com{{/email}}</email>
       <url>${project.url}</url>
       <organization>Coding Sandbox</organization>
@@ -86,20 +92,60 @@
   </developers>
   
   <dependencies>
+    <!--<dependency> <groupId>{{groupid}}{{^groupid}}org.sandbox{{/groupid}}</groupId>
+      <artifactId>{{parent}}{{^parent}}intro_jvm{{/parent}}-util</artifactId>
+      <version>{{version}}{{^version}}0.1.0{{/version}}</version> </dependency>-->
+
     <dependency> <!--<classifier>sources</classifier> <type>jar</type>-->
       <groupId>org.scala-lang</groupId> <artifactId>scala-library</artifactId> </dependency>
-    <!--<dependency> <scope>test</scope> <groupId>org.scalatest</groupId>
-      <artifactId>scalatest_${scala.compat}</artifactId> </dependency>-->
-    <!--<dependency> <scope>test</scope> <groupId>org.scalacheck</groupId>
-      <artifactId>scalacheck_${scala.compat}</artifactId> </dependency>-->
+    <dependency> <scope>test</scope> <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_${scala.compat}</artifactId> </dependency>
+    <dependency> <scope>test</scope> <groupId>org.scalacheck</groupId>
+      <artifactId>scalacheck_${scala.compat}</artifactId> </dependency>
+    <dependency> <groupId>com.beautiful-scala</groupId>
+      <artifactId>scalastyle_${scala.compat}</artifactId> </dependency>
+	<dependency> <optional>true</optional> <groupId>net.alchim31.maven</groupId>
+	  <artifactId>scala-maven-plugin</artifactId> </dependency>
+      
+    <!--<dependency> <groupId>org.codehaus.groovy</groupId>
+      <artifactId>groovy-all</artifactId> </dependency>
+    <dependency> <scope>test</scope> <groupId>org.spockframework</groupId>
+      <artifactId>spock-core</artifactId> </dependency>
+    <dependency> <groupId>org.codenarc</groupId>
+      <artifactId>CodeNarc</artifactId> </dependency>-->
+
+    <!--<dependency> <groupId>org.clojure</groupId>
+      <artifactId>clojure</artifactId> </dependency>
+    <dependency> <groupId>org.clojure</groupId>
+      <artifactId>test.check</artifactId> </dependency>
+    <dependency> <groupId>org.clojure</groupId>
+      <artifactId>tools.reader</artifactId> </dependency>
+    <dependency> <groupId>org.clojure</groupId>
+      <artifactId>tools.logging</artifactId> </dependency>
+    <dependency> <groupId>org.clojure</groupId>
+      <artifactId>tools.cli</artifactId> </dependency>
+    <dependency> <groupId>org.clojure</groupId>
+      <artifactId>data.json</artifactId> </dependency>-->
     
-    <dependency> <scope>test</scope> <groupId>junit</groupId>
-      <artifactId>junit</artifactId> </dependency>
+    <!--<dependency> <scope>test</scope> <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-console</artifactId> </dependency>
+    <dependency> <scope>test</scope> <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-suite</artifactId> </dependency>
+    <dependency> <scope>test</scope> <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId> </dependency>-->
+    <!--<dependency> <scope>test</scope> <groupId>org.junit.platform</groupId>
+      <artifactId>junit-platform-runner</artifactId> </dependency>
+    <dependency> <scope>test</scope> <groupId>org.junit.vintage</groupId>
+      <artifactId>junit-vintage-engine</artifactId> </dependency>-->
     <!--<dependency> <scope>test</scope> <groupId>org.testng</groupId>
       <artifactId>testng</artifactId> </dependency>-->
-    <!--<dependency> <scope>test</scope> <groupId>org.spockframework</groupId>
-      <artifactId>spock-core</artifactId> </dependency>-->
+    <dependency> <groupId>org.jacoco</groupId>
+	  <artifactId>org.jacoco.ant</artifactId> </dependency>
+    <dependency> <groupId>com.puppycrawl.tools</groupId>
+      <artifactId>checkstyle</artifactId> </dependency>
     
+    <dependency> <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId> </dependency>
     <!--<dependency> <groupId>org.slf4j</groupId>
       <artifactId>log4j-over-slf4j</artifactId> </dependency>-->
     <dependency> <groupId>ch.qos.logback</groupId>
@@ -117,11 +163,9 @@
       <artifactId>javax.json</artifactId> </dependency>
     <dependency> <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId> </dependency>
+    <dependency> <groupId>com.moandjiezana.toml</groupId>
+      <artifactId>toml4j</artifactId> </dependency>
     {{/executable}}
-    
-    <!--<dependency> <groupId>{{groupid}}{{^groupid}}org.sandbox{{/groupid}}</groupId>
-      <artifactId>{{parent}}{{^parent}}intro_scala{{/parent}}-util</artifactId>
-      <version>{{version}}{{^version}}0.1.0{{/version}}</version> </dependency>-->
   </dependencies>
   
   <build>
@@ -129,23 +173,44 @@
     <testSourceDirectory>src/test/scala</testSourceDirectory>-->
     <plugins>
 	  <!-- default pluginGroups: org.apache.maven.plugins; org.codehaus.mojo -->
+	  <plugin> <artifactId>maven-help-plugin</artifactId> </plugin>
+	  <plugin> <groupId>org.codehaus.mojo</groupId> 
+	    <artifactId>versions-maven-plugin</artifactId> </plugin>
 	  <plugin> <artifactId>maven-antrun-plugin</artifactId> </plugin>
-	  <!--<plugin> <artifactId>maven-clean-plugin</artifactId> </plugin>-->
+	  <plugin> <artifactId>maven-clean-plugin</artifactId> </plugin>
 	  <plugin> <artifactId>maven-dependency-plugin</artifactId> </plugin>
-	  <!--<plugin> <artifactId>maven-resources-plugin</artifactId> </plugin>-->
-      <plugin> <groupId>net.alchim31.maven</groupId>
-        <artifactId>scala-maven-plugin</artifactId> </plugin>
+	  <plugin> <artifactId>maven-resources-plugin</artifactId> </plugin>
       <plugin> <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
+	    <!--<dependencies>
+	      <dependency>
+			<groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-eclipse-compiler</artifactId>
+          </dependency>
+	      <dependency>
+			<groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-eclipse-batch</artifactId>
+          </dependency>
+	    </dependencies>-->
+	    <configuration>
+	      <!--<compilerId>groovy-eclipse-compiler</compilerId>-->
           <testExcludes>
             <testExclude>**/ClassicTest.*</testExclude>
             <testExclude>**/ClassicProp.*</testExclude>
           </testExcludes>
-        </configuration>
+	    </configuration>
       </plugin>
-	  <!--<plugin> <artifactId>maven-surefire-plugin</artifactId> </plugin>-->
+	  <plugin> <artifactId>maven-surefire-plugin</artifactId>
+	    <configuration> <testFailureIgnore>true</testFailureIgnore>
+	      <skipTests>true</skipTests> </configuration>
+	  </plugin>
+	  <plugin> <artifactId>maven-failsafe-plugin</artifactId>
+	    <configuration> <testFailureIgnore>true</testFailureIgnore>
+	      <skipTests>true</skipTests> </configuration>
+	  </plugin>
+	  <plugin> <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId> </plugin>
       <plugin> <artifactId>maven-jar-plugin</artifactId>
-        <!--<configuration>
+        <configuration>
           <archive combine.self = 'override'>
             <index>false</index>
             <manifestEntries><Built-By></Built-By></manifestEntries>
@@ -157,18 +222,34 @@
               <packageName>${project.package}</packageName>
             </manifest>
           </archive>
-        </configuration>-->
+        </configuration>
       </plugin>
 	  <plugin> <artifactId>maven-source-plugin</artifactId> </plugin>
 	  <plugin> <artifactId>maven-assembly-plugin</artifactId> </plugin>
 	  <plugin> <artifactId>maven-javadoc-plugin</artifactId> </plugin>
-      <plugin> <groupId>org.scalastyle</groupId>
-		<artifactId>scalastyle-maven-plugin</artifactId> </plugin>
 	  <plugin> <artifactId>maven-checkstyle-plugin</artifactId> </plugin>
+	  <plugin> <groupId>org.codehaus.mojo</groupId>
+        <artifactId>codenarc-maven-plugin</artifactId> </plugin>
+	  <plugin> <artifactId>maven-install-plugin</artifactId> </plugin>
+	  <plugin> <artifactId>maven-deploy-plugin</artifactId> </plugin>
+
+      <plugin> <groupId>net.alchim31.maven</groupId>
+        <artifactId>scala-maven-plugin</artifactId> </plugin>
+      <!--<plugin> <groupId>org.codehaus.groovy</groupId>
+		<artifactId>groovy-eclipse-compiler</artifactId> </plugin>-->
+	  <!--<plugin> <groupId>com.theoryinpractise</groupId>
+		<artifactId>clojure-maven-plugin</artifactId> </plugin>-->
+	  <!--<plugin> <groupId>org.codehaus.mojo</groupId>
+		<artifactId>build-helper-maven-plugin</artifactId> </plugin>-->
+      <plugin> <groupId>org.scalatest</groupId>
+		<artifactId>scalatest-maven-plugin</artifactId>
+	    <configuration> <testFailureIgnore>true</testFailureIgnore>
+	        <skipTests>false</skipTests> </configuration>
+	  </plugin>
+      <plugin> <groupId>org.neo4j</groupId>
+		<artifactId>scalastyle-maven-plugin</artifactId> </plugin>
 	  <plugin> <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId> </plugin>
-	  <!--<plugin> <artifactId>maven-install-plugin</artifactId> </plugin>-->
-	  <!--<plugin> <artifactId>maven-deploy-plugin</artifactId> </plugin>-->
     </plugins>
   </build>
 </project>

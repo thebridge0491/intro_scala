@@ -5,8 +5,8 @@ package ${package} {
 
 import org.scalacheck.{Prop,Properties,Gen}
 import org.scalacheck.Prop._
-import org.junit.Test
-import org.junit.Assert._
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.Assertions._
 
 import scala.collection.mutable.{ListBuffer => M_List}
 
@@ -18,29 +18,30 @@ class NewProp {
 		SchkTest.check(SchkTest.Parameters.default, p).passed
         //SchkTest.check(SchkTest.Parameters.defaultVerbose, p).passed
 	}
-    
+
     // using def doCheck, scalacheck property check
     /*val propMap = NewProp.properties.toMap
-    
+
     @Test
     def test_propCommutativeAdd() =
         assertTrue(doCheck(propMap(NewProp.name + ".commutative addition")))
-    
+
     @Test
     def test_propAssociativeAdd() =
         assertTrue(doCheck(propMap(NewProp.name + ".associative addition")))*/
-    
+
     @Test
     def test_propsNew() =
         // (from junit) execute scalacheck-style propert(y|ies) check(s)
         //NewProp.main(Array())
-        NewProp.properties.foreach { (name_prop:(String, Prop)) => 
-            name_prop match { case (name, prop) => 
+        NewProp.properties.foreach { (name_prop:(String, Prop)) =>
+            name_prop match { case (name, prop) =>
                 //prop.check
-                
+
                 // using def doCheck, scalacheck property check
                 try {
                     assertTrue(doCheck(prop))
+                    Console.err.printf("assertTrue: %s\n".format(name))
                 } catch {
                     case exc: AssertionError => {
                         Console.err.printf("AssertionError: %s\n".format(name))
@@ -54,35 +55,35 @@ class NewProp {
 // scalacheck properties object w/ (implicit) main method
 object NewProp extends Properties("(props) New examples") {
     //import scala.language.implicitConversions
-    
+
     implicit val chooseInteger: Gen.Choose[Integer] = new Gen.Choose[Integer] {
 		def choose(low: Integer, high: Integer) =
 			Gen.Choose.chooseInt.choose(low.intValue, high.intValue).map(
 				e => Integer.valueOf(e))
 	}
-    
+
     //val tolerance = 2.0f * Float.MinPositiveValue
     val epsilon = 0.001 //1.0e-7f
-	
+
     def in_epsilon(a: Double, b: Double, tolerance: Double = 0.001): Boolean = {
         val delta = Math.abs(tolerance)
         //(a - delta) <= b && (a + delta) >= b
 		!((a + delta) < b) && !((b + delta) < a)
     }
-    
-    def genTup2Int(gen0: Gen[Int], gen1: Gen[Int]) = 
+
+    def genTup2Int(gen0: Gen[Int], gen1: Gen[Int]) =
         for { x <- gen0 ; y <- gen1 } yield (x, y)
-    
-    def genTup3Int(gen0: Gen[Int], gen1: Gen[Int], gen2: Gen[Int]) = 
+
+    def genTup3Int(gen0: Gen[Int], gen1: Gen[Int], gen2: Gen[Int]) =
         for { x <- gen0 ; y <- gen1 ; z <- gen2 } yield (x, y, z)
-    
+
     def genListInts(gen0: Gen[Int]) = for {
         numElems <- Gen.choose[Int](1, 100)
         //elems <- Gen.listOfN[Int](numElems, gen0)
 		elems <- Gen.containerOfN[M_List, Int](numElems, gen0)
 	} yield elems
-    
-    
+
+
     // scalacheck-style property define
     property("commutative addition") = forAll(genTup2Int(
             Gen.choose(-50, 50), Gen.choose(-50, 50))) { (x_y:(Int, Int)) =>
@@ -92,7 +93,7 @@ object NewProp extends Properties("(props) New examples") {
                 x, y, ans))
         }
     }
-    
+
     property("associative addition") = forAll(genTup3Int(
             Gen.choose(-25, 25), Gen.choose(-25, 25), Gen.choose(0, 25))) { (x_y_z:(Int, Int, Int)) =>
         x_y_z match { case (x, y, z) =>
@@ -101,30 +102,30 @@ object NewProp extends Properties("(props) New examples") {
                 x, y, z, ans))
         }
     }
-    
+
     property("list reverse reverse is list") = forAll(genListInts(
-            Gen.choose(-50, 50))) { (xs: M_List[Int]) => 
+            Gen.choose(-50, 50))) { (xs: M_List[Int]) =>
         val (ans, res) = (xs, xs.reverse.reverse)
         (ans == res).label("===propRevRev(%s) : %s===".format(
             res.mkString("[", ", ", "]"), ans.mkString("[", ", ", "]")))
     }
-    
+
     property("list reverse is list") = forAll(genListInts(
-            Gen.choose(-50, 50))) { (xs: M_List[Int]) => 
+            Gen.choose(-50, 50))) { (xs: M_List[Int]) =>
         val (ans, res) = (xs, xs.reverse)
         (ans == res).label("===propRevId(%s) : %s===".format(
             res.mkString("[", ", ", "]"), ans.mkString("[", ", ", "]")))
     }
-    
+
     property("list reverse & sorted is list") = forAll(genListInts(
-            Gen.choose(-50, 50))) { (xs: M_List[Int]) => 
+            Gen.choose(-50, 50))) { (xs: M_List[Int]) =>
         val (ans, res) = (xs.sorted, xs.reverse.sorted)
         (ans == res).label("===propSortRev(%s) : %s===".format(
             res.mkString("[", ", ", "]"), ans.mkString("[", ", ", "]")))
     }
-    
+
     property("head of sorted list is minimum") = forAll(genListInts(
-            Gen.choose(-50, 50))) { (xs: M_List[Int]) => 
+            Gen.choose(-50, 50))) { (xs: M_List[Int]) =>
         val (ans, res) = (xs.min, xs.sorted.apply(0))
         (ans == res).label("===propSortMin(%d) : %d===".format(res, ans))
     }

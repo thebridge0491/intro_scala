@@ -4,10 +4,10 @@
 <?xml version = '1.0' encoding = 'UTF-8'?>
 <project name = '${parent}' default = 'help' basedir = '.'>
   <description>Multi-package Ant buildfile script.</description>
-  
+
   <property environment = 'env'/>
   <property file = 'build.properties'/>
-  
+
   <property name = 'echo.pat' value = '^ant\.'/>
 
   <condition property = 'tar.compression' value = 'xz'>
@@ -22,7 +22,7 @@
   <condition property = 'tar.compression' value = 'none' else = 'none'>
     <equals casesensitive = 'false' arg1 = 'tar' arg2 = "${symbol_dollar}{tarext}"/>
   </condition>
-  
+
   <macrodef name = 'iterate'>
     <attribute name = 'target'/>
     <sequential>
@@ -33,15 +33,15 @@
         <dirset dir = '.' includes = "${symbol_dollar}{subdirs}"/> </subant>
     </sequential>
   </macrodef>
-  
+
   <target name = 'help' description = "Usage: ant [-Dsubdirs='${symbol_dollar}{subdirs}' -DDEBUG=${symbol_dollar}{DEBUG}] [target]">
     <iterate target = 'help'/> </target>
-  
+
   <target name = 'properties' description = "Echo properties matching pattern [-Dsubdirs='${symbol_dollar}{subdirs}' -Decho.pat='${symbol_dollar}{echo.pat}']">
     <iterate target = 'properties'/> </target>
   <target name = 'prep' description = "Prep build [-Dsubdirs='${symbol_dollar}{subdirs}']">
     <iterate target = 'prep'/> </target>
-  
+
   <target name = 'clean' description = "Remove generated file(s) [-Dsubdirs='${symbol_dollar}{subdirs}']">
     <iterate target = 'clean'/> </target>
   <target name = 'compile' description = "Build target [-Dsubdirs='${symbol_dollar}{subdirs}']">
@@ -67,7 +67,7 @@
     <delete failonerror = 'false'
       file = "${symbol_dollar}{build.dir}/${symbol_dollar}{ant.project.name}-${symbol_dollar}{ant.project.rev}.${symbol_dollar}{tarext}"/>
     <tar destfile = "${symbol_dollar}{build.dir}/${symbol_dollar}{ant.project.name}-${symbol_dollar}{ant.project.rev}.${symbol_dollar}{tarext}"
-        basedir = "${symbol_dollar}{build.dir}" compression = "${symbol_dollar}{tar.compression}" 
+        basedir = "${symbol_dollar}{build.dir}" compression = "${symbol_dollar}{tar.compression}"
         excludesfile = "${symbol_dollar}{basedir}/exclude.lst"
         includes = "${symbol_dollar}{ant.project.name}-${symbol_dollar}{ant.project.rev}/**"/>
   </target>
@@ -79,13 +79,15 @@
         basedir = "${symbol_dollar}{build.dir}" excludesfile = "${symbol_dollar}{basedir}/exclude.lst"
         includes = "${symbol_dollar}{ant.project.name}-${symbol_dollar}{ant.project.rev}/**"/>
   </target>
-  
+
   <target name = 'package' description = "Package project (jar) [-Dsubdirs='${symbol_dollar}{subdirs}']">
     <iterate target = 'package'/> </target>
   <target name = 'javadoc' description = "Generate documentation (javadoc) [-Dsubdirs='${symbol_dollar}{subdirs}']">
     <iterate target = 'javadoc'/> </target>
   <target name = 'scaladoc' description = "Generate documentation (scaladoc) [-Dsubdirs='${symbol_dollar}{subdirs}']">
     <iterate target = 'scaladoc'/> </target>
+  <!--<target name = 'groovydoc' description = "Generate documentation (groovydoc) [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'groovydoc'/> </target>-->
   <target name = 'doc' description = "Generate documentation (javadoc &amp; scaladoc) [-Dsubdirs='${symbol_dollar}{subdirs}']">
     <iterate target = 'doc'/> </target>
 
@@ -95,6 +97,8 @@
     <iterate target = 'checkstyle'/> </target>
   <target name = 'scalastyle' description = "Lint check (scalastyle) [-Dsubdirs='${symbol_dollar}{subdirs}']">
     <iterate target = 'scalastyle'/> </target>
+  <!--<target name = 'codenarc' description = "Lint check (codenarc) [-Dsubdirs='${symbol_dollar}{subdirs}']">
+    <iterate target = 'codenarc'/> </target>-->
   <target name = 'lint' description = "Lint check (checkstyle &amp; scalastyle) [-Dsubdirs='${symbol_dollar}{subdirs}']">
     <iterate target = 'lint'/> </target>
 

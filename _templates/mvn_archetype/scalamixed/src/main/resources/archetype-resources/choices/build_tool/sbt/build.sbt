@@ -4,38 +4,69 @@
 import Settings._
 import BuildTasks._
 
-//scalaVersion     in ThisBuild := "2.9.2"
-organization     in ThisBuild := "${groupId}"
-organizationName in ThisBuild := "Coding Sandbox"
+ThisBuild / scalaVersion := "2.13.2"
+ThisBuild / organization := "${groupId}"
+ThisBuild / organizationName := "Coding Sandbox"
 
-lazy val ${name} = (project in file("."))
-	.settings(defaultSettings:_*)
-	.settings(otherTasks:_*)
-	.settings(name := "${parent}-${name}"
-        , version := "${version}"
-        /*, libraryDependencies ++= Seq(
-            "org.scala-lang" % "scala-library" % "[2.9.2,)"
-            , "junit" % "junit" % "[4.10,)" % "test"
-			)*/
-        //, externalIvySettingsURL(url("file://" + 
-        //    sys.env.getOrElse("HOME", ".") + "/.ivy2/ivysettings.xml"))
-        , externalIvySettings(Def.setting(file(sys.env.getOrElse("HOME", 
-            ".") + "/.ivy2/ivysettings.xml")))
-        , externalIvyFile()
-        , classpathConfiguration in Compile := Compile
-        , classpathConfiguration in Runtime := Runtime
-        , classpathConfiguration in Test := Test
-		//, publishArtifact := false
-		//, unmanagedBase := baseDirectory.value / "lib"
-		/*, unmanagedJars in Test ++= (java_lib ** ("hamcrest-core.jar" ||
-            "junit.jar")).classpath
-		, unmanagedJars in Compile ++= { 
-            val base = baseDirectory.value
-			val baseDirectories = (base / "lib") +++ (base / "../lib")
-			val customJars = (baseDirectories ** "*.jar") +++ (java_lib ** 
-				("slf4j-api.jar" || "jna.jar"))
-			customJars.classpath }
-        */)
-	.settings(excludeFilter in Test in unmanagedSources := "ClassicTest.*" || "ClassicProp.*")
+// ? need old functionality (useCoursier := false) f/ external ivy.xml / pom
+ThisBuild / useCoursier := true
 
-//lazy val scalaCompat = sys.props.getOrElse("scala.compat", "2.9")
+lazy val ${name} = project.in(file("."))
+  .settings(defaultSettings:_*)
+  .settings(otherTasks:_*)
+  .settings(name := "${parent}-${name}"
+    , version := "${version}"
+
+    // ?? deprecated since sbt 1.5
+    //, externalIvySettingsURL(url("file://" +
+    //  sys.env.getOrElse("HOME", ".") + "/.ivy2/ivysettings.xml"))
+    //, externalIvySettings(Def.setting(file(sys.env.getOrElse("HOME",
+    //  ".") + "/.ivy2/ivysettings.xml")))
+    //, externalIvyFile()
+
+    //, libraryDependencies += "${groupId}" % "${parent}-bom" % "0" pomOnly()
+    //, libraryDependencies += ("org.scalatest" %% "scalatest" % "3.2.10" % Test)
+    //  .exclude("org.scala-lang.modules", "scala-xml_2.12")
+    //  .exclude("org.scala-lang.modules", "scala-parser-combinators_2.12")
+    , libraryDependencies ++= Seq(
+      //"org.scala-lang" % "scala-library" % "2.13.2"
+      //, "org.scalatest" %% "scalatest" % "3.2.10" % Test
+      depnMap("scalaLib"), depnMap("scalaTest") % Test
+      , depnMap("scalaCheck") % Test
+
+      //, depnMap("junitConsole") % Test
+      //, depnMap("junitSuite") % Test, depnMap("junitJupiter") % Test
+      //, depnMap("junitRunner") % Test, depnMap("junitVintage") % Test
+      //, depnMap("testng") % Test
+
+      , depnMap("slf4j")//, depnMap("log4jOverSlf4j") % Runtime
+      , depnMap("logbackClassic") % Runtime
+
+      , depnMap("ini4j")
+      //, depnMap("jna")
+#{if}("yes" == ${executable})
+      , depnMap("jsonp"), depnMap("jsonpApi")
+      , depnMap("snakeYaml"), depnMap("toml4j")
+#{end}
+      )
+    , Compile / classpathConfiguration := Compile
+    , Runtime / classpathConfiguration := Runtime
+    , Test / classpathConfiguration := Test
+    //, publishArtifact := false
+    //, unmanagedBase := baseDirectory.value / "lib"
+    //, Test / unmanagedJars ++= (java_lib ** ("hamcrest-core.jar" ||
+    //  "junit.jar")).classpath
+    //, Compile / unmanagedJars ++= {
+    //  val base = baseDirectory.value
+    //  val baseDirectories = (base / "lib") +++ (base / "../lib")
+    //  val customJars = (baseDirectories ** "*.jar") +++ (java_lib **
+    //    ("slf4j-api.jar" || "jna.jar"))
+    //  customJars.classpath }
+    )
+  .settings(Test / unmanagedSources / excludeFilter := "ClassicTest.*" || "ClassicProp.*")
+
+//lazy val scalaCompat = sys.props.getOrElse("scala.compat", "2.13")
+
+//addCommandAlias("install", "publishLocal")
+
+// See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.

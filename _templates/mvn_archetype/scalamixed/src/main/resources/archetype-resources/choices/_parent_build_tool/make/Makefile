@@ -8,6 +8,7 @@ help:
 ${symbol_pound}MAKE = make ${symbol_pound} (GNU make variants: make (Linux) gmake (FreeBSD)
 
 parent = ${parent}
+version = ${version}
 SUBDIRS = common app
 
 .PHONY: all clean compile configure help publish testCompile test
@@ -26,22 +27,26 @@ clean: ${symbol_dollar}(SUBDIRS)
 	-rm -fr core* *~ .*~ target/* *.log */*.log
 
 ${symbol_pound}----------------------------------------
-FMTS ?= tar.gz
-distdir = ${symbol_dollar}(parent)-0.1.0
+FMTS ?= tar.gz,zip
+distdir = ${symbol_dollar}(parent)-${symbol_dollar}(version)
+
+target/${symbol_dollar}(distdir) :
+	-@mkdir -p target/${symbol_dollar}(distdir) ; cp -f exclude.lst target/
+#	#-zip -9 -q --exclude @exclude.lst -r - . | unzip -od target/${symbol_dollar}(distdir) -
+	-tar --format=posix --dereference --exclude-from=exclude.lst -cf - . | tar -xpf - -C target/${symbol_dollar}(distdir)
 
 .PHONY: dist jar javadoc scaladoc checkstyle scalastyle cover report run debug
-dist: ${symbol_dollar}(SUBDIRS)
-	-mkdir -p target/${symbol_dollar}(distdir) ; cp exclude.lst target/
-${symbol_pound}	${symbol_pound}-zip -9 -q --exclude @exclude.lst -r - . | unzip -od target/${symbol_dollar}(distdir) -
-	-tar --format=posix --dereference --exclude-from=exclude.lst -cf - . | tar -xpf - -C target/${symbol_dollar}(distdir)
-	
+dist | target/${symbol_dollar}(distdir): ${symbol_dollar}(SUBDIRS)
 	-@for fmt in `echo ${symbol_dollar}(FMTS) | tr ',' ' '` ; do \
 		case ${symbol_dollar}${symbol_dollar}fmt in \
-			zip) echo "### target/${symbol_dollar}(distdir).zip ###" ; \
+			7z) echo "${symbol_pound}${symbol_pound}${symbol_pound} target/${symbol_dollar}(distdir).7z ${symbol_pound}${symbol_pound}${symbol_pound}" ; \
+				rm -f target/${symbol_dollar}(distdir).7z ; \
+				(cd target ; 7za a -t7z -mx=9 ${symbol_dollar}(distdir).7z ${symbol_dollar}(distdir)) ;; \
+			zip) echo "${symbol_pound}${symbol_pound}${symbol_pound} target/${symbol_dollar}(distdir).zip ${symbol_pound}${symbol_pound}${symbol_pound}" ; \
 				rm -f target/${symbol_dollar}(distdir).zip ; \
 				(cd target ; zip -9 -q -r ${symbol_dollar}(distdir).zip ${symbol_dollar}(distdir)) ;; \
-			*) tarext=`echo ${symbol_dollar}${symbol_dollar}fmt | grep -e '^tar${symbol_dollar}${symbol_dollar}' -e '^tar.xz${symbol_dollar}${symbol_dollar}' -e '^tar.bz2${symbol_dollar}${symbol_dollar}' || echo tar.gz` ; \
-				echo "### target/${symbol_dollar}(distdir).${symbol_dollar}${symbol_dollar}tarext ###" ; \
+			*) tarext=`echo ${symbol_dollar}${symbol_dollar}fmt | grep -e '^tar${symbol_dollar}${symbol_dollar}' -e '^tar.xz${symbol_dollar}${symbol_dollar}' -e '^tar.zst${symbol_dollar}${symbol_dollar}' -e '^tar.bz2${symbol_dollar}${symbol_dollar}' || echo tar.gz` ; \
+				echo "${symbol_pound}${symbol_pound}${symbol_pound} target/${symbol_dollar}(distdir).${symbol_dollar}${symbol_dollar}tarext ${symbol_pound}${symbol_pound}${symbol_pound}" ; \
 				rm -f target/${symbol_dollar}(distdir).${symbol_dollar}${symbol_dollar}tarext ; \
 				(cd target ; tar --posix -L -caf ${symbol_dollar}(distdir).${symbol_dollar}${symbol_dollar}tarext ${symbol_dollar}(distdir)) ;; \
 		esac \

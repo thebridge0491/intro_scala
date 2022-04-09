@@ -7,7 +7,7 @@
 [app]
   org: ${symbol_dollar}{sbt.organization-org.scala-sbt}
   name: sbt
-  version: ${symbol_dollar}{sbt.version-read(sbt.version)[0.12.0]}
+  version: ${symbol_dollar}{sbt.version-read(sbt.version)[1.5.2]}
   class: ${symbol_dollar}{sbt.main.class-sbt.xMain}
   components: xsbti,extra
   cross-versioned: ${symbol_dollar}{sbt.cross.versioned-false}

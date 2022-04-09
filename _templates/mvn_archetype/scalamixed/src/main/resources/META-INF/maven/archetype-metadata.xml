@@ -22,7 +22,7 @@
       <defaultValue>${name.substring(0,1).toUpperCase()}${name.substring(1)}</defaultValue>
     </requiredProperty>-->
     <requiredProperty key="description">
-      <defaultValue>Utilites sub-package for Scala Intro examples project.</defaultValue> </requiredProperty>
+      <defaultValue>Utilities sub-package for Scala Intro examples project.</defaultValue> </requiredProperty>
     <requiredProperty key="package">
       <defaultValue>${groupId}.${parent}.${name}</defaultValue>
     </requiredProperty>
@@ -113,16 +113,29 @@
     <fileSet filtered="true" encoding="UTF-8">
       <directory>choices/_parent_build_tool</directory>
       <includes> <include>**/*.txt</include> <include>**/*.xml</include>
-        <include>**/*.gradle</include> <include>**/*.mk</include> 
+        <include>**/*.gradle</include> <include>**/*.mk</include>
         <include>**/*.rb</include> <include>**/*.new</include>
-        <include>**/*.sbt</include> <include>**/*.</include> </includes>
+        <include>**/*.sbt</include> <include>**/*.</include>
+         <include>**/gradle.properties</include> </includes>
+      <excludes> <exclude>**/depnmgr-ivy.xml</exclude> 
+        <exclude>**/depnmgr-maven.xml*</exclude> 
+        <exclude>**/build-jacoco.xml*</exclude> </excludes>
     </fileSet>
     <fileSet filtered="true" encoding="UTF-8">
       <directory>choices/build_tool</directory>
       <includes> <include>**/*.txt</include> <include>**/*.xml</include>
-        <include>**/*.gradle</include> <include>**/*.mk</include> 
+        <include>**/*.gradle</include> <include>**/*.mk</include>
         <include>**/*.rb</include> <include>**/*.new</include>
-        <include>**/*.sbt</include> <include>**/*.bak</include> </includes>
+        <include>**/*.sbt</include> <include>**/*.bak</include>
+         <include>**/gradle.properties</include> </includes>
+      <excludes> <exclude>**/depnmgr-ivy.xml</exclude> 
+        <exclude>**/depnmgr-maven.xml*</exclude> 
+        <exclude>**/build-jacoco.xml</exclude>  
+        <exclude>**/build-targets.xml</exclude> 
+        <exclude>**/sbt.boot.properties*</exclude> 
+        <exclude>**/rakefile-targets.rb</exclude>  
+        <exclude>**/Makefile-targets.mk</exclude>  
+        <exclude>**/build-targets.gradle</exclude> </excludes>
     </fileSet>
     <fileSet filtered="true" encoding="UTF-8">
       <directory>choices/ffi_lib</directory>
@@ -145,16 +158,27 @@
     <fileSet encoding="UTF-8">
       <directory>choices/_parent_build_tool</directory>
       <includes> <include>**/*.properties</include> <include>**/*.</include>
-      <include>**/*.scala</include> <include>**/.sbtopts</include>
-      <include>**/*.bak</include> <include>**/rakefile</include>
-      <include>**/Makefile</include> </includes>
+        <include>**/*.scala</include> <include>**/.sbtopts</include>
+        <include>**/*.bak</include> <include>**/Rakefile</include>
+        <include>**/Makefile</include>
+        <include>**/depnmgr-ivy.xml</include> 
+        <include>**/depnmgr-maven.xml*</include> 
+        <include>**/build-jacoco.xml*</include> </includes>
     </fileSet>
     <fileSet encoding="UTF-8">
       <directory>choices/build_tool</directory>
       <includes> <include>**/*.properties</include> <include>**/*.</include>
-      <include>**/*.scala</include> <include>**/.sbtopts</include>
-      <include>**/rakefile</include> <include>**/Makefile</include>
-      <include>**/*.sh</include> </includes>
+        <include>**/*.scala</include> <include>**/.sbtopts</include>
+        <include>**/Rakefile</include> <include>**/Makefile</include>
+        <include>**/*.sh</include>
+        <include>**/depnmgr-ivy.xml</include> 
+        <include>**/depnmgr-maven.xml*</include> 
+        <include>**/build-jacoco.xml</include>  
+        <include>**/build-targets.xml</include> 
+        <include>**/sbt.boot.properties*</include> 
+        <include>**/rakefile-targets.rb</include>  
+        <include>**/Makefile-targets.mk</include>  
+        <include>**/build-targets.gradle</include> </includes>
     </fileSet>
     <fileSet encoding="UTF-8">
       <directory>choices/_parent_init</directory>
@@ -171,6 +195,9 @@
       <directory></directory>
       <includes> <include>_gitignore</include> <include>_hgignore</include>
         <include>.editorconfig</include> <include>exclude.lst</include>
+        <include>**/_mvn/wrapper/*.properties</include> <include>**/gradle/wrapper/*.properties</include>
+        <include>**/_mvn/wrapper/*.jar</include> <include>**/gradle/wrapper/*.jar</include>
+        <include>**/mvnw*</include> <include>**/gradlew*</include>
         </includes>
     </fileSet>
   </fileSets>

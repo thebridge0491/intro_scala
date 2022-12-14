@@ -46,7 +46,7 @@
     <version.ini4j>0.5.4</version.ini4j>
     <version.jna>5.10.0</version.jna>
     <version.jsonp>1.1.4</version.jsonp>
-    <version.snakeyaml>1.30</version.snakeyaml>
+    <version.snakeyaml>1.32</version.snakeyaml>
   </properties>
 
   <dependencyManagement>

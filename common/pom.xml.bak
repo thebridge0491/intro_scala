@@ -137,6 +137,8 @@
       <artifactId>junit-platform-runner</artifactId> </dependency>
     <dependency> <scope>test</scope> <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId> </dependency>-->
+    <!--<dependency> <scope>test</scope> <groupId>junit</groupId>
+      <artifactId>junit</artifactId> </dependency>-->
     <!--<dependency> <scope>test</scope> <groupId>org.testng</groupId>
       <artifactId>testng</artifactId> </dependency>-->
     <dependency> <groupId>org.jacoco</groupId>
@@ -160,8 +162,8 @@
       <artifactId>javax.json-api</artifactId> </dependency>
     <dependency> <groupId>org.glassfish</groupId>
       <artifactId>javax.json</artifactId> </dependency>
-    <dependency> <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId> </dependency>-->
+    <dependency> <groupId>org.snakeyaml</groupId>
+      <artifactId>snakeyaml-engine</artifactId> </dependency>-->
   </dependencies>
   
   <build>

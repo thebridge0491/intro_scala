@@ -86,6 +86,7 @@
     <exclude org = 'org.junit.jupiter' module = 'junit-jupiter'/>
     <exclude org = 'org.junit.platform' module = 'junit-platform-runner'/>
     <exclude org = 'org.junit.vintage' module = 'junit-vintage-engine'/>
+    <exclude org = 'junit' module = 'junit'/>
     <exclude org = 'org.testng' module = 'testng'/>
     <!--<exclude org = 'com.puppycrawl.tools' module = 'checkstyle'/>-->
     
@@ -96,6 +97,6 @@
     <exclude org = 'net.java.dev.jna' module = 'jna'/>
     <!--<exclude org = 'javax.json' module = 'javax.json-api'/>
     <exclude org = 'org.glassfish' module = 'javax.json'/>
-    <exclude org = 'org.yaml' module = 'snakeyaml'/>-->
+    <exclude org = 'org.snakeyaml' module = 'snakeyaml-engine'/>-->
   </dependencies>
 </ivy-module>

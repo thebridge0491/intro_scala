@@ -101,8 +101,8 @@
       revConstraint = "[${version.junitplatform},)"/>
     <dependency org = 'org.junit.vintage' name = 'junit-vintage-engine'
       rev = "${version.junit}" revConstraint = "[${version.junit},)"/>
-    <!--<dependency org = 'junit' name = 'junit' rev = "${version.junit4}"
-      revConstraint = "[${version.junit4},)"/>-->
+    <dependency org = 'junit' name = 'junit' rev = "${version.junit4}"
+      revConstraint = "[${version.junit4},)"/>
     <dependency org = 'org.testng' name = 'testng' rev = "${version.testng}"
       revConstraint = "[${version.testng},)"/>
     <dependency org = 'org.jacoco' name = 'org.jacoco.ant' rev = "${version.jacoco}"
@@ -125,7 +125,7 @@
       rev = "${version.jsonp}" revConstraint = "[${version.jsonp},)"/>
     <dependency org = 'org.glassfish' name = 'javax.json'
       rev = "${version.jsonp}" revConstraint = "[${version.jsonp},)"/>
-    <dependency org = 'org.yaml' name = 'snakeyaml'
+    <dependency org = 'org.snakeyaml' name = 'snakeyaml-engine'
       rev = "${version.snakeyaml}" revConstraint = "[${version.snakeyaml},)"/>
   </dependencies>
 </ivy-module>

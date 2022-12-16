@@ -15,7 +15,7 @@
 
   <properties>
     <scala.compat>2.13</scala.compat>
-    <version.scala>2.13.2</version.scala>
+    <version.scala>2.13.9</version.scala>
     <versionplugin.scala>4.5.6</versionplugin.scala>
     <version.scalatest>3.2.10</version.scalatest>
     <version.scalacheck>1.15.4</version.scalacheck>
@@ -35,8 +35,8 @@
 
     <version.junit>5.8.0</version.junit>
     <version.junitplatform>1.8.0</version.junitplatform>
-    <!--<version.junit4>4.13.2</version.junit4>-->
-    <version.testng>7.5</version.testng>
+    <version.junit4>4.13.2</version.junit4>
+    <version.testng>7.7.0</version.testng>
     <version.jacoco>0.8.7</version.jacoco>
     <version.checkstyle>9.2.1</version.checkstyle>
     
@@ -46,7 +46,7 @@
     <version.ini4j>0.5.4</version.ini4j>
     <version.jna>5.10.0</version.jna>
     <version.jsonp>1.1.4</version.jsonp>
-    <version.snakeyaml>1.30</version.snakeyaml>
+    <version.snakeyaml>2.5</version.snakeyaml>
   </properties>
 
   <dependencyManagement>
@@ -110,8 +110,8 @@
       <artifactId>junit-platform-runner</artifactId> </dependency>
     <dependency> <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId> </dependency>-->
-    <!--<dependency> <groupId>junit</groupId> <artifactId>junit</artifactId>
-      <version>${version.junit4}</version> </dependency>-->
+    <dependency> <groupId>junit</groupId> <artifactId>junit</artifactId>
+      <version>${version.junit4}</version> </dependency>
     <dependency> <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
       <version>${version.testng}</version> </dependency>
@@ -151,8 +151,8 @@
     <dependency> <groupId>org.glassfish</groupId>
       <artifactId>javax.json</artifactId>
       <version>${version.jsonp}</version> </dependency>
-    <dependency> <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId>
+    <dependency> <groupId>org.snakeyaml</groupId>
+      <artifactId>snakeyaml-engine</artifactId>
       <version>${version.snakeyaml}</version> </dependency>
   </dependencies>
   </dependencyManagement>

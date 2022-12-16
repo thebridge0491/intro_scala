@@ -7,7 +7,7 @@
   %versions;
 ]>-->
   <!ENTITY scala.compat '2.13'>
-  <!ENTITY version.scala '2.13.2'>
+  <!ENTITY version.scala '2.13.9'>
   <!ENTITY versionplugin.scala '4.5.6'>
   <!ENTITY version.scalatest '3.2.10'>
   <!ENTITY version.scalacheck '1.15.4'>
@@ -27,8 +27,8 @@
 
   <!ENTITY version.junit '5.8.0'>
   <!ENTITY version.junitplatform '1.8.0'>
-  <!--<!ENTITY version.junit4 '4.13.2'>-->
-  <!ENTITY version.testng '7.5'>
+  <!ENTITY version.junit4 '4.13.2'>
+  <!ENTITY version.testng '7.7.0'>
   <!ENTITY version.jacoco '0.8.7'>
   <!ENTITY version.checkstyle '9.2.1'>
   
@@ -38,4 +38,4 @@
   <!ENTITY version.ini4j '0.5.4'>
   <!ENTITY version.jna '5.10.0'>
   <!ENTITY version.jsonp '1.1.4'>
-  <!ENTITY version.snakeyaml '1.30'>
+  <!ENTITY version.snakeyaml '2.5'>

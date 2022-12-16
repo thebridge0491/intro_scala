@@ -46,9 +46,11 @@ object Main {
         val blank_cfg = collection.mutable.Map[String, Object]("fmt" -> fmt)
         fmt match {
             case "yaml" | "json" =>
-                var yaml = new org.yaml.snakeyaml.Yaml()
-                val yamlmap = yaml.load(data_str).asInstanceOf[
-                    java.util.HashMap[String, Object]].asScala
+                var settings = org.snakeyaml.engine.v2.api.LoadSettings
+                	.builder().build()
+                var yaml = new org.snakeyaml.engine.v2.api.Load(settings)
+                val yamlmap = yaml.loadFromString(data_str).asInstanceOf[
+                	java.util.HashMap[String, Object]].asScala
                 blank_cfg ++ yamlmap
             case "toml" =>
                 var toml = new com.moandjiezana.toml.Toml()

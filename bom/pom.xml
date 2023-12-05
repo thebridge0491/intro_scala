@@ -41,7 +41,7 @@
     <version.checkstyle>9.2.1</version.checkstyle>
     
     <version.slf4j>1.7.33</version.slf4j>
-    <version.logback>1.2.10</version.logback>
+    <version.logback>1.2.13</version.logback>
     
     <version.ini4j>0.5.4</version.ini4j>
     <version.jna>5.10.0</version.jna>
